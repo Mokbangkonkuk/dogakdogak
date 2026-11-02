@@ -2,7 +2,7 @@
    - 화면 파일(index.html, config.js)은 늘 인터넷에서 새로 받고, 끊겼을 때만 저장본을 써요 → 고친 내용이 바로 반영돼요.
    - 아이콘·글꼴·QR 라이브러리는 저장본을 먼저 써서 빨리 열려요.
    - 학습회 데이터(앱스 스크립트 서버)는 절대 저장하지 않아요. */
-const VERSION = 'dogak-v5';
+const VERSION = 'dogak-v8';
 const SHELL = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo.png', 'favicon.png'];
 
 self.addEventListener('install', e => {
