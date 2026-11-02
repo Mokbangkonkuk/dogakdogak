@@ -464,6 +464,42 @@ body.mobile-sim .narrow{max-width:none}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo{filter:invert(1) brightness(.95)} }
 :root[data-theme="dark"] .logo{filter:invert(1) brightness(.95)}
 .mini-brand .logo{margin-right:2px}
+/* 학습회 카드 + QR 바로 띄우기 */
+.card-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch}
+.qr-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:74px;border:1px solid var(--line);background:var(--surface);border-radius:12px;cursor:pointer;color:var(--accent);font:inherit;font-size:12px;font-weight:600;line-height:1.2;padding:8px 4px;text-align:center}
+.qr-btn:hover{border-color:var(--accent)}
+.qr-btn svg{width:26px;height:26px}
+.sortbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rank-note{margin:0}
+.dateblk.rank b{color:var(--accent)}
+.c-good{color:var(--muted);font-size:13px;margin-top:4px}
+.c-good b{color:var(--ink);font-weight:600}
+.card h3,.c-good{word-break:keep-all}
+.qr-btn .l-long{display:none}
+.c-side{flex-wrap:wrap}
+.c-side .score,.c-side .count{white-space:nowrap}
+/* 휴대폰: QR 버튼을 카드 아래 띠로 붙여요 */
+@media (max-width:640px){
+  .card-row{grid-template-columns:1fr;gap:0}
+  .card-row .card{border-bottom-left-radius:0;border-bottom-right-radius:0}
+  .qr-btn{width:auto;flex-direction:row;gap:8px;border-top:0;border-radius:0 0 12px 12px;padding:10px;font-size:14px}
+  .qr-btn svg{width:20px;height:20px}
+  .qr-btn .l-short{display:none} .qr-btn .l-long{display:inline}
+}
+body.mobile-sim .card-row{grid-template-columns:1fr;gap:0}
+body.mobile-sim .card-row .card{border-bottom-left-radius:0;border-bottom-right-radius:0}
+body.mobile-sim .qr-btn{width:auto;flex-direction:row;gap:8px;border-top:0;border-radius:0 0 12px 12px;padding:10px;font-size:14px}
+body.mobile-sim .qr-btn svg{width:20px;height:20px}
+body.mobile-sim .qr-btn .l-short{display:none} body.mobile-sim .qr-btn .l-long{display:inline}
+/* QR 크게 보기 */
+.qrsheet{position:fixed;inset:0;z-index:50;background:color-mix(in srgb, var(--ink) 55%, transparent);display:flex;align-items:center;justify-content:center;padding:max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom))}
+.qrsheet .box{background:var(--surface);color:var(--ink);border-radius:18px;padding:22px 20px 18px;width:min(440px, 100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.qrsheet .kicker{font-size:13px;font-weight:600;color:var(--wood)}
+.qrsheet h2{font-size:21px}
+.qrsheet .qbig{background:#fff;padding:14px;border-radius:12px;width:min(78vw, 56vh, 360px);aspect-ratio:1}
+.qrsheet .qbig canvas,.qrsheet .qbig img{width:100%!important;height:100%!important;display:block;image-rendering:pixelated}
+.qrsheet .url{font-size:12px;color:var(--muted);word-break:break-all;margin:0}
+.qrsheet .actions{justify-content:center}
 /* 숨은 비밀번호 바꾸기: 목록 화면의 '도각도각' 글자 */
 .title-btn{all:unset;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:6px}
 .title-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -570,7 +606,6 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
       </div>
       <button class="btn primary" id="btn-new" type="button">새 학습회 만들기</button>
     </div>
-    <div class="stats" id="stats"></div>
     <form class="panel" id="create" hidden novalidate></form>
     <div class="toolbar">
       <h2 id="list-title">학습회</h2>
@@ -579,6 +614,13 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
         <button type="button" class="btn sm ghost" data-act="refresh">새로고침</button>
         <button type="button" class="btn sm ghost" data-act="logout">로그아웃</button>
       </div>
+    </div>
+    <div class="sortbar">
+      <div class="seg" role="radiogroup" aria-label="학습회 보는 순서" id="sort-seg">
+        <button type="button" role="radio" data-sort="date" aria-checked="true">날짜순</button>
+        <button type="button" role="radio" data-sort="rank" aria-checked="false">만족도 추천순</button>
+      </div>
+      <p class="hint rank-note" id="rank-note" hidden>전반 만족도 평균이 높은 순서예요. 응답이 3개 이상인 학습회를 먼저 보여 줘요.</p>
     </div>
     <p class="msg ok" id="pw-done" role="status" hidden></p>
     <form class="panel" id="pwform" hidden novalidate></form>
@@ -602,6 +644,19 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
     <div class="panel" id="tab-host" role="tabpanel" aria-labelledby="t-host" hidden></div>
     <div class="panel" id="tab-share" role="tabpanel" aria-labelledby="t-share" hidden></div>
   </section>
+
+  <div class="qrsheet" id="qrsheet" role="dialog" aria-modal="true" aria-labelledby="qrs-title" hidden>
+    <div class="box">
+      <div class="kicker">만족도 조사 QR</div>
+      <h2 id="qrs-title"></h2>
+      <p class="hint" id="qrs-sub" style="margin:0"></p>
+      <div class="qbig" id="qrs-code"></div>
+      <p class="hint" style="margin:0">휴대폰 카메라로 찍으면 바로 익명 평가 화면이 열려요.</p>
+      <p class="url num" id="qrs-url"></p>
+      <div class="actions"><button type="button" class="btn sm" id="qrs-copy">링크 복사</button><button type="button" class="btn sm primary" id="qrs-close">닫기</button></div>
+      <span class="msg" id="qrs-msg" role="status"></span>
+    </div>
+  </div>
 
   <div class="install" id="install" hidden>
     <img src="icon-192.png" alt="">
@@ -751,7 +806,7 @@ function makeCore(store, env) {
       const c = findClass(s, classId); if (!c) fail('들을 회차를 골라 주세요.');
       const regs = store.list('regs');
       if (regs.some(r => r.sid === s.id && r.studentNo === o.studentNo && r.status !== 'cancelled'))
-        fail('이미 이 학습회에 신청했어요. 아래 "내 신청 확인"에서 상태를 보거나 취소할 수 있어요.');
+        fail('이미 이 학습회에 신청했어요. 아래 "내 신청 확인"에서 상태를 볼 수 있어요.');
       const st = classStats(regs, s.id, c.id);
       const status = (!c.capacity || (st.confirmed < c.capacity && st.waiting === 0)) ? 'confirmed' : 'waiting';
       store.insert('regs', Object.assign({ id: 'g' + env.uid(), sid: s.id, classId: c.id, status: status, attended: [], reviewed: '', createdAt: now(), updatedAt: now() }, o));
@@ -1265,7 +1320,7 @@ async function api(fn, ...args){
     }
     let j = null; try { j = await r.json(); } catch(e){}
     if (!j) throw new Error('서버 응답을 읽지 못했어요. 앱스 스크립트에 Api.gs를 넣고 [새 버전]으로 배포했는지, 액세스가 [모든 사용자]인지 확인해 주세요.');
-    if (!j.ok) throw new Error(j.error || '요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    if (!j.ok) throw new Error(String(j.error || '요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.').replace('에서 상태를 보거나 취소할 수 있어요.', '에서 상태를 볼 수 있어요.'));
     return j.data;
   }
   return new Promise((res, rej) => setTimeout(() => { try { res(clone(Demo[fn](...args))); } catch(e){ rej(e); } }, 160));
@@ -1273,7 +1328,7 @@ async function api(fn, ...args){
 
 /* ---------- state ---------- */
 const S = {
-  view:null, pw:'', data:null, termFilter:null, sid:null, tab:'results',
+  view:null, pw:'', data:null, termFilter:null, sortMode: store('l', 'dg_sort') === 'rank' ? 'rank' : 'date', sid:null, tab:'results',
   cd:null, inf:null, infMsg:'', infMsgCls:'', delArmed:false,
   hd:null, hdKind:null, hdOpen:false, hdPin:'', hdMsg:'', hdMsgCls:'', pinFor:null, pinMsg:'',
   notice:{}, regMsg:'', regMsgCls:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null, rawComments:false,
@@ -1342,7 +1397,7 @@ function renderApply(){
     h += `<div class="panel result ${ok?'':'wait'}" id="ap-result">
       <h2>${ok ? '신청이 확정됐어요' : `대기 ${r.position}번으로 신청됐어요`}</h2>
       <dl class="kv"><dt>학습회</dt><dd>${esc(r.title)} · ${esc(r.classLabel)}</dd><dt>날짜</dt><dd>${esc(datesText(r.dates))}</dd>${r.time?`<dt>시간</dt><dd>${esc(r.time)}</dd>`:''}${r.places && r.places.length?`<dt>장소</dt><dd>${esc(r.places.join(' · '))}</dd>`:''}</dl>
-      <p class="hint">${ok ? '못 오게 되면 아래 <b>내 신청 확인</b>에서 꼭 취소해 주세요. 대기하던 분께 자리가 넘어가요.' : '자리가 나면 자동으로 확정돼요. 확정됐는지는 아래 <b>내 신청 확인</b>에서 학번과 전화번호 뒤 4자리로 볼 수 있어요.'}</p>
+      <p class="hint">${ok ? '못 오게 되면 꼭 <b>학술부장님께 연락</b>해 주세요. 취소하면 대기하던 분께 자리가 넘어가요.' : '자리가 나면 자동으로 확정돼요. 확정됐는지는 아래 <b>내 신청 확인</b>에서 학번과 전화번호 뒤 4자리로 볼 수 있어요.'}</p>
       <div><button type="button" class="btn sm ghost" data-act="ap-again">다른 회차·학습회 신청하기</button></div></div>`;
   } else if (!list.length){
     h += `<div class="empty">지금 신청 받는 학습회가 없어요. 동아리 공지를 기다려 주세요.</div>`;
@@ -1369,8 +1424,8 @@ function renderApply(){
     }).join('');
   }
   h += `<section class="panel" id="mine">
-    <h2>내 신청 확인 · 취소</h2>
-    <p class="hint">신청할 때 쓴 학번과 전화번호 뒤 4자리로 확정·대기 상태를 보고 취소할 수 있어요.</p>
+    <h2>내 신청 확인</h2>
+    <p class="hint">신청할 때 쓴 학번과 전화번호 뒤 4자리로 확정·대기 상태를 볼 수 있어요. 참석이 어려워지면 학술부장님께 연락해 주세요.</p>
     <form class="two" id="mine-form" novalidate>
       <div class="field"><label for="m-sn">학번</label><input type="text" id="m-sn" inputmode="numeric" value="${esc(A.sn)}" autocomplete="off"></div>
       <div class="field"><label for="m-p4">전화번호 뒤 4자리</label><div class="pw-row"><input type="password" id="m-p4" inputmode="numeric" maxlength="4" value="${esc(A.p4)}" autocomplete="off"><button class="btn primary" type="submit">확인</button></div></div>
@@ -1379,8 +1434,8 @@ function renderApply(){
     ${A.mine ? (A.mine.length ? `<div class="mine-list">${A.mine.map(m => `
       <div class="mine"><div class="grow"><b>${esc(m.title)}</b> · ${esc(m.classLabel)}<div class="sub2">${esc(datesText(m.dates))}${m.time?' · '+esc(m.time):''}${m.places&&m.places.length?' · '+esc(m.places.join(' · ')):''}</div></div>
         ${m.status==='confirmed' ? '<span class="chip conf">확정</span>' : `<span class="chip wait">대기 ${m.position}번</span>`}
-        ${m.attended ? '<span class="chip done">출석</span>' : `<button type="button" class="mini danger ${A.armed===m.id?'armed':''}" data-act="ap-cancel" data-id="${esc(m.id)}">${A.armed===m.id?'한 번 더 누르면 취소돼요':'신청 취소'}</button>`}
-      </div>`).join('')}</div>` : '<div class="empty">취소하지 않은 신청이 없어요.</div>') : ''}
+        ${m.attended ? '<span class="chip done">출석</span>' : ''}
+      </div>`).join('')}</div>` : '<div class="empty">확인된 신청이 없어요. 학번과 전화번호 뒤 4자리를 다시 확인해 주세요.</div>') : ''}
   </section>`;
   $('#v-apply').innerHTML = h;
 }
@@ -1648,15 +1703,28 @@ function infoClick(e, d, root){
 /* =========================================================
    진행자: 목록
    ========================================================= */
-function cardHTML(s){
+const QR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/><path d="M6 6h1v1H6zM17 6h1v1h-1zM6 17h1v1H6z" fill="currentColor"/></svg>';
+/* 학습회 하나의 만족도 요약: 평균, 응답 수, 강점 두 가지, 난이도 */
+function rankInfo(s){
+  const rs = reviewsFor(s.id); const ov = rs.map(r => r.overall).filter(fin);
+  const ms = cfgOf(s).metrics.map(m => ({s: m.s, a: avg(rs.map(r => scoreOf(r, m.id)).filter(fin))})).filter(x => x.a != null).sort((x,y) => y.a - x.a);
+  const d = avg(rs.map(diffOf).filter(fin));
+  return { n: ov.length, a: avg(ov), top: ms.slice(0, 2), diff: d == null ? '' : DIFF_LABEL(d) };
+}
+function cardHTML(s, rank){
+  const card = cardInner(s, rank);
+  return `<div class="card-row">${card}<button type="button" class="qr-btn" data-qr="${esc(s.id)}" aria-label="${esc(s.title || '제목 없음')} 만족도 조사 QR 띄우기">${QR_ICON}<span class="l-short">만족도<br>QR</span><span class="l-long">만족도 조사 QR 띄우기</span></button></div>`;
+}
+function cardInner(s, rank){
   const rs = reviewsFor(s.id); const a = avg(rs.map(r=>r.overall).filter(fin));
   const regs = regsFor(s.id); const conf = regs.filter(r => r.status === 'confirmed').length; const wait = regs.filter(r => r.status === 'waiting').length;
   const cap = (s.classes||[]).reduce((n,c) => n + (Number(c.capacity)||0), 0); const unlimited = (s.classes||[]).some(c => !c.capacity);
   const ds = sDates(s); const p = parseDate(ds[0]);
   return `<button type="button" class="card" data-sid="${esc(s.id)}">
-    <div class="dateblk">${p ? `<span>${p.m}월</span><b>${p.d}</b>` : '<span>날짜</span><b>–</b>'}</div>
+    ${rank ? `<div class="dateblk rank"><span>추천</span><b>${rank}</b></div>` : `<div class="dateblk">${p ? `<span>${p.m}월</span><b>${p.d}</b>` : '<span>날짜</span><b>–</b>'}</div>`}
     <div><h3>${esc(s.title || '제목 없음')}</h3>
-      <div class="c-meta">${placesChip(s.places)}<span>회차 ${(s.classes||[]).length}개</span>${s.lead&&s.lead.name?`<span>대표 ${esc(s.lead.name)}</span>`:''}</div></div>
+      <div class="c-meta">${rank !== undefined ? `<span class="num">${esc(termLabel(termFor(s)))}${p ? ` · ${p.m}/${p.d}` : ''}</span>` : ''}${placesChip(s.places)}<span>회차 ${(s.classes||[]).length}개</span>${s.lead&&s.lead.name?`<span>대표 ${esc(s.lead.name)}</span>`:''}</div>
+      ${rank !== undefined ? (() => { const ri = rankInfo(s); const bits = ri.top.map(m => `${esc(m.s)} <b class="num">${f1(m.a)}</b>`); if (ri.diff) bits.push(`난이도 <b>${esc(ri.diff)}</b>`); return bits.length ? `<div class="c-good">강점 · ${bits.join(' · ')}</div>` : ''; })() : ''}</div>
     <div class="c-side">
       <div class="score">${f1(a)}<small> / 5</small></div>
       <div class="count">신청 ${conf}${unlimited?'':`/${cap}`}${wait?` · 대기 ${wait}`:''} · 만족도 응답 ${rs.length}</div>
@@ -1674,27 +1742,38 @@ function renderList(){
   $('#term-filter').innerHTML = [...terms.map(t => `<button type="button" class="term" data-v="${t}" aria-pressed="${sel===t}">${termLabel(t)}</button>`),
     `<button type="button" class="term" data-v="all" aria-pressed="${sel==='all'}">전체</button>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
-  const rv = D().reviews.filter(r => shownS.some(s => s.id === r.sid));
-  const att = D().regs.filter(r => shownS.some(s => s.id === r.sid) && (r.attended||[]).length).length;
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#stats').innerHTML = `
-    <div class="stat"><b>${shownS.length}</b><span>${sel==='all'?'전체':esc(termLabel(sel))} 학습회</span></div>
-    <div class="stat"><b>${att}</b><span>출석한 사람</span></div>
-    <div class="stat"><b>${rv.length}</b><span>만족도 조사 응답</span></div>
-    <div class="stat"><b>${f1(avg(rv.map(r=>r.overall).filter(fin)))}<small> / 5</small></b><span>평균 만족도</span></div>`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 2판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 5판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
+  const ranked = S.sortMode === 'rank';
+  document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
+  $('#term-filter').hidden = ranked; $('#rank-note').hidden = !ranked;
+  if (ranked) $('#list-title').textContent = '만족도 추천순 · 전체 학습회';
+  if (ranked && ss.length){
+    const info = new Map(ss.map(s => [s.id, rankInfo(s)]));
+    const by = (x,y) => { const a = info.get(x.id), b = info.get(y.id); return (b.a - a.a) || (b.n - a.n) || (sDates(y)[0]||'').localeCompare(sDates(x)[0]||''); };
+    const enough = ss.filter(s => info.get(s.id).n >= 3).sort(by);
+    const few = ss.filter(s => { const n = info.get(s.id).n; return n > 0 && n < 3; }).sort(by);
+    const none = ss.filter(s => !info.get(s.id).n).sort((a,b) => (sDates(b)[0]||'').localeCompare(sDates(a)[0]||''));
+    let k = 0;
+    list.innerHTML = (enough.length ? enough.map(s => cardHTML(s, ++k)).join('') : '<div class="empty">응답이 3개 이상 모인 학습회가 아직 없어요.</div>')
+      + (few.length ? `<h3 class="term-h">응답이 적은 학습회 <span class="hint">1~2개라 참고만 해 주세요</span></h3>${few.map(s => cardHTML(s, ++k)).join('')}` : '')
+      + (none.length ? `<h3 class="term-h">아직 응답이 없는 학습회</h3>${none.map(s => cardHTML(s, 0)).join('')}` : '');
+    return;
+  }
   if (!ss.length){ list.innerHTML = `<div class="empty">아직 학습회가 없어요. <b>새 학습회 만들기</b>로 첫 학습회를 열어 보세요.</div>`; return; }
   const byDate = (a,b) => (sDates(b)[0]||'').localeCompare(sDates(a)[0]||'') || (b.createdAt||0)-(a.createdAt||0);
   if (!shownS.length){ list.innerHTML = `<div class="empty">${esc(termLabel(sel))}에 연 학습회가 아직 없어요.</div>`; return; }
   if (sel === 'all'){
     list.innerHTML = terms.map(t => { const g = ss.filter(s => termFor(s) === t).sort(byDate); if (!g.length) return '';
       const ga = avg(D().reviews.filter(r => g.some(s => s.id === r.sid)).map(r => r.overall).filter(fin));
-      return `<h3 class="term-h">${termLabel(t)} <span class="hint num">학습회 ${g.length}개 · 평균 만족도 ${f1(ga)}</span></h3>${g.map(cardHTML).join('')}`; }).join('');
-  } else list.innerHTML = shownS.sort(byDate).map(cardHTML).join('');
+      return `<h3 class="term-h">${termLabel(t)} <span class="hint num">학습회 ${g.length}개 · 평균 만족도 ${f1(ga)}</span></h3>${g.map(s => cardHTML(s)).join('')}`; }).join('');
+  } else list.innerHTML = shownS.sort(byDate).map(s => cardHTML(s)).join('');
 }
 $('#v-list').addEventListener('click', async e => {
   const t = e.target.closest('.term'); if (t){ S.termFilter = t.dataset.v; renderList(); return; }
+  const sb = e.target.closest('#sort-seg button'); if (sb){ S.sortMode = sb.dataset.sort; store('l', 'dg_sort', S.sortMode); renderList(); return; }
+  const qb = e.target.closest('[data-qr]'); if (qb){ openQR(qb.dataset.qr, qb); return; }
   const c = e.target.closest('.card'); if (c){ openSession(c.dataset.sid, 'regs'); return; }
   if (e.target.closest('[data-act="refresh"]')){ await reload(); renderList(); return; }
   if (e.target.closest('[data-act="logout"]')){ store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
@@ -1773,7 +1852,7 @@ $('#v-session').addEventListener('click', async e => {
 
 /* --- 신청 · 출석 --- */
 function regMessage(s, c){
-  return `[${s.title} 학습회 신청 확정 안내]\n${s.title} ${c.label} 신청이 확정되었습니다.\n· 날짜: ${datesText(c.dates)}${c.time?`\n· 시간: ${c.time}`:''}${(s.places||[]).length?`\n· 장소: ${s.places.join(', ')}`:''}\n참석이 어려워지면 신청 페이지의 '내 신청 확인'에서 취소 부탁드립니다. 대기하시는 분께 자리가 넘어갑니다.\n${link('a', s.id)}`;
+  return `[${s.title} 학습회 신청 확정 안내]\n${s.title} ${c.label} 신청이 확정되었습니다.\n· 날짜: ${datesText(c.dates)}${c.time?`\n· 시간: ${c.time}`:''}${(s.places||[]).length?`\n· 장소: ${s.places.join(', ')}`:''}\n참석이 어려워지면 학술부장님께 연락 부탁드립니다. 취소하면 대기자분께 자리가 넘어가게 됩니다.`;
 }
 function renderRegs(){
   const p = $('#tab-regs'); const s = cur(); const regs = regsFor(s.id);
@@ -2269,7 +2348,7 @@ function applyNotice(s){
   if (lead) L.push(`▶ 진행: ${lead}${asst.length ? ` (보조 ${asst.join(', ')})` : ''}`);
   if (tools.length){ L.push(`▶ 사용 장비: ${tools.join(', ')}`); if (tools.some(t => DANGER.includes(t))) L.push('   위험한 전동 장비를 사용하므로 안전 교육 후 진행자의 지도 아래에서만 작업합니다.'); }
   if (notes.length){ L.push('', '유의사항'); notes.forEach((x,i) => L.push(`${i+1}. ${x}`)); }
-  L.push('', `신청하기 ▶ ${link('a', s.id)}`, '신청 확인과 취소도 같은 링크에서 가능합니다.', '', '많은 관심과 참여 부탁드립니다.');
+  L.push('', `신청하기 ▶ ${link('a', s.id)}`, '신청 확인도 같은 링크에서 가능합니다. 취소는 학술부장님께 연락 부탁드립니다.', '', '많은 관심과 참여 부탁드립니다.');
   return L.join('\n');
 }
 function reviewNotice(s){
@@ -2401,6 +2480,36 @@ function setDemo(which, sid){
   else if (which === 'review') openReview(sid || 'sexjewel');
   else { if (S.pw) { reload().then(openList); } else openLogin(); }
 }
+/* =========================================================
+   만족도 조사 QR 크게 보기
+   ========================================================= */
+let qrBack = null, qrLock = null;
+function openQR(sid, from){
+  const s = D().sessions.find(x => x.id === sid); if (!s) return;
+  const url = link('r', s.id); qrBack = from || null;
+  $('#qrs-title').textContent = s.title || '제목 없음';
+  $('#qrs-sub').textContent = [rangeText(sDates(s)), (s.places||[]).join(' · ')].filter(Boolean).join(' · ');
+  $('#qrs-url').textContent = url; $('#qrs-msg').textContent = '';
+  const box = $('#qrs-code'); box.innerHTML = '';
+  if (window.QRCode){ try { new QRCode(box, {text:url, width:512, height:512, colorDark:'#1d2420', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M}); } catch(e){ box.textContent = 'QR을 만들지 못했어요'; } }
+  else box.textContent = 'QR을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';
+  $('#qrsheet').hidden = false; document.body.style.overflow = 'hidden'; $('#qrs-close').focus();
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { qrLock = l; }).catch(() => {}); } catch(e){}   // 띄워 둔 동안 화면이 꺼지지 않게
+}
+function closeQR(){
+  $('#qrsheet').hidden = true; document.body.style.overflow = '';
+  try { if (qrLock) qrLock.release(); } catch(e){} qrLock = null;
+  if (qrBack && document.body.contains(qrBack)) qrBack.focus(); qrBack = null;
+}
+$('#qrs-close').addEventListener('click', closeQR);
+$('#qrsheet').addEventListener('click', e => { if (e.target.id === 'qrsheet') closeQR(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#qrsheet').hidden) closeQR(); });
+$('#qrs-copy').addEventListener('click', async () => {
+  const m = $('#qrs-msg');
+  try { await navigator.clipboard.writeText($('#qrs-url').textContent); m.className = 'msg ok'; m.textContent = '링크를 복사했어요.'; }
+  catch(e){ m.className = 'msg err'; m.textContent = '복사하지 못했어요. 위 주소를 길게 눌러 복사해 주세요.'; }
+});
+
 /* =========================================================
    홈 화면에 추가 (설치 안내)
    ========================================================= */
