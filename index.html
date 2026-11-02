@@ -7,8 +7,9 @@
 <meta name="theme-color" content="#121613" media="(prefers-color-scheme: dark)">
 <meta name="description" content="목방 목공 학습회 신청 · 출석 · 만족도 조사">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="도각도각">
@@ -458,6 +459,14 @@ body.mobile-sim .narrow{max-width:none}
   .wrap{padding-top:max(28px, calc(env(safe-area-inset-top) + 12px));padding-bottom:max(64px, calc(env(safe-area-inset-bottom) + 40px));
     padding-left:max(20px, env(safe-area-inset-left));padding-right:max(20px, env(safe-area-inset-right))}
 }
+/* 동아리 로고 (회색 그림). 어두운 화면에서는 밝게 뒤집어요 */
+.logo{display:inline-block;flex:none;object-fit:contain;vertical-align:middle}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo{filter:invert(1) brightness(.95)} }
+:root[data-theme="dark"] .logo{filter:invert(1) brightness(.95)}
+.mini-brand .logo{margin-right:2px}
+/* 숨은 비밀번호 바꾸기: 목록 화면의 '도각도각' 글자 */
+.title-btn{all:unset;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:6px}
+.title-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 /* 설치 안내 */
 .install{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
 .install img{width:44px;height:44px;border-radius:10px;flex:none}
@@ -554,15 +563,8 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
     <div class="top">
       <div>
         <div class="brand">
-          <svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true">
-            <g fill="none" style="stroke:var(--wood)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="28" width="36" height="11" rx="2.5"/>
-              <path d="M9 34c4-2 8-2 12 0s8 2 14 0"/>
-              <path d="M22 28c-1-7 3-13 9-13 4 0 6 3 5 6-1 3-5 4-7 1.5-1.4-1.8 0-4 2-3.5"/>
-              <path d="M12 21l-2-4M16 18l1-5M38 12l3-3"/>
-            </g>
-          </svg>
-          <div><div class="tag">목방 목공 학습회 · 진행자 화면</div><h1>도각도각</h1></div>
+          <img class="logo" src="logo.png" alt="" width="56" height="48">
+          <div><div class="tag">목방 목공 학습회 · 진행자 화면</div><h1><button type="button" class="title-btn" data-act="pw-open" aria-label="도각도각 (동아리 비밀번호 바꾸기)">도각도각</button></h1></div>
         </div>
         <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 진행 설명서를 남겨요.</p>
       </div>
@@ -575,7 +577,6 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
       <div class="right">
         <div class="terms" role="group" aria-label="학기 고르기" id="term-filter"></div>
         <button type="button" class="btn sm ghost" data-act="refresh">새로고침</button>
-        <button type="button" class="btn sm ghost" data-act="pw-open">비밀번호 바꾸기</button>
         <button type="button" class="btn sm ghost" data-act="logout">로그아웃</button>
       </div>
     </div>
@@ -603,7 +604,7 @@ body.mobile-sim .linkcard .qrrow{flex-direction:column}
   </section>
 
   <div class="install" id="install" hidden>
-    <img src="icons/icon-192.png" alt="">
+    <img src="icon-192.png" alt="">
     <div class="txt"><b>홈 화면에 도각도각 추가하기</b><p class="hint" id="install-how"></p></div>
     <div class="btns"><button type="button" class="btn sm primary" id="install-go" hidden>앱 설치</button><button type="button" class="btn sm ghost" id="install-x">닫기</button></div>
   </div>
@@ -1106,7 +1107,7 @@ const SELF = [
   {k:'planScore', q:'계획한 시간표대로 진행됐나요?',  ends:['많이 어긋났어요','계획대로였어요'], s:'시간 계획'},
 ];
 const DIFF_LABEL = v => v < 1.8 ? '너무 쉬웠어요' : v < 2.6 ? '조금 쉬웠어요' : v <= 3.4 ? '적당했어요' : v <= 4.2 ? '조금 어려웠어요' : '너무 어려웠어요';
-const BRAND_SVG = (w) => `<svg viewBox="0 0 44 44" width="${w}" height="${w}" aria-hidden="true"><g fill="none" style="stroke:var(--wood)" stroke-width="${w<30?2.4:1.7}" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="28" width="36" height="11" rx="2.5"/><path d="M9 34c4-2 8-2 12 0s8 2 14 0"/><path d="M22 28c-1-7 3-13 9-13 4 0 6 3 5 6-1 3-5 4-7 1.5-1.4-1.8 0-4 2-3.5"/></g></svg>`;
+const BRAND_SVG = (w) => { w = Math.max(w, 24); return `<img class="logo" src="logo.png" alt="" width="${Math.round(w*1.17)}" height="${w}">`; };
 
 /* ---------- helpers ---------- */
 function parseDate(d){ if(!d) return null; const [y,m,dd]=String(d).split('-').map(Number); const dt=new Date(y,m-1,dd); return isNaN(dt)?null:{y,m,d:dd,w:'일월화수목금토'[dt.getDay()]}; }
@@ -1681,7 +1682,7 @@ function renderList(){
     <div class="stat"><b>${att}</b><span>출석한 사람</span></div>
     <div class="stat"><b>${rv.length}</b><span>만족도 조사 응답</span></div>
     <div class="stat"><b>${f1(avg(rv.map(r=>r.overall).filter(fin)))}<small> / 5</small></b><span>평균 만족도</span></div>`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 1판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 2판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   if (!ss.length){ list.innerHTML = `<div class="empty">아직 학습회가 없어요. <b>새 학습회 만들기</b>로 첫 학습회를 열어 보세요.</div>`; return; }
   const byDate = (a,b) => (sDates(b)[0]||'').localeCompare(sDates(a)[0]||'') || (b.createdAt||0)-(a.createdAt||0);
@@ -1708,7 +1709,7 @@ $('#v-list').addEventListener('click', async e => {
         <div class="field"><label for="pw-new2">새 비밀번호 한 번 더</label><input type="password" id="pw-new2" autocomplete="new-password"></div>
       </div>
       <div class="actions"><button class="btn primary" type="submit" id="pw-save">비밀번호 바꾸기</button><button class="btn ghost" type="button" data-act="pw-close">닫기</button><span class="msg err" id="pwc-msg" role="status"></span></div>`;
-    f.hidden = false; $('#pw-cur').focus(); return;
+    f.hidden = false; f.scrollIntoView({block:'center', behavior:'smooth'}); $('#pw-cur').focus({preventScroll:true}); return;
   }
   if (e.target.closest('[data-act="pw-close"]')){ $('#pwform').hidden = true; return; }
   if (e.target.closest('#btn-new')){
