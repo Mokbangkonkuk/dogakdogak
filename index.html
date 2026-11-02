@@ -1642,7 +1642,7 @@ function renderReview(){
   const R = S.rv; const p = R.pub; const box = $('#v-review'); const r = R.form; const cls = p.classes || []; const cfg = Object.assign({}, p.review || DEFAULT_REVIEW, {difficulty: true}); const once = !p.review || p.review.once !== false;
   const head = `${miniBrand('목공 학습회 평가')}
     <div class="s-head"><div class="s-meta"><span class="num">${esc(rangeText(p.dates))}</span>${placesChip(p.places)}${p.lead?`<span>대표 ${esc(p.lead)}</span>`:''}</div><h1>${esc(p.title)}</h1></div>`;
-  if (R.sent){ box.innerHTML = head + `<div class="panel thanks"><h2>평가를 보냈어요</h2><p class="sub">소중한 의견 고마워요. 다음 학습회 준비에 꼭 반영할게요.</p></div>`; return; }
+  if (R.sent){ box.innerHTML = head + `<div class="panel thanks"><h2>평가를 보냈어요</h2><p class="sub">소중한 의견 감사합니다.<br>다음 학습회 준비에 반영하겠습니다.</p></div>`; return; }
   if (once && store('l', 'dg_sent_' + p.id)){ box.innerHTML = head + `<div class="panel thanks"><h2>이미 평가를 보냈어요</h2><p class="sub">이 학습회 평가는 한 번만 할 수 있어요. 참여해 주셔서 고마워요!</p></div>`; return; }
   box.innerHTML = head + `
   <form class="panel" id="rv-form" novalidate>
@@ -1876,7 +1876,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 12판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 13판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
