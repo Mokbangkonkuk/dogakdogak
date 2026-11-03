@@ -603,12 +603,21 @@ body.tut-on .qrsheet .box{max-height:100%;padding:16px 16px 14px;gap:8px}
 body.tut-on .qrsheet .qbig{width:min(62vw, 26vh, 240px);padding:10px}
 body.tut-on .qrsheet .url,body.tut-on .qrsheet .box>.hint{display:none}
 .tut .t-ok{color:var(--good);font-weight:600;margin:4px 0 0}
+/* 튜토리얼 중: 안내하는 칸만 또렷하게, 나머지 화면은 반투명하게 덮어요 (누르는 건 그대로 돼요) */
+body.tut-on .tut-hl{position:relative;z-index:55;background-clip:padding-box;
+  box-shadow:0 0 0 200vmax rgba(238,240,235,.72);box-shadow:0 0 0 200vmax color-mix(in srgb, var(--paper) 74%, transparent)}
+body.tut-on .tut{box-shadow:0 18px 50px rgba(0,0,0,.28),0 0 0 1px var(--line)}
 .tut .t-opt{font-size:12px;color:var(--muted);font-weight:500}
 .tut-hl{outline:3px solid var(--warn)!important;outline-offset:4px;border-radius:10px;animation:tut-pulse 1.4s ease-in-out infinite}
 @keyframes tut-pulse{50%{outline-color:transparent}}
 .chip.practice{color:var(--warn);border-color:currentColor;margin-left:6px;vertical-align:middle}
 @media print{ .tut{display:none!important} }
 @media (prefers-reduced-motion: reduce){ .tut-hl{animation:none} }
+/* 학습회 삭제 (새로고침 옆) */
+.btn.del-top{color:var(--bad)}
+.btn.del-top:hover{border-color:var(--bad)}
+.btn.del-top.armed,.btn.del-top.armed:hover{background:var(--bad);border-color:var(--bad);color:#fff}
+body.tut-on .btn.del-top{display:none}
 /* 학기 고르기 (목록) */
 /* 브라우저마다 다르게 그리는 기본 모양을 끄고, 옆 버튼(새로고침·로그아웃)과 같은 크기로 맞춰요 */
 select.term-sel{-webkit-appearance:none;appearance:none;width:auto;min-width:0;height:36px;margin:0;padding:0 34px 0 12px;font-size:14px;font-weight:500;line-height:normal;color:var(--ink);
@@ -799,7 +808,7 @@ window.dgWrite = function(root){
   </section>
 
   <section id="v-session" class="stackcol" hidden>
-    <div class="actions"><button type="button" class="back btn ghost sm" data-act="back">← 학습회 목록</button><span class="spacer"></span><button type="button" class="btn sm ghost" data-act="refresh">새로고침</button></div>
+    <div class="actions"><button type="button" class="back btn ghost sm" data-act="back">← 학습회 목록</button><span class="spacer"></span><button type="button" class="btn sm ghost" data-act="refresh">새로고침</button><button type="button" class="btn sm ghost del-top" data-act="del-top" id="del-top" title="신청·만족도 조사·기록까지 모두 지워져요">학습회 삭제</button></div>
     <div class="s-head" id="s-head"></div>
     <div class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" id="t-results" aria-controls="tab-results" data-tab="results" type="button">만족도 조사<span class="n num" id="t-count"></span></button>
@@ -1921,7 +1930,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 20판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 21판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -2009,7 +2018,8 @@ $('#create').addEventListener('submit', async e => {
 /* =========================================================
    진행자: 학습회 상세
    ========================================================= */
-function resetSessionUI(){ Object.assign(S, {asAddName:'', asAddMsg:'', flipArmed:false, rvList:false, armedRv:null, rvListMsg:'', notice:{}, quick:null, quickMsg:'', shareEdit:null, justOpened:false, hdOpen:false, hd:null, hdKind:null, hdPin:'', hdMsg:'', pinFor:null, pinMsg:'', inf:null, infMsg:'', delArmed:false, regMsg:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null}); }
+function resetDelTop(){ const b = $('#del-top'); if (!b) return; if (b.classList.contains('armed')) banner(''); b.classList.remove('armed'); b.disabled = false; b.textContent = '학습회 삭제'; }
+function resetSessionUI(){ resetDelTop(); Object.assign(S, {asAddName:'', asAddMsg:'', flipArmed:false, rvList:false, armedRv:null, rvListMsg:'', notice:{}, quick:null, quickMsg:'', shareEdit:null, justOpened:false, hdOpen:false, hd:null, hdKind:null, hdPin:'', hdMsg:'', pinFor:null, pinMsg:'', inf:null, infMsg:'', delArmed:false, regMsg:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null}); }
 function openSession(sid, tab){ S.sid = sid; S.tab = tab || 'regs'; resetSessionUI(); show('session'); renderSession(); }
 function renderSession(){
   const s = cur(); if (!s){ S.sid = null; openList(); return; }
@@ -2027,6 +2037,19 @@ function renderSession(){
 }
 $('#v-session').addEventListener('click', async e => {
   if (e.target.closest('[data-act="back"]')){ openList(); return; }
+  const dt = e.target.closest('[data-act="del-top"]');
+  if (dt){
+    const s = cur(); if (!s || TUT) return;
+    if (!dt.classList.contains('armed')){
+      dt.classList.add('armed'); dt.textContent = '삭제할까요?'; banner(`'${s.title || '제목 없음'}' 학습회를 지울까요? [삭제할까요?]를 한 번 더 누르면 신청·만족도 조사·기록까지 모두 삭제돼요.`);
+      clearTimeout(S.delTopT); S.delTopT = setTimeout(resetDelTop, 5000); return;
+    }
+    clearTimeout(S.delTopT); dt.disabled = true; dt.textContent = '삭제하는 중…';
+    try { S.data = await api('deleteSession', S.pw, s.id); }
+    catch(err){ resetDelTop(); banner(err.message); return; }
+    resetDelTop(); openList();
+    const n = $('#pw-done'); n.hidden = false; n.textContent = `'${s.title || '제목 없음'}' 학습회를 삭제했어요.`; return;
+  }
   if (e.target.closest('.actions [data-act="refresh"]') && !e.target.closest('.panel')){ await reload(); resetSessionUI(); renderSession(); return; }
   const t = e.target.closest('#tabs .tab'); if (t){ S.tab = t.dataset.tab; resetSessionUI(); renderSession(); }
 });
