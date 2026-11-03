@@ -352,7 +352,7 @@ table.regs select{width:auto;padding:4px 6px;font-size:13px}
 .cls-edit .meta input[data-cf="time"]{width:150px}
 .cls-edit .meta input[data-cf="capacity"]{width:80px}
 .cls-edit .rm{grid-column:1;align-self:end}
-/* 진행 설명서 */
+/* 목공 설명서 */
 .manual{display:flex;flex-direction:column;gap:18px}
 .manual>header{border-bottom:2px solid var(--wood);padding-bottom:12px;display:flex;flex-direction:column;gap:4px}
 .manual .tag{font-size:12px;letter-spacing:.08em;color:var(--wood);font-weight:700}
@@ -648,6 +648,23 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .install .txt p{margin:2px 0 0}
 .install .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 @media (max-width:560px){ .install{flex-wrap:wrap} .install .btns{width:100%;justify-content:flex-start} }
+/* 신청 예약: 날짜 + 시 + 분 */
+.dt10{display:flex;gap:6px;align-items:center;flex:1;min-width:0;flex-wrap:wrap}
+.dt10 input[type=date]{flex:1 1 140px;min-width:0;width:auto}
+.dt10 select{width:auto;flex:none;padding-right:26px}
+.pw-row .dt10 + .btn{align-self:flex-start;min-height:42px}
+/* 부원 난이도 평가 */
+.lib-rate{display:flex;flex-direction:column;gap:10px}
+.lib-rate h3{font-size:16px}
+.rate5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rate5 button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border:1px solid var(--line);border-radius:10px;background:var(--paper);text-align:center;-webkit-tap-highlight-color:transparent}
+.rate5 button b{font-size:17px}
+.rate5 button span{font-size:12px;color:var(--muted);word-break:keep-all;line-height:1.3}
+.rate5 button[aria-checked="true"]{background:var(--wood);border-color:var(--wood);color:#fff}
+.rate5 button[aria-checked="true"] span{color:#fff}
+.rate5 button:disabled{opacity:.6;cursor:default}
+.rate5 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lib-rate .msg:empty{display:none}
 /* 부원용 설명서 열람 */
 .login.stackcol{gap:16px}
 .lib-entry{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;background:var(--surface);border:1.5px solid var(--wood);border-radius:14px;padding:18px;-webkit-tap-highlight-color:transparent}
@@ -694,6 +711,7 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 @media print{
   @page{margin:16mm 14mm}
   #v-guides>*:not(.manual){display:none!important}
+  .lib-rate{display:none!important}
   #v-guides .manual{border:0!important;padding:0!important}
   html,body{background:#fff!important;color:#111!important}
   .demobar,#install,#credit,#banner,#v-apply,#v-review,#v-login,#v-list,#s-head,#tabs,#v-session>.actions,#tab-results,#tab-regs,#tab-host,#tab-share{display:none!important}
@@ -838,7 +856,7 @@ window.dgWrite = function(root){
           <img class="logo" src="logo.png" alt="" width="56" height="48">
           <div><div class="tag">목방 목공 학습회 · 진행자 화면</div><h1><button type="button" class="title-btn" data-act="pw-open" aria-label="도각도각 (동아리 비밀번호 바꾸기)">도각도각</button></h1></div>
         </div>
-        <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 진행 설명서를 남겨요.</p>
+        <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 목공 설명서를 남겨요.</p>
       </div>
       <div class="top-acts"><button class="btn" id="btn-tut" type="button">앱 사용 튜토리얼</button><button class="btn primary" id="btn-new" type="button">새 학습회 만들기</button></div>
     </div>
@@ -861,7 +879,7 @@ window.dgWrite = function(root){
     <p class="msg ok" id="pw-done" role="status" hidden></p>
     <form class="panel" id="pwform" hidden novalidate></form>
     <div class="list" id="list"></div>
-    <div class="lib-share"><span class="hint">부원들에게는 설명서 열람 링크를 보내면 비밀번호 없이 진행 설명서를 볼 수 있어요.</span>
+    <div class="lib-share"><span class="hint">부원들에게 설명서 열람 링크를 보내면 비밀번호 없이 목공 설명서를 볼 수 있어요.</span>
       <span class="btns"><button type="button" class="btn sm ghost" data-act="open-lib">열람 화면 보기</button><button type="button" class="btn sm" data-act="copy-lib">설명서 열람 링크 복사</button></span>
       <span class="msg ok" id="lib-copy-msg" role="status"></span></div>
     <p class="hint" id="ver" style="text-align:right"></p>
@@ -873,7 +891,7 @@ window.dgWrite = function(root){
     <div class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" id="t-results" aria-controls="tab-results" data-tab="results" type="button">만족도 조사<span class="n num" id="t-count"></span></button>
       <button class="tab" role="tab" id="t-regs" aria-controls="tab-regs" data-tab="regs" type="button">신청 · 출석<span class="n num" id="t-regcount"></span></button>
-      <button class="tab" role="tab" id="t-guide" aria-controls="tab-guide" data-tab="guide" type="button">진행 설명서</button>
+      <button class="tab" role="tab" id="t-guide" aria-controls="tab-guide" data-tab="guide" type="button">목공 설명서</button>
       <button class="tab" role="tab" id="t-host" aria-controls="tab-host" data-tab="host" type="button">진행자 기록</button>
       <button class="tab" role="tab" id="t-share" aria-controls="tab-share" data-tab="share" type="button">링크 · 정보</button>
     </div>
@@ -978,9 +996,9 @@ function applyState(s, t) {
 }
 /* 부원용 설명서 모음: 설명서가 있는 학습회만 골라, 설명서와 만족도 요약(평균·난이도·응답 수)만 내보내요.
    신청자 이름·연락처, 자유 의견, 진행자 기록은 넣지 않아요. (Api.gs의 buildGuideLibrary와 같은 내용) */
-function buildGuideLibrary(all) {
-  all = all || {};
-  var hasG = function (g) { return !!(g && (g.intro || (g.prep || []).length || (g.cutting || []).length || (g.flow || []).length || g.safety || g.tips)); };
+function buildGuideLibrary(all, ratings) {
+  all = all || {}; ratings = ratings || {};
+  var hasG = function (g) { return !!(g && (g.intro || g.makeTime || (g.prep || []).length || (g.cutting || []).length || (g.flow || []).length || g.safety || g.tips)); };
   var mean = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
   var out = [];
   (all.sessions || []).forEach(function (s) {
@@ -998,9 +1016,14 @@ function buildGuideLibrary(all) {
       .filter(function (v) { return v != null; });
     out.push({ id: s.id, title: s.title || '', term: s.term || '', places: s.places || [], tools: s.tools || [],
       lead: { name: (s.lead && s.lead.name) || '' }, classes: [{ dates: Object.keys(dates).sort() }],
-      guide: g, at: at || null, n: ov.length, overall: mean(ov), difficulty: mean(df) });
+      guide: g, at: at || null, n: ov.length, overall: mean(ov), difficulty: mean(df), rated: rateSum(ratings[s.id]) });
   });
   return out;
+}
+function rateSum(c) {
+  c = Array.isArray(c) ? c : []; var n = 0, t = 0;
+  for (var i = 0; i < 5; i++) { var k = Math.max(0, Number(c[i]) || 0); n += k; t += k * (i + 1); }
+  return { n: n, avg: n ? t / n : null };
 }
 function guideLibraryPhotos(lib) {
   var ids = [];
@@ -1010,6 +1033,7 @@ function guideLibraryPhotos(lib) {
   return ids;
 }
 function makeCore(store, env) {
+  const RATED = {};   // 미리보기용 부원 난이도 평가
   const PLACES = ['1동방', '2동방'];
   const SELF_KEYS = ['selfScore', 'prepScore', 'planScore'];
   const STATUS = ['ok', 'short', 'none'];
@@ -1313,7 +1337,7 @@ function makeCore(store, env) {
     g = g || {};
     const lines = (v, n, m) => String(v == null ? '' : v).split('\n').map(x => x.trim()).filter(Boolean).slice(0, m).map(x => x.slice(0, n));
     return {
-      intro: cut(g.intro, 400), duration: cut(g.duration, 30),
+      intro: cut(g.intro, 400), duration: cut(g.duration, 30), makeTime: cut(g.makeTime, 30),
       prep: lines(g.prep, 120, 40), cutting: lines(g.cutting, 300, 30),
       flow: (g.flow || []).slice(0, 20).map(f => ({ title: cut(f.title, 60), min: Math.max(0, Math.min(600, Math.round(Number(f.min)) || 0)), body: cut(f.body, 600), photos: photoList(f.photos, 4) }))
         .filter(f => f.title || f.body || f.photos.length),
@@ -1321,7 +1345,7 @@ function makeCore(store, env) {
       safety: cut(g.safety, 1000), tips: cut(g.tips, 1000),
     };
   }
-  /* 진행 설명서: 진행자 화면에 들어온 사람이면 누구나 쓰고 고쳐요 (PIN 없음) */
+  /* 목공 설명서: 진행자 화면에 들어온 사람이면 누구나 쓰고 고쳐요 (PIN 없음) */
   function saveGuide(pw, sid, guide) {
     auth(pw);
     const g = cleanGuide(guide); let removed = [];
@@ -1392,7 +1416,10 @@ function makeCore(store, env) {
     getApplyInfo, apply, myRegs, cancelMine, getPublicSession, submitReview, changePassword,
     hostLogin: getAll, getAll, saveSession, deleteSession, setApplyOpen, setAttendance, hostCancelReg, promoteReg, moveReg, addReg,
     checkHostPin, saveHostLog, deleteHostLog, saveGuide, deleteReview, flipDifficulty, uploadPhoto, getPhoto,
-    getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword())),
+    getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword()), RATED),
+    rateGuide: (sid, v, prev) => { v = sc5(v); if (!v) fail('난이도를 골라 주세요.');
+      if (!buildGuideLibrary(getAll(env.getPassword())).some(x => x.id === String(sid))) fail('설명서를 찾을 수 없어요.');
+      const c = RATED[sid] = RATED[sid] || [0,0,0,0,0]; const pv = sc5(prev); if (pv && c[pv-1] > 0) c[pv-1]--; c[v-1]++; return rateSum(c); },
     getGuidePhoto: id => { if (guideLibraryPhotos(buildGuideLibrary(getAll(env.getPassword()))).indexOf(String(id)) < 0) fail('사진을 찾을 수 없어요.'); return env.readPhoto(String(id)); },
   };
 }
@@ -1423,6 +1450,19 @@ const DANGER = ['테이블 쏘','밴드 쏘','루터','각도 절단기','드릴
 const W7 = '일월화수목금토';
 function fmtDT(ms){ const d = new Date(Number(ms)); if (isNaN(d)) return ''; return `${d.getMonth()+1}/${d.getDate()}(${W7[d.getDay()]}) ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
 function toLocalInput(ms){ if (!ms) return ''; const d = new Date(Number(ms)); if (isNaN(d)) return ''; const z = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; }
+/* 신청 예약 입력: 날짜 + 시 + 분(10분 단위) */
+const MIN10 = ['00','10','20','30','40','50'];
+function dtPick(id, key, ms){
+  const z = n => String(n).padStart(2,'0'); const d = ms ? new Date(Number(ms)) : null; const ok = d && !isNaN(d);
+  const date = ok ? `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}` : '';
+  const hh = ok ? z(d.getHours()) : (key === 'closeAt' ? '23' : '18'); const mm = ok ? z(d.getMinutes()) : (key === 'closeAt' ? '50' : '00');
+  const mins = MIN10.includes(mm) ? MIN10 : MIN10.concat(mm).sort();
+  return `<span class="dt10" data-atg="${key}"><input type="date" id="${id}" data-atp="${key}" data-part="d" value="${date}">
+    <select data-atp="${key}" data-part="h" aria-label="시">${Array.from({length:24}, (_, i) => z(i)).map(x => `<option value="${x}"${x===hh?' selected':''}>${x}시</option>`).join('')}</select>
+    <select data-atp="${key}" data-part="m" aria-label="분">${mins.map(x => `<option value="${x}"${x===mm?' selected':''}>${x}분</option>`).join('')}</select></span>`;
+}
+function dtRead(t){ const g = t.closest('[data-atg]'); const v = g.querySelector('[data-part="d"]').value; if (!v) return '';
+  return fromLocalInput(`${v}T${g.querySelector('[data-part="h"]').value}:${g.querySelector('[data-part="m"]').value}`); }
 function fromLocalInput(v){ if (!v) return ''; const t = new Date(v).getTime(); return isNaN(t) ? '' : t; }
 function stateInfo(s){
   const st = applyState(s, Date.now());
@@ -1627,7 +1667,7 @@ const regsFor = sid => D().regs.filter(r => r.sid === sid);
 const logsFor = sid => D().hostlogs.filter(l => l.sid === sid);
 const cur = () => D().sessions.find(s => s.id === S.sid);
 const leadLog = s => s && s.lead ? logsFor(s.id).find(l => l.hostId === s.lead.id) : null;
-const hasGuide = g => !!(g && (g.intro || (g.prep||[]).length || (g.cutting||[]).length || (g.flow||[]).length || g.safety || g.tips));
+const hasGuide = g => !!(g && (g.intro || g.makeTime || (g.prep||[]).length || (g.cutting||[]).length || (g.flow||[]).length || g.safety || g.tips));
 const baseUrl = () => LIVE ? SITE : D().url;
 const link = (v, sid) => `${baseUrl()}?v=${v}&s=${encodeURIComponent(sid)}`;
 
@@ -1693,7 +1733,7 @@ function renderApply(){
         <div class="s-meta"><span class="num">${esc(rangeText(s.dates))}</span>${placesChip(s.places)}${s.lead?`<span>대표 ${esc(s.lead)}${s.assistants.length?` · 보조 ${esc(s.assistants.join(', '))}`:''}</span>`:''}</div>
         ${single ? '' : `<h2>${esc(s.title)}</h2>`}
         ${s.desc ? `<p class="s-desc" style="margin:0">${esc(s.desc)}</p>` : ''}
-        ${(s.tools||[]).length ? `<div class="ap-info"><span class="lbl">사용 장비</span><span>${esc(s.tools.join(', '))}</span></div>${s.tools.some(t => DANGER.includes(t)) ? `<p class="hint" style="margin:0">위험한 전동 장비를 써요.<br>안전 교육을 받은 뒤 진행자 지도 아래에서만 작업해요.</p>` : ''}` : ''}
+        ${(s.tools||[]).length ? `<div class="ap-info"><span class="lbl">사용 장비</span><span>${esc(s.tools.join(', '))}</span></div>` : ''}
         ${noteLines(s.notes).length ? `<div class="ap-notes"><span class="lbl">유의사항</span><ol>${noteLines(s.notes).map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}
         ${s.state === 'soon' ? `<div class="empty"><b>${esc(fmtDT(s.openAt))}</b>부터 신청할 수 있어요.${s.closeAt ? `<br>마감은 ${esc(fmtDT(s.closeAt))}이에요.` : ''}</div>
           <div class="cls-opts">${s.classes.map(c2 => `<div class="cls-opt" aria-disabled="true"><b>${esc(c2.label)}</b><span class="d">${esc(datesText(c2.dates))}</span>${c2.time?`<span class="t">${esc(c2.time)}</span>`:''}<span class="seat">정원 ${c2.capacity||'제한 없음'}${c2.capacity?'명':''}</span></div>`).join('')}</div>`
@@ -1797,7 +1837,7 @@ function renderReview(){
   if (once && store('l', 'dg_sent_' + p.id)){ box.innerHTML = head + `<div class="panel thanks"><h2>이미 평가를 보냈습니다</h2><p class="sub">이 학습회 평가는 한 번만 할 수 있습니다.<br>참여해 주셔서 감사합니다.</p></div>`; return; }
   box.innerHTML = head + `
   <form class="panel" id="rv-form" novalidate>
-    <div class="privacy"><span aria-hidden="true">🔒</span><span>익명 평가예요. 이름, 학번, 계정 정보를 받지 않아서 진행자도 누가 썼는지 알 수 없어요.</span></div>
+    <div class="privacy"><span aria-hidden="true">🔒</span><span>익명으로 평가 받고 있습니다!</span></div>
     ${cls.length > 1 ? `<div class="field"><div class="lbl" id="lbl-rvcls">어느 회차에 참여했나요?<span class="req">필수</span></div>
       <div class="cls-opts" role="radiogroup" aria-labelledby="lbl-rvcls">${cls.map(c => `<button type="button" class="cls-opt" role="radio" data-rc="${esc(c.id)}" aria-checked="${r.classId===c.id}"><b>${esc(c.label)}</b><span class="d">${esc(datesText(c.dates))}</span></button>`).join('')}</div></div>` : ''}
     <div class="q-grid top2">
@@ -1843,19 +1883,19 @@ function openLogin(note){
   $('#v-login').innerHTML = `
   <div class="login stackcol">
   <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방</div><h1>도각도각</h1></div></div>
-  <button type="button" class="lib-entry" data-act="open-guides">
-    <span class="lib-ic" aria-hidden="true">${BOOK_ICON}</span>
-    <span class="grow"><b>목공 설명서 열람하기</b><span>부원 누구나 · 비밀번호 없이 들어가요. 지금까지 연 학습회의 준비물, 진행 순서, 사진을 보고 해 보고 싶은 작업을 골라 보세요.</span></span>
-    <span class="lib-go" aria-hidden="true">→</span>
-  </button>
   <form class="panel" id="login-form" novalidate>
-    <div><div class="tag">임원진 전용</div><h2>진행자 화면</h2></div>
+    <h2>임원진 전용</h2>
     <p class="sub" style="margin:0">학습회를 열고 신청·출석을 관리하려면 동아리 비밀번호를 입력해 주세요. 참가자는 신청 링크와 만족도 조사 링크로만 들어와요.</p>
     <div class="field"><label for="pw">동아리 비밀번호</label>
       <div class="pw-row"><input type="password" id="pw" autocomplete="current-password"><button class="btn primary" type="submit" id="pw-go">들어가기</button></div></div>
     <span class="msg err" id="pw-msg" role="status">${esc(note||'')}</span>
     ${LIVE ? '' : '<p class="hint">미리보기 비밀번호는 <b>1234</b>예요.</p>'}
   </form>
+  <button type="button" class="lib-entry" data-act="open-guides">
+    <span class="lib-ic" aria-hidden="true">${BOOK_ICON}</span>
+    <span class="grow"><b>목공 설명서 열람하기</b><span>설명서를 보고 원하는 작업을 골라 진행해 보세요.</span></span>
+    <span class="lib-go" aria-hidden="true">→</span>
+  </button>
   </div>`;
   if (!matchMedia('(pointer: coarse)').matches) $('#pw').focus();
 }
@@ -1876,7 +1916,7 @@ $('#v-login').addEventListener('submit', async e => {
 const BOOK_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>';
 const LIB = { list: null, q: '', sort: store('l', 'dg_libsort') === 'new' ? 'new' : 'rank', sid: null, msg: '' };
 const libTotal = g => (g.flow || []).reduce((n, f) => n + (Number(f.min) || 0), 0);
-const libTime = x => x.guide.duration || (libTotal(x.guide) ? `${libTotal(x.guide)}분` : '');
+const libTime = x => x.guide.makeTime || '';
 const libThumb = x => { const g = x.guide; return (g.finalPhotos || [])[0] || ((g.flow || []).find(f => (f.photos || []).length) || {photos: []}).photos[0] || ''; };
 const libStars = x => x.n ? `<span class="lib-star">★ <b class="num">${f1(x.overall)}</b><small> (${x.n}명)</small></span>` : '<span class="hint">평가 없음</span>';
 async function openGuides(sid){
@@ -1898,19 +1938,21 @@ function renderGuides(){
       <span class="msg ok lib-msg" role="status">${esc(LIB.msg)}</span>
       <div class="lib-sum">
         <div><span class="lbl">학기</span><b>${esc(termLabel(termFor(x)))}</b></div>
-        ${libTime(x) ? `<div><span class="lbl">걸리는 시간</span><b>${esc(libTime(x))}</b></div>` : ''}
+        ${libTime(x) ? `<div><span class="lbl">완성까지</span><b>${esc(libTime(x))}</b></div>` : ''}
         <div><span class="lbl">만족도</span><b>${x.n ? `★ ${f1(x.overall)} <small>(${x.n}명)</small>` : '<small>평가 없음</small>'}</b></div>
-        ${x.difficulty != null ? `<div><span class="lbl">난이도</span><b>${esc(DIFF_LABEL(x.difficulty))}</b></div>` : ''}
+        ${x.difficulty != null ? `<div><span class="lbl">참가자 난이도</span><b>${esc(DIFF_LABEL(x.difficulty))}</b></div>` : ''}
+        ${x.rated && x.rated.n ? `<div><span class="lbl">부원 난이도</span><b>${esc(DIFF_LABEL(x.rated.avg))} <small>(${x.rated.n}명)</small></b></div>` : ''}
         ${(x.tools || []).length ? `<div class="wide"><span class="lbl">사용 장비</span><b class="lib-tools">${x.tools.map(t => `<span class="chip${DANGER.includes(t) ? ' danger' : ''}">${esc(t)}</span>`).join('')}</b></div>` : ''}
       </div>
-      ${manualHTML(x, {g: x.guide, at: x.at})}`;
+      ${manualHTML(x, {g: x.guide, at: x.at})}
+      ${libRateHTML(x)}`;
     LIB.msg = ''; window.scrollTo(0, 0); loadPhotos(); return;
   }
   LIB.sid = null;
   v.innerHTML = `
     <div class="top lib-head"><div>
       <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>목공 설명서</h1></div></div>
-      <p class="sub">임원진이 학습회를 마치고 남긴 진행 설명서예요. 준비물과 진행 순서를 보고 해 보고 싶은 작업을 골라 보세요.</p></div></div>
+      <p class="sub">다양한 목공 설명서를 열람할 수 있어요.<br>원하는 작업을 골라 진행해 보아요.</p></div></div>
     <div class="lib-tools-row">
       <input type="search" id="lib-q" placeholder="찾기 (예: 도마, 카빙, 호두나무)" value="${esc(LIB.q)}" aria-label="설명서 찾기">
       <div class="seg" role="radiogroup" aria-label="보는 순서" id="lib-sort">
@@ -1921,6 +1963,16 @@ function renderGuides(){
     <p class="hint lib-foot">임원진이세요? <button type="button" class="linkish" data-act="lib-host">진행자 화면으로 가기</button></p>`;
   loadPhotos();
 }
+const RATE_WORDS = ['너무 쉬움','조금 쉬움','적당함','조금 어려움','너무 어려움'];
+function libRateHTML(x){
+  const mine = Number(store('l', 'dg_rt_' + x.id)) || 0;
+  return `<section class="panel lib-rate" id="lib-rate">
+    <h3>난이도 평가해 보기</h3>
+    <p class="hint">이 작업을 해 봤다면 느낀 난이도를 골라 주세요. 이름 없이 모여요.</p>
+    <div class="rate5" role="radiogroup" aria-label="난이도">${RATE_WORDS.map((w, i) => `<button type="button" role="radio" data-rate="${i+1}" aria-checked="${mine === i+1}"><b>${i+1}</b><span>${w}</span></button>`).join('')}</div>
+    <span class="msg ok" id="rate-msg" role="status">${mine ? `평가했어요. 다시 누르면 바꿀 수 있어요.${x.rated && x.rated.n ? ` 부원 평균: ${esc(DIFF_LABEL(x.rated.avg))} (${x.rated.n}명)` : ''}` : ''}</span>
+  </section>`;
+}
 function libCards(){
   const all = LIB.list || []; const total = all.length;
   const q = LIB.q.trim().toLowerCase();
@@ -1928,21 +1980,29 @@ function libCards(){
   const shown = all.filter(i => !q || q.split(/\s+/).every(w => hay(i).includes(w)));
   const newest = (a, b) => (sDates(b)[0] || '').localeCompare(sDates(a)[0] || '') || (b.at || 0) - (a.at || 0);
   shown.sort(LIB.sort === 'new' ? newest : (a, b) => ((b.n >= 3) - (a.n >= 3)) || ((b.overall || 0) - (a.overall || 0)) || newest(a, b));
-  if (!total) return `<div class="empty">아직 올라온 설명서가 없어요. 학습회를 마친 임원진이 진행 설명서를 쓰면 여기에 모여요.</div>`;
+  if (!total) return `<div class="empty">아직 올라온 설명서가 없어요. 학습회를 마친 임원진이 목공 설명서를 쓰면 여기에 모여요.</div>`;
   if (!shown.length) return `<div class="empty">'${esc(LIB.q)}'에 맞는 설명서가 없어요.</div>`;
   return shown.map(x => { const th = libThumb(x); const t = libTime(x);
     return `<button type="button" class="lib-card" data-g="${esc(x.id)}">
       <div class="lib-th">${th ? phImg(th, `${x.title} 사진`) : `<span aria-hidden="true">${BOOK_ICON}</span>`}</div>
       <div class="lib-body"><h3>${esc(x.title || '제목 없음')}</h3>
-        <div class="c-meta"><span class="num">${esc(termLabel(termFor(x)))}</span>${t ? `<span>${esc(t)}</span>` : ''}${x.difficulty != null ? `<span>난이도 ${esc(DIFF_LABEL(x.difficulty).replace('했어요','함').replace('웠어요','움'))}</span>` : ''}${libStars(x)}</div>
+        <div class="c-meta"><span class="num">${esc(termLabel(termFor(x)))}</span>${t ? `<span>완성까지 ${esc(t)}</span>` : ''}${(() => { const dv = x.difficulty != null ? x.difficulty : (x.rated && x.rated.n ? x.rated.avg : null); return dv != null ? `<span>난이도 ${esc(DIFF_LABEL(dv).replace('했어요','함').replace('웠어요','움'))}</span>` : ''; })()}${libStars(x)}</div>
         ${x.guide.intro ? `<p class="lib-intro">${esc(x.guide.intro)}</p>` : ''}
-        ${(x.tools || []).length ? `<div class="lib-chips">${x.tools.slice(0, 5).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}</div>
+</div>
     </button>`; }).join('');
 }
 /* 찾기 칸은 그대로 두고 목록만 바꿔요 (한글 입력이 끊기지 않게) */
 $('#v-guides').addEventListener('input', e => { if (e.target.id !== 'lib-q') return; LIB.q = e.target.value; const l = $('#lib-list'); if (l){ l.innerHTML = libCards(); loadPhotos(); } });
 $('#v-guides').addEventListener('click', async e => {
   const c = e.target.closest('.lib-card'); if (c){ LIB.sid = c.dataset.g; renderGuides(); return; }
+  const rb = e.target.closest('[data-rate]'); if (rb){ const v = Number(rb.dataset.rate); const sid = LIB.sid; const prev = Number(store('l', 'dg_rt_' + sid)) || 0; const m = $('#rate-msg');
+    if (prev === v){ m.textContent = '이미 이 난이도로 평가했어요.'; return; }
+    document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = true); m.className = 'msg'; m.textContent = '보내는 중…';
+    try { const r = await api('rateGuide', sid, v, prev || null); store('l', 'dg_rt_' + sid, String(v));
+      const it = (LIB.list || []).find(i => i.id === sid); if (it) it.rated = r;
+      const y = window.scrollY; renderGuides(); window.scrollTo(0, y); $('#rate-msg').textContent = `고마워요! 부원 평균: ${DIFF_LABEL(r.avg)} (${r.n}명)`; }
+    catch(err){ document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = false); m.className = 'msg err'; m.textContent = /알 수 없는 요청/.test(err.message) ? '난이도 평가는 서버(Api.gs)를 새 판으로 바꾸면 열려요.' : err.message; }
+    return; }
   const sb = e.target.closest('#lib-sort button'); if (sb){ LIB.sort = sb.dataset.sort; store('l', 'dg_libsort', LIB.sort); renderGuides(); return; }
   if (e.target.closest('[data-act="lib-back"]')){ LIB.sid = null; renderGuides(); window.scrollTo(0, 0); return; }
   if (e.target.closest('[data-act="print"]')){ window.print(); return; }
@@ -1980,9 +2040,9 @@ function infoFields(p, d, compact){
   </div>
   ${compact ? '' : `  <div class="row">
     <div class="field"><label for="${p}-openat">신청 열기 예약 <span class="hint">비워 두면 저장하자마자 열려요</span></label>
-      <div class="pw-row"><input type="datetime-local" id="${p}-openat" data-at="openAt" value="${esc(toLocalInput(d.openAt))}"><button type="button" class="btn sm ghost" data-act="clear-at" data-k="openAt">비우기</button></div></div>
+      <div class="pw-row">${dtPick(`${p}-openat`, 'openAt', d.openAt)}<button type="button" class="btn sm ghost" data-act="clear-at" data-k="openAt">비우기</button></div></div>
     <div class="field"><label for="${p}-closeat">신청 마감 예약 <span class="hint">비워 두면 직접 마감할 때까지</span></label>
-      <div class="pw-row"><input type="datetime-local" id="${p}-closeat" data-at="closeAt" value="${esc(toLocalInput(d.closeAt))}"><button type="button" class="btn sm ghost" data-act="clear-at" data-k="closeAt">비우기</button></div></div>
+      <div class="pw-row">${dtPick(`${p}-closeat`, 'closeAt', d.closeAt)}<button type="button" class="btn sm ghost" data-act="clear-at" data-k="closeAt">비우기</button></div></div>
   </div>`}
   <div class="field"><div class="lbl" id="${p}-tools-l">사용 장비 <span class="hint">공지글과 신청 화면에 보여요</span></div>
     <div class="tool-chips" role="group" aria-labelledby="${p}-tools-l" data-tools>${TOOLS.map(t => `<button type="button" data-v="${t}" aria-pressed="${d.tools.includes(t)}">${t}</button>`).join('')}</div>
@@ -2017,7 +2077,7 @@ function infoInput(t, d){
     if (t.dataset.di != null && t.type === 'date'){ c.dates[Number(t.dataset.di)] = t.value; return true; } }
   if (t.hasAttribute('data-a')){ d.attendees = t.value; return true; }
   if (t.hasAttribute('data-toolx')){ d._extra = t.value; d.tools = toolsOf(d); return true; }
-  if (t.dataset.at){ d[t.dataset.at] = fromLocalInput(t.value); return true; }
+  if (t.dataset.atp){ d[t.dataset.atp] = dtRead(t); return true; }
   if (t.dataset.rm != null){ const i = Number(t.dataset.rm); const m = d.review.metrics[i]; m.q = t.value; m.s = shortLabel(t.value); const pv = document.getElementById('rvpv-' + i); if (pv) pv.innerHTML = rvPreview(m); return true; }
   if (t.dataset.rt){ d.review.texts[Number(t.dataset.rt)].q = t.value; return true; }
   if (t.hasAttribute('data-ronce')){ d.review.once = t.checked; return true; }
@@ -2055,7 +2115,7 @@ function infoClick(e, d, root){
     if (a2 === 'add-t'){ const ins = root.querySelectorAll('[data-rt]'); if (ins.length) ins[ins.length-1].focus(); }
     return true; }
   const ca = e.target.closest('[data-act="clear-at"]');
-  if (ca){ d[ca.dataset.k] = ''; const inp = ca.parentElement.querySelector('input'); if (inp) inp.value = ''; return true; }
+  if (ca){ d[ca.dataset.k] = ''; const inp = ca.parentElement.querySelector('input[data-part="d"]'); if (inp) inp.value = ''; return true; }
   const tb = e.target.closest('[data-tools] button');
   if (tb){ const v = tb.dataset.v; const on = d.tools.includes(v); d.tools = on ? d.tools.filter(x => x !== v) : d.tools.concat(v); d.tools = toolsOf(d); tb.setAttribute('aria-pressed', String(!on)); return true; }
   const pb = e.target.closest('[data-places] button');
@@ -2102,7 +2162,7 @@ function cardInner(s, rank){
       ${rank !== undefined ? (() => { const ri = rankInfo(s); const bits = ri.top.map(m => `${esc(m.s)} <b class="num">${f1(m.a)}</b>`); if (ri.diff) bits.push(`난이도 <b>${esc(ri.diff)}</b>`); return bits.length ? `<div class="c-good">강점 · ${bits.join(' · ')}</div>` : ''; })() : ''}</div>
     <div class="c-side">
       <div class="score">${f1(a)}<small> / 5</small></div>
-      <div class="count">신청 ${conf}${unlimited?'':`/${cap}`}${wait?` · 대기 ${wait}`:''} · 만족도 응답 ${rs.length}</div>
+      <div class="count">신청 ${conf}${unlimited?'':`/${cap}`}${wait?` · 대기 ${wait}`:''}</div>
       ${stateChip(s)}
     </div>
   </button>`;
@@ -2118,7 +2178,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 26판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 27판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -2345,10 +2405,10 @@ function readNewPin(msgEl){
   return p1;
 }
 
-/* --- 진행 설명서 (PIN 없이 진행자라면 누구나) --- */
+/* --- 목공 설명서 (PIN 없이 진행자라면 누구나) --- */
 const guideRow = s => D().guides ? D().guides.find(g => g.sid === s.id) : null;
 function guideOf(s){ const r = guideRow(s); if (r && r.guide) return {g:r.guide, at:r.updatedAt}; const L = leadLog(s); return L && L.guide ? {g:L.guide, at:L.updatedAt} : null; }
-function guideDraft(g){ g = g || {}; return { intro:g.intro||'', duration:g.duration||'', prep:(g.prep||[]).join('\n'), cutting:(g.cutting||[]).join('\n'),
+function guideDraft(g){ g = g || {}; return { intro:g.intro||'', duration:g.duration||'', makeTime:g.makeTime||'', prep:(g.prep||[]).join('\n'), cutting:(g.cutting||[]).join('\n'),
   flow: (g.flow||[]).length ? clone(g.flow).map(f => ({...f, photos: f.photos || []})) : [{title:'',min:'',body:'',photos:[]}], safety:g.safety||'', tips:g.tips||'', finalPhotos:(g.finalPhotos||[]).slice() }; }
 
 /* 사진: 서버에서 한 장씩 받아 오고 한 번 받은 건 기억해 둬요 */
@@ -2377,8 +2437,8 @@ const photoGrid = (ids, alt) => ids && ids.length ? `<div class="ph-grid">${ids.
 function manualHTML(s, G){
   const g = G.g; const total = (g.flow||[]).reduce((n,f)=>n+(Number(f.min)||0),0); const when = G.at ? new Date(Number(G.at)) : null;
   return `<article class="manual">
-    <header><div class="tag">진행 설명서</div><h2>${esc(s.title)}</h2>
-      <p class="hint">${s.lead && s.lead.name ? `대표 진행자 ${esc(s.lead.name)}` : ''}${g.duration?` · ${esc(g.duration)}`:''}${when?` · ${when.getFullYear()}. ${when.getMonth()+1}. ${when.getDate()} 고침`:''}</p></header>
+    <header><div class="tag">목공 설명서</div><h2>${esc(s.title)}</h2>
+      <p class="hint">${[s.lead && s.lead.name ? `대표 진행자 ${esc(s.lead.name)}` : '', g.makeTime ? `완성까지 ${esc(g.makeTime)}` : '', g.duration ? esc(g.duration) : ''].filter(Boolean).join(' · ')}${when?` · ${when.getFullYear()}. ${when.getMonth()+1}. ${when.getDate()} 고침`:''}</p></header>
     ${g.intro ? `<p>${esc(g.intro)}</p>` : ''}
     ${(g.prep||[]).length ? `<section><h3>준비물 · 재료</h3><ul class="checklist">${g.prep.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>` : ''}
     ${(g.cutting||[]).length ? `<section><h3>준비 방법</h3><ol class="steps">${g.cutting.map(x=>`<li><span>${esc(x)}</span></li>`).join('')}</ol></section>` : ''}
@@ -2386,7 +2446,7 @@ function manualHTML(s, G){
     ${g.safety ? `<section class="warnbox"><h3>안전 주의사항</h3><p>${esc(g.safety)}</p></section>` : ''}
     ${g.tips ? `<section><h3>진행 팁</h3><p>${esc(g.tips)}</p></section>` : ''}
     ${(g.finalPhotos||[]).length ? `<section class="final"><h3>완성 사진</h3>${photoGrid(g.finalPhotos, '완성 사진')}</section>` : ''}
-    <p class="print-only hint">도각도각 · 목방 목공 학습회 진행 설명서 · ${esc(termLabel(termFor(s)))}</p>
+    <p class="print-only hint">도각도각 · 목방 목공 학습회 목공 설명서 · ${esc(termLabel(termFor(s)))}</p>
   </article>`;
 }
 function renderGuide(){
@@ -2395,12 +2455,12 @@ function renderGuide(){
   if (S.hdOpen && S.hdKind === 'guide'){ p.innerHTML = guideForm(s, G, others); loadPhotos(); return; }
   const has = G && hasGuide(G.g);
   p.innerHTML = `
-    <div class="actions"><h2>진행 설명서</h2><span class="spacer"></span>
+    <div class="actions"><h2>목공 설명서</h2><span class="spacer"></span>
       ${has ? `<button type="button" class="btn sm" data-act="print">인쇄하기</button>` : ''}
       <button type="button" class="btn sm ${has?'':'primary'}" data-act="guide-edit">${has ? '설명서 고치기' : '설명서 쓰기'}</button></div>
     <span class="msg ${S.hdMsgCls}" role="status">${esc(S.hdMsg)}</span>
-    ${has ? manualHTML(s, G) : `<div class="empty">아직 진행 설명서가 없어요. 준비물, 준비 방법, 진행 순서와 사진을 정리해 두면 다음 학기 임원진도 그대로 따라 할 수 있어요.</div>`}
-    ${others.length ? `<div class="field"><div class="lbl">다른 학습회 설명서</div><div class="other-guides">${others.map(o => `<button type="button" class="btn sm ghost" data-act="goto-guide" data-s="${esc(o.s.id)}">${esc(o.s.title)} · ${esc(termLabel(termFor(o.s)))}</button>`).join('')}</div></div>` : ''}`;
+    ${has ? manualHTML(s, G) : `<div class="empty">아직 목공 설명서가 없어요. 준비물, 준비 방법, 진행 순서와 사진을 정리해 두면 다음 학기 임원진도 그대로 따라 할 수 있어요.</div>`}
+`;
   loadPhotos();
 }
 function photoEdit(ids, key, label){
@@ -2412,12 +2472,13 @@ function photoEdit(ids, key, label){
 function guideForm(s, G, others){
   const g = S.hd;
   return `<form id="gd-form" class="myform" novalidate>
-    <h3>진행 설명서 ${G && hasGuide(G.g) ? '고치기' : '쓰기'}</h3>
+    <h3>목공 설명서 ${G && hasGuide(G.g) ? '고치기' : '쓰기'}</h3>
     ${others.length ? `<div class="field" style="max-width:420px"><label for="gd-import">다른 학습회 설명서 가져오기</label><select id="gd-import"><option value="">가져오지 않음</option>${others.map(o=>`<option value="${esc(o.s.id)}">${esc(o.s.title)} · ${esc(termLabel(termFor(o.s)))}</option>`).join('')}</select><p class="hint">같은 주제를 다시 열 때 지난 설명서를 불러와서 고쳐 쓰세요. 사진도 같이 가져와요.</p></div>` : ''}
     <div class="row">
       <div class="field"><label for="gd-intro">한 줄 소개</label><textarea id="gd-intro" data-g="intro" maxlength="400" placeholder="무엇을 어떤 크기로 만드는지, 회차 구성은 어떤지">${esc(g.intro)}</textarea></div>
-      <div class="field"><label for="gd-dur">소요 시간</label><input type="text" id="gd-dur" data-g="duration" maxlength="30" value="${esc(g.duration)}" placeholder="예: 회차당 2시간 / 두 번, 하루 2시간 30분"></div>
+      <div class="field"><label for="gd-make">완성까지 걸리는 시간 <span class="hint">처음부터 완성까지 실제로 드는 시간</span></label><input type="text" id="gd-make" data-g="makeTime" maxlength="30" value="${esc(g.makeTime)}" placeholder="예: 약 4시간 30분"></div>
     </div>
+    <div class="field" style="max-width:420px"><label for="gd-dur">회차 구성</label><input type="text" id="gd-dur" data-g="duration" maxlength="30" value="${esc(g.duration)}" placeholder="예: 회차당 2시간 / 두 번, 하루 2시간 30분"></div>
     <div class="row">
       <div class="field"><label for="gd-prep">준비물 · 재료 <span class="hint">한 줄에 하나</span></label><textarea id="gd-prep" data-g="prep" rows="7" placeholder="피나무 블록 50×50×80mm&#10;카빙나이프 (1인 1자루)&#10;방검 장갑 M·L">${esc(g.prep)}</textarea></div>
       <div class="field"><label for="gd-cut">준비 방법 <span class="hint">한 줄에 한 단계 (재단, 초벌 가공, 자리 배치 등)</span></label><textarea id="gd-cut" data-g="cutting" rows="7" placeholder="블록에 옆모습 도안을 그려요.&#10;밴드 쏘로 도안 바깥 2mm를 남기고 잘라요.">${esc(g.cutting)}</textarea></div>
@@ -2494,7 +2555,7 @@ gdPanel.addEventListener('submit', async e => {
   btn.disabled = true; msg.className = 'msg'; msg.textContent = '저장하는 중…';
   try { S.data = await api('saveGuide', S.pw, S.sid, body); }
   catch(err){ btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
-  S.hdOpen = false; S.hd = null; S.hdMsg = '진행 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide(); if (TUT) tutEvent('guideSaved');
+  S.hdOpen = false; S.hd = null; S.hdMsg = '목공 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide(); if (TUT) tutEvent('guideSaved');
 });
 
 /* --- 진행자 기록 (대표: 길게, 보조: 간단히) --- */
@@ -2538,7 +2599,7 @@ function renderHost(){
     </article>`;
   };
   p.innerHTML = `
-    <div><h2>진행자 기록</h2><p class="hint" style="margin-top:4px">대표 진행자는 진행 전체를 길게, 보조는 자기 보조 역할을 간단히 평가해요. 처음 저장할 때 정한 본인 PIN이 있어야 고치거나 지울 수 있어요.</p></div>
+    <div><h2>진행자 기록</h2><p class="hint" style="margin-top:4px">본인의 역할을 간단히 평가하고, 기록해요. 본인 기록은 본인만 수정할 수 있어요.</p></div>
     <span class="msg ${S.hdMsgCls}" role="status">${esc(S.hdMsg)}</span>
     <div class="hcards">${lead ? card(lead, 'lead') : '<div class="empty">링크 · 정보 탭에서 대표 진행자를 넣어 주세요.</div>'}${(s.assistants||[]).filter(a=>a.name).map(a => card(a, 'assist')).join('')}</div>
     <form class="as-add" id="as-add" novalidate>
@@ -2822,9 +2883,9 @@ function renderShare(){
       <div class="qs-grid">
         <div class="field"><label for="q-lead">대표 진행자</label><input type="text" id="q-lead" data-lead maxlength="20" value="${esc(Q.lead.name)}" placeholder="이름"></div>
         <div class="field"><label for="q-openat">신청 열기 예약 <span class="hint">비우면 바로 열림</span></label>
-          <div class="pw-row"><input type="datetime-local" id="q-openat" data-at="openAt" value="${esc(toLocalInput(Q.openAt))}"><button type="button" class="btn sm ghost" data-act="clear-at" data-k="openAt">비우기</button></div></div>
+          <div class="pw-row">${dtPick('q-openat', 'openAt', Q.openAt)}<button type="button" class="btn sm ghost" data-act="clear-at" data-k="openAt">비우기</button></div></div>
         <div class="field"><label for="q-closeat">신청 마감 예약 <span class="hint">비우면 직접 마감</span></label>
-          <div class="pw-row"><input type="datetime-local" id="q-closeat" data-at="closeAt" value="${esc(toLocalInput(Q.closeAt))}"><button type="button" class="btn sm ghost" data-act="clear-at" data-k="closeAt">비우기</button></div></div>
+          <div class="pw-row">${dtPick('q-closeat', 'closeAt', Q.closeAt)}<button type="button" class="btn sm ghost" data-act="clear-at" data-k="closeAt">비우기</button></div></div>
       </div>
       <div class="actions"><button class="btn primary sm" type="submit" id="quick-submit">저장하기</button><span class="msg" id="quick-msg" role="status">${esc(S.quickMsg||'')}</span></div>
     </form>
@@ -2972,7 +3033,7 @@ function exCreate(){
   fill('#create .cls-edit [data-cf="time"]', '19:00~21:00');
   fill('#create .cls-edit [data-cf="capacity"]', '6');
   fill('#create [data-lead]', '김목방');
-  fill('#c-closeat', `${tutDate(5)}T23:59`);
+  { const ca = document.querySelector('#c-closeat'); if (ca && !ca.value){ const g = ca.closest('.dt10'); g.querySelector('[data-part="h"]').value = '23'; g.querySelector('[data-part="m"]').value = '50'; setVal(ca, tutDate(5)); } }
   if (!document.querySelector('#create [data-tools] button[aria-pressed="true"]')){ const tool = document.querySelector('#create [data-tools] button[data-v="밴드 쏘"]'); if (tool) tool.click(); }
   fill('#c-notes', '완성한 컵받침은 가져가셔도 됩니다.\n작업복이나 앞치마를 챙겨 와 주세요.');
   fill('#c-desc', '편백 판재로 컵받침 두 개를 재단하고 사포질과 오일 마감까지 해요.');
@@ -2991,7 +3052,8 @@ function exAssistLog(){
 }
 function exGuide(){
   setVal('#gd-intro', '편백 컵받침 두 개를 만드는 2시간짜리 입문 학습회예요.');
-  setVal('#gd-dur', '2시간');
+  setVal('#gd-make', '약 2시간');
+  setVal('#gd-dur', '한 번, 2시간');
   setVal('#gd-prep', '편백 판재 100×100×10mm 2장\n사포 120·240방\n도마용 오일, 천');
   setVal('#gd-cut', '판재를 100mm로 미리 재단해 두기\n자리마다 사포와 오일 놓기');
   const r1 = document.querySelector('#flow-edit .flow-row'); if (r1){ setVal(r1.querySelector('[data-fl="title"]'), '안전 교육'); setVal(r1.querySelector('[data-fl="min"]'), '10'); setVal(r1.querySelector('[data-fl="body"]'), '밴드 쏘 쓰는 법과 손 위치를 보여 줘요.'); }
@@ -3053,7 +3115,7 @@ const TUT_STEPS = [
     body: () => `<p><b>신청 마감 예약</b>은 정해 둔 시간에 신청이 저절로 닫히게 해요.</p><p>비워 두면 진행자가 직접 마감할 때까지 열려 있어요.</p>`,
     hl: () => fld('#c-closeat') },
   { part: 'host', title: '1. 새 학습회 만들기 · 사용 장비', ex: T_CREATE_EX, opt: true,
-    body: () => `<p>쓰는 <b>장비</b>를 눌러 골라요. 목록에 없으면 아래 칸에 쉼표로 적어요.</p><p>테이블 쏘, 밴드 쏘처럼 위험한 전동 장비를 고르면 신청 화면에 안전 안내가 함께 나가요.</p>`,
+    body: () => `<p>쓰는 <b>장비</b>를 눌러 골라요. 목록에 없으면 아래 칸에 쉼표로 적어요.</p><p>고른 장비는 공지글과 신청 화면에 보여요.</p>`,
     hl: () => fld('#create [data-tools]') },
   { part: 'host', title: '1. 새 학습회 만들기 · 유의사항', ex: T_CREATE_EX, opt: true,
     body: () => `<p><b>유의사항</b>은 한 줄에 하나씩 적어요. 신청 화면과 공지글에 번호를 붙여 보여 줘요.</p><p class="hint">예: 완성한 작품은 전시회에 출품해야 합니다.</p>`,
@@ -3127,12 +3189,12 @@ const TUT_STEPS = [
     body: () => `<p>보조 진행자 카드에 <b>기록 완료</b>가 붙었어요. 고칠 때는 카드의 <b>[고치기 (PIN)]</b>를 누르고 PIN을 넣어요.</p>`,
     enter: () => { if (S.view !== 'session' || S.tab !== 'host') openSession(TUT.sid, 'host'); }, hl: () => [...document.querySelectorAll('#tab-host .hcard')].pop() },
 
-  // 7. 진행 설명서
-  { part: 'host', title: '7. 진행 설명서 쓰기', wait: 'guideOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
+  // 7. 목공 설명서
+  { part: 'host', title: '7. 목공 설명서 쓰기', wait: 'guideOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
     body: () => `<p>다음에 같은 학습회를 열 후배를 위한 설명서예요. <b>[설명서 쓰기]</b>를 눌러 보세요.</p>`,
     enter: () => openSession(TUT.sid, 'guide'), hl: () => document.querySelector('#tab-guide [data-act="guide-edit"]'),
     done: () => !!document.querySelector('#gd-form') },
-  { part: 'host', title: '7. 진행 설명서 채우고 저장하기', ex: ['예시로 채우기', exGuide], wait: 'guideSaved', auto: true, waitLabel: '저장하면 넘어가요',
+  { part: 'host', title: '7. 목공 설명서 채우고 저장하기', ex: ['예시로 채우기', exGuide], wait: 'guideSaved', auto: true, waitLabel: '저장하면 넘어가요',
     body: () => `<p>한 줄 소개, 소요 시간, 준비물, 준비 방법, <b>진행 순서</b>(단계마다 사진도 넣을 수 있어요), 안전 주의사항, 진행 팁을 적어요.</p><p>다 적었으면 맨 아래 <b>[설명서 저장하기]</b>를 눌러요.</p>`,
     hl: '#gd-form' },
   { part: 'host', title: '7. 설명서가 저장됐어요',
@@ -3182,8 +3244,8 @@ const TUT_MODS = {
   apply: { name: '신청받기·만족도 조사', desc: '신청 링크·QR을 나누고 출석을 관리한 뒤, 만족도 조사 QR을 띄우고 결과를 봐요.',
     intro: '신청 링크를 나누고 신청·출석을 관리하고, 수업이 끝난 뒤 만족도 조사를 받는 방법까지 볼게요.',
     pick: st => st.part === 'host' && /^2\. 링크와 QR|^[3458]\. /.test(st.title) },
-  guide: { name: '기록·설명서 쓰기', desc: '수업을 마친 뒤 진행자 기록(보조 진행자 포함)을 남기고, 후배를 위한 진행 설명서를 써요.',
-    intro: '수업을 마친 뒤 진행자 기록을 남기고, 다음에 같은 학습회를 열 후배를 위한 진행 설명서를 써 볼게요.',
+  guide: { name: '기록·설명서 쓰기', desc: '수업을 마친 뒤 진행자 기록(보조 진행자 포함)을 남기고, 후배를 위한 목공 설명서를 써요.',
+    intro: '수업을 마친 뒤 진행자 기록을 남기고, 다음에 같은 학습회를 열 후배를 위한 목공 설명서를 써 볼게요.',
     pick: st => st.part === 'host' && /^[67]\. /.test(st.title) },
   guest: { name: '신청자 화면 연습', desc: '참가자가 보는 신청 · 내 신청 확인 · 만족도 조사 화면을 직접 해 봐요.',
     intro: '참가자 입장에서 신청하고, 신청을 확인하고, 평가해 볼게요.',
