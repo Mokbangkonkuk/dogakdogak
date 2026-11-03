@@ -1702,6 +1702,26 @@ const Demo = (() => {
     trashPhoto: id => { delete photos[id]; } });
 })();
 
+/* 화면을 불러오는 동안 시작 화면과 같은 로고 애니메이션을 띄워요.
+   0.2초 안에 끝나면 띄우지 않고, 한번 뜨면 깜빡이지 않게 0.9초는 보여 줘요. */
+let LOADN = 0, loadT0 = 0, loadTimer = null;
+function loaderOn(){
+  if (++LOADN > 1) return;
+  loadTimer = setTimeout(() => {
+    if (!LOADN || document.getElementById('splash') || !window.__splashHTML) return;
+    document.body.insertAdjacentHTML('afterbegin', window.__splashHTML);
+    const sp = document.getElementById('splash'); sp.dataset.loader = '1'; sp.setAttribute('aria-label', '불러오는 중');
+    loadT0 = Date.now(); if (window.dgWrite) window.dgWrite(sp);
+  }, LIVE ? 200 : 0);   // 미리보기는 가짜 서버가 너무 빨라서 바로 띄워 보여 줘요
+}
+function loaderOff(){
+  LOADN = Math.max(0, LOADN - 1); if (LOADN) return;
+  clearTimeout(loadTimer);
+  const sp = document.getElementById('splash'); if (!sp || !sp.dataset.loader || sp.dataset.closing) return;
+  sp.dataset.closing = '1';
+  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 420); }, Math.max(0, 900 - (Date.now() - loadT0)));
+}
+async function withLoader(p){ loaderOn(); try { return await p; } finally { loaderOff(); } }
 async function api(fn, ...args){
   // 튜토리얼 중에는 실제 서버 대신 연습용 사본에서 처리해요 (실제 기록에 남지 않아요)
   if (TUT && TUT.core && !(fn === 'getPhoto' && !TUT.photos[args[1]])){
@@ -1776,7 +1796,7 @@ async function openApply(sid){
   show('apply');
   S.ap = { sid: sid || '', info:null, pickS:null, pickC:null, f:{}, agree:false, result:null, msg:'', sn:'', p4:'', mine:null, mineMsg:'', armed:null };
   $('#v-apply').innerHTML = `<div class="empty">신청 화면을 여는 중이에요…</div>`;
-  try { S.ap.info = await api('getApplyInfo', S.ap.sid); }
+  try { S.ap.info = await withLoader(api('getApplyInfo', S.ap.sid)); }
   catch(e){ $('#v-apply').innerHTML = `<div class="panel"><h1>신청 화면을 열지 못했어요</h1><p class="sub">${esc(e.message)}</p></div>`; return; }
   renderApply();
 }
@@ -1898,7 +1918,7 @@ async function openReview(sid){
   show('review');
   S.rv = { sid, pub:null, form:{}, sent:false, msg:'' };
   $('#v-review').innerHTML = `<div class="empty">평가 화면을 여는 중이에요…</div>`;
-  try { S.rv.pub = sid ? await api('getPublicSession', sid) : null; }
+  try { S.rv.pub = sid ? await withLoader(api('getPublicSession', sid)) : null; }
   catch(e){ $('#v-review').innerHTML = `<div class="panel"><h1>평가 화면을 열지 못했어요</h1><p class="sub">${esc(e.message)}</p></div>`; return; }
   if (!S.rv.pub){ $('#v-review').innerHTML = `<div class="panel"><h1>링크를 다시 확인해 주세요</h1><p class="sub">이 학습회를 찾을 수 없어요. 진행자에게 평가 링크를 다시 받아 주세요.</p></div>`; return; }
   const cls = S.rv.pub.classes || []; if (cls.length === 1) S.rv.form.classId = cls[0].id;
@@ -1980,7 +2000,7 @@ $('#v-login').addEventListener('submit', async e => {
   const pw = $('#pw').value; const msg = $('#pw-msg');
   if (!pw){ msg.textContent = '비밀번호를 입력해 주세요.'; return; }
   $('#pw-go').disabled = true; msg.className = 'msg'; msg.textContent = '확인하는 중…';
-  try { S.data = await api('hostLogin', pw); }
+  try { S.data = await withLoader(api('hostLogin', pw)); }
   catch(err){ $('#pw-go').disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
   S.pw = pw; store(PWK, 'dg_pw', pw);
   openList();
@@ -1998,7 +2018,7 @@ async function openGuides(sid){
   show('guides'); LIB.sid = sid || null; banner('');
   if (!LIB.list){
     $('#v-guides').innerHTML = `<div class="empty">설명서를 불러오는 중…</div>`;
-    try { LIB.list = await api('getGuideLibrary'); }
+    try { LIB.list = await withLoader(api('getGuideLibrary')); }
     catch(e){ const old = /알 수 없는 요청/.test(e.message); $('#v-guides').innerHTML = `<div class="empty">${old ? '설명서 열람을 아직 준비하는 중이에요. 임원진이 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}<br><button type="button" class="btn sm" data-act="lib-retry" style="margin-top:12px">다시 시도</button></div>`; return; }
   }
   renderGuides();
@@ -2118,7 +2138,7 @@ $('#v-guides').addEventListener('click', async e => {
     try { await navigator.clipboard.writeText(u); LIB.msg = '이 설명서 링크를 복사했어요.'; } catch(err){ LIB.msg = u; }
     const m = $('#v-guides .lib-msg'); if (m) m.textContent = LIB.msg; LIB.msg = ''; return; }
 });
-async function reload(){ LIB.list = null; try { S.data = await api('getAll', S.pw); banner(''); } catch(e){ banner(e.message); } }
+async function reload(){ LIB.list = null; try { S.data = await withLoader(api('getAll', S.pw)); banner(''); } catch(e){ banner(e.message); } }
 
 /* =========================================================
    진행자: 학습회 정보 입력 (만들기·고치기 공용)
@@ -2284,7 +2304,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 33판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 34판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
