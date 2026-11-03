@@ -665,6 +665,49 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .rate5 button:disabled{opacity:.6;cursor:default}
 .rate5 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .lib-rate .msg:empty{display:none}
+.rate-stats{display:grid;grid-template-columns:auto 1fr;gap:16px 22px;align-items:center;padding:4px 0 14px;border-bottom:1px dashed var(--line)}
+.rate-avg{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:110px;text-align:center}
+.rate-avg b{font-size:36px;line-height:1;color:var(--wood)}
+.rate-avg span{font-weight:700}
+.rate-avg small{color:var(--muted);font-size:12px;word-break:keep-all;max-width:130px}
+.rate-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.rate-bars li{display:grid;grid-template-columns:88px 1fr 38px;gap:8px;align-items:center;font-size:13px}
+.rate-bars .rw{color:var(--muted);white-space:nowrap}
+.rate-bars .rb{height:10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.rate-bars .rb i{display:block;height:100%;background:var(--wood);opacity:.55;border-radius:999px}
+.rate-bars .rn{text-align:right;color:var(--muted)}
+.rate-bars li.me .rw,.rate-bars li.me .rn{color:var(--ink);font-weight:700}
+.rate-bars li.me .rb i{opacity:1}
+.rate-ask{display:flex;flex-direction:column;gap:8px}
+/* 난이도 · 걸린 시간: 휴대폰에서도 나란히 */
+.lib-eval{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch}
+@media (max-width:560px){ .lib-eval{grid-template-columns:1fr} }
+.ev-desc{margin:-4px 0 0;font-size:13px;color:var(--muted);word-break:keep-all}
+.ev-box{display:flex;flex-direction:column;gap:10px;padding:14px;min-width:0}
+.ev-box h3{font-size:15px}
+.ev-avg{display:flex;flex-direction:column;gap:2px}
+.ev-avg b{font-size:36px;line-height:1.1;color:var(--wood);word-break:keep-all}
+.ev-avg span{font-size:12px;color:var(--muted)}
+.ev-box .rate5{gap:4px;margin-top:auto}
+.ev-box .rate5 button{height:40px;padding:0;justify-content:center;font-size:15px;font-weight:700;border-radius:8px}
+.ev-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-6px}
+.ev-form{display:flex;flex-direction:column;gap:6px;margin-top:auto}
+.ev-form .ev-ends{margin-top:0}
+.ev-row{display:flex;gap:4px}
+.ev-row input{flex:1;min-width:0;width:auto;height:40px;padding:0 11px}
+.ev-row .btn{flex:none;height:40px;padding:0 14px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.ev-box .msg{font-size:12px}
+.ev-box .msg:empty{display:none}
+.lib-took .took-big{font-size:28px}
+.lib-took .rate-avg{min-width:220px}
+.lib-took .rate-avg small{max-width:260px}
+@media (max-width:560px){ .lib-took .rate-avg{min-width:0} .lib-took .rate-avg small{max-width:none} }
+.lib-took .took-ref{color:var(--wood);font-weight:600}
+.lib-took .rate-bars li{grid-template-columns:88px 1fr 38px}
+.took-other{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0}
+.took-other .hint{margin-right:4px}
+.lib-took .msg:empty,#took-read:empty{display:none}
+@media (max-width:560px){ .rate-stats{grid-template-columns:1fr} .rate-avg{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 10px;min-width:0} .rate-avg small{max-width:none;flex-basis:100%} }
 /* 부원용 설명서 열람 */
 .login.stackcol{gap:16px}
 .lib-entry{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;background:var(--surface);border:1.5px solid var(--wood);border-radius:14px;padding:18px;-webkit-tap-highlight-color:transparent}
@@ -711,7 +754,7 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 @media print{
   @page{margin:16mm 14mm}
   #v-guides>*:not(.manual){display:none!important}
-  .lib-rate{display:none!important}
+  .lib-eval{display:none!important}
   #v-guides .manual{border:0!important;padding:0!important}
   html,body{background:#fff!important;color:#111!important}
   .demobar,#install,#credit,#banner,#v-apply,#v-review,#v-login,#v-list,#s-head,#tabs,#v-session>.actions,#tab-results,#tab-regs,#tab-host,#tab-share{display:none!important}
@@ -996,8 +1039,8 @@ function applyState(s, t) {
 }
 /* 부원용 설명서 모음: 설명서가 있는 학습회만 골라, 설명서와 만족도 요약(평균·난이도·응답 수)만 내보내요.
    신청자 이름·연락처, 자유 의견, 진행자 기록은 넣지 않아요. (Api.gs의 buildGuideLibrary와 같은 내용) */
-function buildGuideLibrary(all, ratings) {
-  all = all || {}; ratings = ratings || {};
+function buildGuideLibrary(all, ratings, times) {
+  all = all || {}; ratings = ratings || {}; times = times || {};
   var hasG = function (g) { return !!(g && (g.intro || g.makeTime || (g.prep || []).length || (g.cutting || []).length || (g.flow || []).length || g.safety || g.tips)); };
   var mean = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
   var out = [];
@@ -1016,14 +1059,39 @@ function buildGuideLibrary(all, ratings) {
       .filter(function (v) { return v != null; });
     out.push({ id: s.id, title: s.title || '', term: s.term || '', places: s.places || [], tools: s.tools || [],
       lead: { name: (s.lead && s.lead.name) || '' }, classes: [{ dates: Object.keys(dates).sort() }],
-      guide: g, at: at || null, n: ov.length, overall: mean(ov), difficulty: mean(df), rated: rateSum(ratings[s.id]) });
+      guide: g, at: at || null, n: ov.length, overall: mean(ov), difficulty: mean(df), rated: rateSum(ratings[s.id]), took: tookList(times[s.id]) });
   });
   return out;
 }
+/* 부원이 적은 걸린 시간(주관식)을 분으로 읽어요. 못 읽으면 null (글은 그대로 모아 둬요)
+   예: "2시간 30분" 150, "3시간반" 210, "2~3시간" 150, "1:30" 90, "90분" 90, "3" 180, "두 시간" 120 */
+function parseMinutes(s) {
+  s = String(s == null ? '' : s).toLowerCase().replace(/\s+/g, '').replace(/약|대략|정도|쯤|넘게|이상|이하|안팎|내외|걸렸어요|걸림|걸려요|요$/g, '');
+  if (!s) return null;
+  var KO = { '한': 1, '두': 2, '세': 3, '네': 4, '다섯': 5, '여섯': 6, '일곱': 7, '여덟': 8, '아홉': 9, '열': 10 };
+  s = s.replace(/(한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)(?=시간)/g, function (k) { return String(KO[k]); });
+  s = s.replace(/(\d+(?:\.\d+)?)[~\-–](\d+(?:\.\d+)?)/g, function (_, a, b) { return String((Number(a) + Number(b)) / 2); });
+  var m = s.match(/^(\d{1,2}):(\d{2})$/), total = 0, hit = false;
+  if (m) { total = Number(m[1]) * 60 + Number(m[2]); hit = true; }
+  else {
+    var hm = s.match(/(\d+(?:\.\d+)?)(시간|hours?|hrs?|h)(반)?/);
+    if (hm) { total += Number(hm[1]) * 60 + (hm[3] ? 30 : 0); hit = true; s = s.replace(hm[0], ''); }
+    var mm = s.match(/(\d+)(분|minutes?|mins?|m)/);
+    if (mm) { total += Number(mm[1]); hit = true; }
+    if (!hit && /^\d+(\.\d+)?$/.test(s)) { var n = Number(s); total = n <= 12 ? n * 60 : n; hit = true; }
+  }
+  if (!hit || !(total >= 5 && total <= 2880)) return null;
+  return Math.round(total / 5) * 5;
+}
+function tookList(list) {
+  return (Array.isArray(list) ? list : []).filter(function (e) { return Array.isArray(e) && e[2]; })
+    .map(function (e) { return { m: e[1] == null ? null : Number(e[1]), t: String(e[2]) }; });
+}
 function rateSum(c) {
   c = Array.isArray(c) ? c : []; var n = 0, t = 0;
-  for (var i = 0; i < 5; i++) { var k = Math.max(0, Number(c[i]) || 0); n += k; t += k * (i + 1); }
-  return { n: n, avg: n ? t / n : null };
+  var cnt = [];
+  for (var i = 0; i < 5; i++) { var k = Math.max(0, Number(c[i]) || 0); cnt.push(k); n += k; t += k * (i + 1); }
+  return { n: n, avg: n ? t / n : null, c: cnt };
 }
 function guideLibraryPhotos(lib) {
   var ids = [];
@@ -1033,7 +1101,8 @@ function guideLibraryPhotos(lib) {
   return ids;
 }
 function makeCore(store, env) {
-  const RATED = {};   // 미리보기용 부원 난이도 평가
+  const RATED = env.ratings || {};   // 미리보기용 부원 난이도 평가
+  const TOOK = env.times || {};      // 미리보기용 부원 걸린 시간
   const PLACES = ['1동방', '2동방'];
   const SELF_KEYS = ['selfScore', 'prepScore', 'planScore'];
   const STATUS = ['ok', 'short', 'none'];
@@ -1416,7 +1485,10 @@ function makeCore(store, env) {
     getApplyInfo, apply, myRegs, cancelMine, getPublicSession, submitReview, changePassword,
     hostLogin: getAll, getAll, saveSession, deleteSession, setApplyOpen, setAttendance, hostCancelReg, promoteReg, moveReg, addReg,
     checkHostPin, saveHostLog, deleteHostLog, saveGuide, deleteReview, flipDifficulty, uploadPhoto, getPhoto,
-    getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword()), RATED),
+    getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword()), RATED, TOOK),
+    timeGuide: (sid, who, text) => { who = String(who || '').replace(/[^a-z0-9]/gi, '').slice(0, 8); text = cut(text, 20); if (!who) fail('다시 시도해 주세요.');
+      if (!buildGuideLibrary(getAll(env.getPassword())).some(x => x.id === String(sid))) fail('설명서를 찾을 수 없어요.');
+      const L = (TOOK[sid] || []).filter(e => e[0] !== who); if (text) L.push([who, parseMinutes(text), text]); TOOK[sid] = L.slice(-80); return tookList(TOOK[sid]); },
     rateGuide: (sid, v, prev) => { v = sc5(v); if (!v) fail('난이도를 골라 주세요.');
       if (!buildGuideLibrary(getAll(env.getPassword())).some(x => x.id === String(sid))) fail('설명서를 찾을 수 없어요.');
       const c = RATED[sid] = RATED[sid] || [0,0,0,0,0]; const pv = sc5(prev); if (pv && c[pv-1] > 0) c[pv-1]--; c[v-1]++; return rateSum(c); },
@@ -1596,6 +1668,7 @@ function demoSeed(){
   const jw = guides.find(g => g.sid === 'sexjewel').guide;
   jw.flow[1].photos = ['pdemoCut']; jw.flow[4].photos = ['pdemoHinge']; jw.finalPhotos = ['pdemoBox1', 'pdemoBox2'];
   const rb = guides.find(g => g.sid === 'sexrabbit').guide; rb.finalPhotos = ['pdemoRabbit'];
+  jw.makeTime = '약 5시간 (두 번)'; rb.makeTime = '약 2시간';
   return {sessions, regs, reviews, guides, hostlogs: hostlogs.filter(l => l.logAt)};
 }
 /* 미리보기용 예시 사진 (나뭇결 그림) */
@@ -1620,7 +1693,9 @@ const Demo = (() => {
   const cache = {}; const photos = {};
   const demoLabels = {pdemoCut:['재단 중',28], pdemoHinge:['경첩 달기',24], pdemoBox1:['완성한 보석함',30], pdemoBox2:['뚜껑을 연 모습',32], pdemoRabbit:['완성한 토끼',38]};
   let demoPw = '1234';
-  return makeCore(mem, { getPassword: () => demoPw, setPassword: v => { demoPw = v; }, uid: () => Math.random().toString(36).slice(2,10), hash: (pin, salt) => (salt||'demo') + ':' + pin,
+  return makeCore(mem, { ratings: { sexjewel: [0, 1, 3, 4, 1], sexrabbit: [1, 2, 3, 0, 0] },
+    times: { sexjewel: [['d1',300,'5시간'],['d2',270,'4시간 30분'],['d3',360,'6시간 정도'],['d4',null,'2~3시간씩 두 번'],['d5',null,'이틀'],['d6',330,'5시간반'],['d7',240,'4시간'],['d8',420,'7시간']],
+             sexrabbit: [['e1',120,'2시간'],['e2',150,'2시간 30분'],['e3',100,'100분'],['e4',120,'두 시간']] }, getPassword: () => demoPw, setPassword: v => { demoPw = v; }, uid: () => Math.random().toString(36).slice(2,10), hash: (pin, salt) => (salt||'demo') + ':' + pin,
     cacheGet: k => cache[k] ?? null, cachePut: (k,v) => { cache[k] = v; }, cacheRemove: k => { delete cache[k]; }, url: () => DEMO_URL, version: '18판', lock: fn => fn(),
     savePhoto: (b64, mime) => { const id = 'pd' + Math.random().toString(36).slice(2,12); photos[id] = `data:${mime};base64,${b64}`; return id; },
     readPhoto: id => { if (!photos[id] && demoLabels[id]) photos[id] = fakePhoto(...demoLabels[id]); if (!photos[id]) throw new Error('사진을 찾을 수 없어요.'); return photos[id]; },
@@ -1941,11 +2016,10 @@ function renderGuides(){
         ${libTime(x) ? `<div><span class="lbl">완성까지</span><b>${esc(libTime(x))}</b></div>` : ''}
         <div><span class="lbl">만족도</span><b>${x.n ? `★ ${f1(x.overall)} <small>(${x.n}명)</small>` : '<small>평가 없음</small>'}</b></div>
         ${x.difficulty != null ? `<div><span class="lbl">참가자 난이도</span><b>${esc(DIFF_LABEL(x.difficulty))}</b></div>` : ''}
-        ${x.rated && x.rated.n ? `<div><span class="lbl">부원 난이도</span><b>${esc(DIFF_LABEL(x.rated.avg))} <small>(${x.rated.n}명)</small></b></div>` : ''}
         ${(x.tools || []).length ? `<div class="wide"><span class="lbl">사용 장비</span><b class="lib-tools">${x.tools.map(t => `<span class="chip${DANGER.includes(t) ? ' danger' : ''}">${esc(t)}</span>`).join('')}</b></div>` : ''}
       </div>
       ${manualHTML(x, {g: x.guide, at: x.at})}
-      ${libRateHTML(x)}`;
+      <div class="lib-eval">${libRateHTML(x)}${libTookHTML(x)}</div>`;
     LIB.msg = ''; window.scrollTo(0, 0); loadPhotos(); return;
   }
   LIB.sid = null;
@@ -1965,14 +2039,34 @@ function renderGuides(){
 }
 const RATE_WORDS = ['너무 쉬움','조금 쉬움','적당함','조금 어려움','너무 어려움'];
 function libRateHTML(x){
-  const mine = Number(store('l', 'dg_rt_' + x.id)) || 0;
-  return `<section class="panel lib-rate" id="lib-rate">
-    <h3>난이도 평가해 보기</h3>
-    <p class="hint">이 작업을 해 봤다면 느낀 난이도를 골라 주세요. 이름 없이 모여요.</p>
-    <div class="rate5" role="radiogroup" aria-label="난이도">${RATE_WORDS.map((w, i) => `<button type="button" role="radio" data-rate="${i+1}" aria-checked="${mine === i+1}"><b>${i+1}</b><span>${w}</span></button>`).join('')}</div>
-    <span class="msg ok" id="rate-msg" role="status">${mine ? `평가했어요. 다시 누르면 바꿀 수 있어요.${x.rated && x.rated.n ? ` 부원 평균: ${esc(DIFF_LABEL(x.rated.avg))} (${x.rated.n}명)` : ''}` : ''}</span>
+  const mine = Number(store('l', 'dg_rt_' + x.id)) || 0; const R = x.rated || {n: 0};
+  return `<section class="panel ev-box" id="lib-rate">
+    <h3>난이도</h3>
+    <p class="ev-desc">직접 해 봤다면 느낀 난이도를 골라 주세요.</p>
+    <div class="ev-avg">${R.n ? `<b class="num">${f1(R.avg)}</b><span>평균 · ${R.n}명</span>` : `<b>–</b><span>아직 없어요</span>`}</div>
+    <div class="rate5" role="radiogroup" aria-label="난이도 (1 쉬움 ~ 5 어려움)">${RATE_WORDS.map((w, i) => `<button type="button" role="radio" data-rate="${i+1}" aria-checked="${mine === i+1}" title="${w}" aria-label="${i+1} ${w}">${i+1}</button>`).join('')}</div>
+    <div class="ev-ends" aria-hidden="true"><span>쉬움</span><span>어려움</span></div>
+    <span class="msg ok" id="rate-msg" role="status"></span>
   </section>`;
 }
+const fmtMin = m => { m = Math.round(m); const hh = Math.floor(m / 60), mm = m % 60; return hh ? `${hh}시간${mm ? ` ${mm}분` : ''}` : `${mm}분`; };
+const TOOK_BUCKETS = [[0,60,'1시간 미만'],[60,120,'1~2시간'],[120,180,'2~3시간'],[180,240,'3~4시간'],[240,360,'4~6시간'],[360,1e9,'6시간 이상']];
+function libTookHTML(x){
+  const nums = (x.took || []).map(e => e.m).filter(v => v != null); const mineT = store('l', 'dg_tm_' + x.id) || '';
+  const mean = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  return `<section class="panel ev-box" id="lib-took">
+    <h3>걸린 시간</h3>
+    <p class="ev-desc">직접 해 봤다면 걸린 시간을 적어 주세요.</p>
+    <div class="ev-avg">${mean != null ? `<b class="num">${esc(fmtMin(Math.round(mean / 5) * 5))}</b><span>평균 · ${nums.length}명</span>` : `<b>–</b><span>아직 없어요</span>`}</div>
+    <form class="ev-form" id="took-form" novalidate>
+      <div class="ev-row"><input type="text" id="took-in" maxlength="20" autocomplete="off" placeholder="예: 3시간 반" value="${esc(mineT)}" aria-label="걸린 시간"><button class="btn primary" type="submit" id="took-go">${mineT ? '고치기' : '보내기'}</button></div>
+      <div class="ev-ends"><span id="took-read">${mineT ? tookReadText(mineT) : TOOK_EG}</span></div>
+    </form>
+    <span class="msg ok" id="took-msg" role="status"></span>
+  </section>`;
+}
+const TOOK_EG = '예: 3시간 반, 2시간 30분, 90분';
+function tookReadText(t){ if (!String(t).trim()) return TOOK_EG; const m = parseMinutes(t); return m != null ? `→ ${fmtMin(m)}` : '→ 시간으로 못 읽었어요'; }
 function libCards(){
   const all = LIB.list || []; const total = all.length;
   const q = LIB.q.trim().toLowerCase();
@@ -1992,7 +2086,19 @@ function libCards(){
     </button>`; }).join('');
 }
 /* 찾기 칸은 그대로 두고 목록만 바꿔요 (한글 입력이 끊기지 않게) */
-$('#v-guides').addEventListener('input', e => { if (e.target.id !== 'lib-q') return; LIB.q = e.target.value; const l = $('#lib-list'); if (l){ l.innerHTML = libCards(); loadPhotos(); } });
+$('#v-guides').addEventListener('input', e => { if (e.target.id === 'took-in'){ $('#took-read').textContent = tookReadText(e.target.value); return; } if (e.target.id !== 'lib-q') return; LIB.q = e.target.value; const l = $('#lib-list'); if (l){ l.innerHTML = libCards(); loadPhotos(); } });
+$('#v-guides').addEventListener('submit', async e => {
+  if (e.target.id !== 'took-form') return; e.preventDefault();
+  const sid = LIB.sid; const t = $('#took-in').value.trim(); const m = $('#took-msg'); const prev = store('l', 'dg_tm_' + sid) || '';
+  if (!t && !prev){ m.className = 'msg err'; m.textContent = '걸린 시간을 적어 주세요.'; return; }
+  if (t === prev){ m.className = 'msg ok'; m.textContent = '이미 이렇게 보냈어요.'; return; }
+  let who = store('l', 'dg_tmid'); if (!who){ who = Math.random().toString(36).slice(2, 10); store('l', 'dg_tmid', who); }
+  $('#took-go').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
+  try { const r = await api('timeGuide', sid, who, t); store('l', 'dg_tm_' + sid, t || null);
+    const it = (LIB.list || []).find(i => i.id === sid); if (it) it.took = r;
+    $('#lib-took').outerHTML = libTookHTML(it || {id: sid, took: r}); const mm = $('#took-msg'); mm.textContent = t ? (prev ? '고쳤어요.' : '보냈어요.') : '지웠어요.'; }
+  catch(err){ $('#took-go').disabled = false; m.className = 'msg err'; m.textContent = /알 수 없는 요청/.test(err.message) ? '걸린 시간은 서버(Api.gs)를 새 판으로 바꾸면 모을 수 있어요.' : err.message; }
+});
 $('#v-guides').addEventListener('click', async e => {
   const c = e.target.closest('.lib-card'); if (c){ LIB.sid = c.dataset.g; renderGuides(); return; }
   const rb = e.target.closest('[data-rate]'); if (rb){ const v = Number(rb.dataset.rate); const sid = LIB.sid; const prev = Number(store('l', 'dg_rt_' + sid)) || 0; const m = $('#rate-msg');
@@ -2000,7 +2106,7 @@ $('#v-guides').addEventListener('click', async e => {
     document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = true); m.className = 'msg'; m.textContent = '보내는 중…';
     try { const r = await api('rateGuide', sid, v, prev || null); store('l', 'dg_rt_' + sid, String(v));
       const it = (LIB.list || []).find(i => i.id === sid); if (it) it.rated = r;
-      const y = window.scrollY; renderGuides(); window.scrollTo(0, y); $('#rate-msg').textContent = `고마워요! 부원 평균: ${DIFF_LABEL(r.avg)} (${r.n}명)`; }
+      const y = window.scrollY; renderGuides(); window.scrollTo(0, y); $('#rate-msg').textContent = prev ? '바꿨어요.' : '평가했어요.'; }
     catch(err){ document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = false); m.className = 'msg err'; m.textContent = /알 수 없는 요청/.test(err.message) ? '난이도 평가는 서버(Api.gs)를 새 판으로 바꾸면 열려요.' : err.message; }
     return; }
   const sb = e.target.closest('#lib-sort button'); if (sb){ LIB.sort = sb.dataset.sort; store('l', 'dg_libsort', LIB.sort); renderGuides(); return; }
@@ -2178,7 +2284,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 27판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 33판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
