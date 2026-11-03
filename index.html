@@ -579,6 +579,36 @@ body.mobile-sim .qr-btn .l-short{display:none} body.mobile-sim .qr-btn .l-long{d
 /* 개발자 표시 */
 .credit{font-size:12px;color:var(--muted);text-align:center;margin:-8px 0 0;letter-spacing:.02em}
 body[data-view="list"] .credit{text-align:right;margin-top:-20px}
+/* ===== 앱 사용 튜토리얼 ===== */
+.top-acts{display:flex;gap:8px;flex-wrap:wrap}
+.tut{position:fixed;left:50%;bottom:max(14px, env(safe-area-inset-bottom));transform:translateX(-50%);width:min(560px, calc(100vw - 20px));z-index:60;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.24);padding:14px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.tut .t-top{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--wood);white-space:nowrap}
+.tut .t-top .spacer{flex:1}
+.tut .t-practice{font-size:11px;font-weight:600;color:var(--warn);border:1px solid currentColor;border-radius:999px;padding:1px 8px}
+.tut .t-fold{border:0;background:transparent;color:var(--muted);cursor:pointer;font:inherit;font-size:12px;padding:2px 4px}
+.tut .t-bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.tut .t-bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.tut h3{font-size:17px;margin:2px 0 0}
+.tut .t-body{font-size:14px;line-height:1.65}
+.tut .t-body p{margin:0 0 6px}
+.tut .t-body ul{margin:0 0 6px;padding-left:18px}
+.tut .t-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tut .t-acts .spacer{flex:1}
+.tut .t-end{color:var(--muted);background:transparent;border:0;font:inherit;font-size:13px;cursor:pointer;padding:6px 4px;text-decoration:underline}
+.tut.folded .t-body,.tut.folded .t-acts,.tut.folded h3{display:none}
+body.tut-on .wrap{padding-bottom:calc(var(--tut-h, 300px) + 40px)}
+body.tut-on .qrsheet{align-items:flex-start;padding-bottom:calc(var(--tut-h, 300px) + 28px)}
+body.tut-on .qrsheet .box{max-height:100%;padding:16px 16px 14px;gap:8px}
+body.tut-on .qrsheet .qbig{width:min(62vw, 26vh, 240px);padding:10px}
+body.tut-on .qrsheet .url,body.tut-on .qrsheet .box>.hint{display:none}
+.tut .t-ok{color:var(--good);font-weight:600;margin:4px 0 0}
+.tut .t-opt{font-size:12px;color:var(--muted);font-weight:500}
+.tut-hl{outline:3px solid var(--warn)!important;outline-offset:4px;border-radius:10px;animation:tut-pulse 1.4s ease-in-out infinite}
+@keyframes tut-pulse{50%{outline-color:transparent}}
+.chip.practice{color:var(--warn);border-color:currentColor;margin-left:6px;vertical-align:middle}
+@media print{ .tut{display:none!important} }
+@media (prefers-reduced-motion: reduce){ .tut-hl{animation:none} }
 /* 학기 고르기 (목록) */
 /* 브라우저마다 다르게 그리는 기본 모양을 끄고, 옆 버튼(새로고침·로그아웃)과 같은 크기로 맞춰요 */
 select.term-sel{-webkit-appearance:none;appearance:none;width:auto;min-width:0;height:36px;margin:0;padding:0 34px 0 12px;font-size:14px;font-weight:500;line-height:normal;color:var(--ink);
@@ -744,7 +774,7 @@ window.dgWrite = function(root){
         </div>
         <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 진행 설명서를 남겨요.</p>
       </div>
-      <button class="btn primary" id="btn-new" type="button">새 학습회 만들기</button>
+      <div class="top-acts"><button class="btn" id="btn-tut" type="button">앱 사용 튜토리얼</button><button class="btn primary" id="btn-new" type="button">새 학습회 만들기</button></div>
     </div>
     <form class="panel" id="create" hidden novalidate></form>
     <div class="toolbar">
@@ -797,6 +827,8 @@ window.dgWrite = function(root){
       <span class="msg" id="qrs-msg" role="status"></span>
     </div>
   </div>
+
+  <section class="tut" id="tut" role="dialog" aria-label="앱 사용 튜토리얼" aria-live="polite" hidden></section>
 
   <p class="credit" id="credit">2026 개발 목방 38기 장소현</p>
 
@@ -1452,6 +1484,10 @@ const Demo = (() => {
 })();
 
 async function api(fn, ...args){
+  // 튜토리얼 중에는 실제 서버 대신 연습용 사본에서 처리해요 (실제 기록에 남지 않아요)
+  if (TUT && TUT.core && !(fn === 'getPhoto' && !TUT.photos[args[1]])){
+    return new Promise((res, rej) => setTimeout(() => { try { res(clone(TUT.core[fn](...args))); } catch(e){ rej(e); } }, 120));
+  }
   if (LIVE){
     let r;
     try {
@@ -1864,7 +1900,7 @@ function cardInner(s, rank){
   const ds = sDates(s); const p = parseDate(ds[0]);
   return `<button type="button" class="card" data-sid="${esc(s.id)}">
     ${rank ? `<div class="dateblk rank"><span>추천</span><b>${rank}</b></div>` : `<div class="dateblk">${p ? `<span>${p.m}월</span><b>${p.d}</b>` : '<span>날짜</span><b>–</b>'}</div>`}
-    <div><h3>${esc(s.title || '제목 없음')}</h3>
+    <div><h3>${esc(s.title || '제목 없음')}${TUT && s.id === TUT.sid ? '<span class="chip practice">연습</span>' : ''}</h3>
       <div class="c-meta">${rank !== undefined ? `<span class="num">${esc(termLabel(termFor(s)))}${p ? ` · ${p.m}/${p.d}` : ''}</span>` : ''}${placesChip(s.places)}<span>회차 ${(s.classes||[]).length}개</span>${s.lead&&s.lead.name?`<span>대표 ${esc(s.lead.name)}</span>`:''}</div>
       ${rank !== undefined ? (() => { const ri = rankInfo(s); const bits = ri.top.map(m => `${esc(m.s)} <b class="num">${f1(m.a)}</b>`); if (ri.diff) bits.push(`난이도 <b>${esc(ri.diff)}</b>`); return bits.length ? `<div class="c-good">강점 · ${bits.join(' · ')}</div>` : ''; })() : ''}</div>
     <div class="c-side">
@@ -1885,7 +1921,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 19판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 20판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -1918,7 +1954,7 @@ $('#v-list').addEventListener('click', async e => {
   const qb = e.target.closest('[data-qr]'); if (qb){ openQR(qb.dataset.qr, qb); return; }
   const c = e.target.closest('.card'); if (c){ openSession(c.dataset.sid, 'regs'); return; }
   if (e.target.closest('[data-act="refresh"]')){ await reload(); renderList(); return; }
-  if (e.target.closest('[data-act="logout"]')){ store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
+  if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
   if (e.target.closest('[data-act="pw-open"]')){
     const f = $('#pwform'); if (!f.hidden){ f.hidden = true; return; }
     f.innerHTML = `<h2>동아리 비밀번호 바꾸기</h2>
@@ -1933,6 +1969,7 @@ $('#v-list').addEventListener('click', async e => {
     f.hidden = false; f.scrollIntoView({block:'center', behavior:'smooth'}); $('#pw-cur').focus({preventScroll:true}); return;
   }
   if (e.target.closest('[data-act="pw-close"]')){ $('#pwform').hidden = true; return; }
+  if (e.target.closest('#btn-tut')){ tutStart(); return; }
   if (e.target.closest('#btn-new')){
     const f = $('#create'); if (!f.hidden){ f.hidden = true; return; }
     S.cd = newDraft();
@@ -1965,6 +2002,7 @@ $('#create').addEventListener('submit', async e => {
   $('#c-submit').disabled = true; msg.className='msg'; msg.textContent = '만드는 중…';
   let res; try { res = await api('saveSession', S.pw, Object.assign({}, S.cd, {tools: toolsOf(S.cd)})); } catch(err){ $('#c-submit').disabled = false; msg.className='msg err'; msg.textContent = err.message; return; }
   S.data = res.all; $('#create').hidden = true; S.cd = null;
+  if (TUT && !TUT.sid){ tutEvent('created', res.id); return; }
   openSession(res.id, 'share');
 });
 
@@ -2240,7 +2278,7 @@ gdPanel.addEventListener('submit', async e => {
   btn.disabled = true; msg.className = 'msg'; msg.textContent = '저장하는 중…';
   try { S.data = await api('saveGuide', S.pw, S.sid, body); }
   catch(err){ btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
-  S.hdOpen = false; S.hd = null; S.hdMsg = '진행 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide();
+  S.hdOpen = false; S.hd = null; S.hdMsg = '진행 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide(); if (TUT) tutEvent('guideSaved');
 });
 
 /* --- 진행자 기록 (대표: 길게, 보조: 간단히) --- */
@@ -2274,8 +2312,8 @@ function renderHost(){
     const l = logs.find(x => x.hostId === h.id); const written = l && l.logAt;
     const kind = role === 'lead' ? 'log' : 'assist';
     const pinOpen = l && S.pinFor && S.pinFor.id === l.id && S.pinFor.kind === kind;
-    const act = l ? (pinOpen ? '' : `<button type="button" class="btn sm" data-act="ask-pin" data-kind="${kind}" data-l="${esc(l.id)}">${written ? '고치기' : '기록 쓰기'} (PIN)</button>`)
-                  : `<button type="button" class="btn sm primary" data-act="new" data-kind="${kind}" data-h="${esc(h.id)}">제가 ${esc(h.name)}${iyeyo(h.name)} · 기록 쓰기</button>`;
+    const act = l ? (pinOpen ? '' : `<button type="button" class="btn sm" data-act="ask-pin" data-kind="${kind}" data-l="${esc(l.id)}">${written ? '고치기' : '기록 남기기'} (PIN)</button>`)
+                  : `<button type="button" class="btn sm primary" data-act="new" data-kind="${kind}" data-h="${esc(h.id)}">기록 남기기</button>`;
     const when = written ? new Date(Number(l.logAt)) : null;
     return `<article class="hcard${written ? '' : ' blank'}">
       <header><span class="role-chip ${role==='lead'?'':'as'}">${role==='lead'?'대표':'보조'}</span><h3>${esc(h.name)}</h3>${written ? '<span class="chip done">기록 완료</span>' : '<span class="chip todo">기록 전</span>'}${l ? '<span class="lock">🔒 본인 PIN으로 잠김</span>' : ''}<span class="spacer"></span>${act}</header>
@@ -2384,7 +2422,7 @@ async function addAssistantAndWrite(){
   S.data = res.all; S.asAddName = ''; S.asAddMsg = '';
   const added = (cur().assistants || []).find(a => a.id === id) || (cur().assistants || []).filter(a => a.name === name).pop();
   if (!added){ S.asAddMsg = '추가는 됐는데 기록 화면을 열지 못했어요. 위 카드에서 기록해 주세요.'; renderSession(); return; }
-  S.hdPin = ''; openForm('assist', null, added.id);
+  S.hdPin = ''; openForm('assist', null, added.id); if (TUT) tutEvent('assistAdded');
 }
 async function hostSubmit(e){
   e.preventDefault();
@@ -2409,6 +2447,7 @@ async function hostSubmit(e){
   S.hdOpen = false; S.hd = null; S.hdPin = '';
   S.hdMsg = '기록을 저장하고 잠갔어요.'; S.hdMsgCls = 'ok';
   renderSession();
+  if (TUT) tutEvent('logSaved');
 }
 const hsPanel = $('#tab-host');
 hsPanel.addEventListener('input', e => {
@@ -2638,7 +2677,7 @@ shPanel.addEventListener('submit', async e => {
   let res; try { res = await api('saveSession', S.pw, Object.assign({}, S.inf, {tools: toolsOf(S.inf)})); } catch(err){ btn.disabled = false; msg.className='msg err'; msg.textContent = err.message; return; }
   S.data = res.all; S.inf = null; S.quick = null; S.shareEdit = null; S.notice = {};
   S.infMsg = id === 'info' ? '학습회 정보를 저장했어요. 신청 공지글도 새 정보로 바뀌었어요.' : '만족도 조사 문항을 저장했어요.';
-  renderSession(); S.infMsg = '';
+  renderSession(); S.infMsg = ''; if (TUT) tutEvent(id === 'info' ? 'infoSaved' : 'reviewCfgSaved');
 });
 
 /* =========================================================
@@ -2652,6 +2691,358 @@ function setDemo(which, sid){
   else { if (S.pw) { reload().then(openList); } else openLogin(); }
 }
 /* =========================================================
+   앱 사용 튜토리얼
+   - 진행자가 목록의 [앱 사용 튜토리얼]을 누를 때만 열려요.
+   - 시작하면 지금 데이터를 복사한 "연습용 사본"에서 움직여서, 연습한 일은 실제 시트에 남지 않아요.
+   - 끝에 연습으로 만든 학습회만 실제로 저장할지 물어봐요.
+   ========================================================= */
+let TUT = null, tutI = 0;
+function makeSandbox(){
+  const d = clone(D());
+  const T = { sessions: d.sessions || [], regs: d.regs || [], reviews: d.reviews || [], hostlogs: d.hostlogs || [], guides: d.guides || [] };
+  const mem = { list: k => clone(T[k] || []), insert: (k,o) => { (T[k] = T[k] || []).push(clone(o)); },
+    update: (k,o) => { const i = (T[k] || []).findIndex(x => x.id === o.id); if (i < 0) throw new Error('찾을 수 없어요.'); T[k][i] = clone(o); },
+    remove: (k,id) => { T[k] = (T[k] || []).filter(x => x.id !== id); } };
+  const photos = {}, cache = {};
+  const core = makeCore(mem, { getPassword: () => S.pw, setPassword: () => {}, uid: () => Math.random().toString(36).slice(2,10),
+    hash: (pin, salt) => (salt || Math.random().toString(36).slice(2,6)) + ':' + pin,
+    cacheGet: k => cache[k] ?? null, cachePut: (k,v) => { cache[k] = v; }, cacheRemove: k => { delete cache[k]; },
+    url: () => D().url, version: D().version || '', lock: fn => fn(),
+    savePhoto: (b64, mime) => { const id = 'pt' + Math.random().toString(36).slice(2,12); photos[id] = `data:${mime};base64,${b64}`; return id; },
+    readPhoto: id => { if (photos[id]) return photos[id]; throw new Error('사진을 찾을 수 없어요.'); },
+    trashPhoto: id => { delete photos[id]; } });
+  return { core, photos, sid: null, seeded: {}, folded: false, ok: false, gen: 0, me: null, sched: null, doneSet: new Set() };
+}
+const tutSession = () => TUT && TUT.sid ? D().sessions.find(s => s.id === TUT.sid) : null;
+function tutList(){ S.termFilter = 'all'; S.sortMode = 'date'; openList(); }
+async function tutRefresh(){ try { S.data = await api('getAll', S.pw); } catch(e){} }
+function tutDate(n){ const t = new Date(); t.setDate(t.getDate() + n); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+const fld = sel => { const el = document.querySelector(sel); return el ? (el.closest('.field') || el) : null; };
+function setVal(sel, v){ const el = typeof sel === 'string' ? document.querySelector(sel) : sel; if (!el) return; el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
+/* 연습 학습회는 신청이 열려 있어야 연습 신청을 받을 수 있어요 (예약 시간은 저장할 때 되돌려요) */
+async function tutEnsureOpen(){
+  const s = tutSession(); if (!s) return;
+  if (applyState(s, Date.now()) !== 'open'){
+    if (!TUT.sched) TUT.sched = { openAt: s.openAt || '', closeAt: s.closeAt || '' };
+    try { TUT.core.setApplyOpen(S.pw, s.id, true); } catch(e){}
+    await tutRefresh();
+  }
+}
+async function tutSeedRegs(){
+  if (TUT.seeded.regs || !TUT.sid) return; TUT.seeded.regs = true; await tutEnsureOpen();
+  const s = tutSession(); const cid = s && s.classes && s.classes[0] && s.classes[0].id; if (!cid) return;
+  [['김나무','산업디자인과','20240101','01011112222'],['이대패','건축학과','20240202','01033334444'],['박끌','기계공학과','20240303','01055556666']]
+    .forEach(([name, dept, studentNo, phone]) => { try { TUT.core.apply(s.id, cid, { name, dept, studentNo, phone, agree: true }); } catch(e){} });
+  await tutRefresh();
+}
+async function tutSeedReviews(){
+  if (TUT.seeded.reviews || !TUT.sid) return; TUT.seeded.reviews = true;
+  const s = tutSession(); if (!s) return; const cid = s.classes && s.classes[0] && s.classes[0].id;
+  const ids = cfgOf(s).metrics.map(m => m.id); const tid = (cfgOf(s).texts[0] || {}).id;
+  const R = [[5,3,'설명이 친절해서 처음인데도 끝까지 만들었어요.'],[4,4,'재료가 조금 부족했어요.'],[5,3,'다음에도 참여하고 싶어요!'],[4,2,'시간이 조금 남았어요.']];
+  R.forEach(([o, d, t], i) => { const scores = {}; ids.forEach((id, k) => scores[id] = Math.max(1, Math.min(5, o - ((i + k) % 3 === 0 ? 1 : 0))));
+    try { TUT.core.submitReview(s.id, { overall: o, difficulty: d, classId: cid, scores, texts: tid ? { [tid]: t } : {} }); } catch(e){} });
+  await tutRefresh();
+}
+
+/* ---------- 예시로 채우기 ---------- */
+/* 이미 적은 칸은 그대로 두고 빈 칸만 채워요 */
+function exCreate(){
+  if ($('#create').hidden) $('#btn-new').click();
+  const fill = (sel, v) => { const el = document.querySelector(sel); if (el && !String(el.value || '').trim()) setVal(el, v); };
+  fill('#c-title', '나무 컵받침 만들기');
+  fill('#create .cls-edit input[type=date]', tutDate(7));
+  fill('#create .cls-edit [data-cf="time"]', '19:00~21:00');
+  fill('#create .cls-edit [data-cf="capacity"]', '6');
+  fill('#create [data-lead]', '김목방');
+  fill('#c-closeat', `${tutDate(5)}T23:59`);
+  if (!document.querySelector('#create [data-tools] button[aria-pressed="true"]')){ const tool = document.querySelector('#create [data-tools] button[data-v="밴드 쏘"]'); if (tool) tool.click(); }
+  fill('#c-notes', '완성한 컵받침은 가져가셔도 됩니다.\n작업복이나 앞치마를 챙겨 와 주세요.');
+  fill('#c-desc', '편백 판재로 컵받침 두 개를 재단하고 사포질과 오일 마감까지 해요.');
+}
+function exInfoEdit(){
+  const cap = document.querySelector('#info-form .cls-edit [data-cf="capacity"]'); if (cap) setVal(cap, String((Number(cap.value) || 6) + 2));
+  const n = $('#e-notes'); if (n) setVal(n, (n.value ? n.value.replace(/\s+$/, '') + '\n' : '') + '마감 후에는 대기 신청만 받아요.');
+}
+function exAssistName(){ setVal('#as-add-name', '이보조'); }
+function exAssistLog(){
+  setVal('#as-role', '재단 보조, 안전 관리');
+  const b = document.querySelector('#hd-form .scale[data-key="aScore"] button[data-v="4"]'); if (b) b.click();
+  setVal('#as-good', '밴드 쏘 쓸 때 옆에서 안전 안내를 잘 도왔어요.');
+  setVal('#as-imp', '재료를 미리 나눠 두면 더 빨랐을 것 같아요.');
+  setVal('#pin1', '1234'); setVal('#pin2', '1234');
+}
+function exGuide(){
+  setVal('#gd-intro', '편백 컵받침 두 개를 만드는 2시간짜리 입문 학습회예요.');
+  setVal('#gd-dur', '2시간');
+  setVal('#gd-prep', '편백 판재 100×100×10mm 2장\n사포 120·240방\n도마용 오일, 천');
+  setVal('#gd-cut', '판재를 100mm로 미리 재단해 두기\n자리마다 사포와 오일 놓기');
+  const r1 = document.querySelector('#flow-edit .flow-row'); if (r1){ setVal(r1.querySelector('[data-fl="title"]'), '안전 교육'); setVal(r1.querySelector('[data-fl="min"]'), '10'); setVal(r1.querySelector('[data-fl="body"]'), '밴드 쏘 쓰는 법과 손 위치를 보여 줘요.'); }
+  setVal('#gd-safe', '밴드 쏘는 진행자가 옆에 있을 때만 써요.');
+  setVal('#gd-tips', '오일은 얇게 두 번 바르면 얼룩이 덜 생겨요.');
+}
+const ME = { name: '최연습', dept: '화학과', studentNo: '20250505', phone: '01077778888' };
+function exApply(){
+  const opt = [...document.querySelectorAll('#v-apply .cls-opt[role=radio]')].find(b => !b.disabled) || document.querySelector('#v-apply .cls-opt[role=radio]');
+  if (opt && opt.getAttribute('aria-checked') !== 'true') opt.click();
+  setTimeout(() => {
+    const ins = [...document.querySelectorAll('#ap-form input')].filter(i => i.offsetParent !== null);
+    const map = [ME.name, ME.dept, ME.studentNo, ME.phone]; let k = 0;
+    ins.forEach(i => { if (i.type === 'checkbox'){ if (!i.checked) i.click(); } else if (k < map.length) setVal(i, map[k++]); });
+    TUT.me = ME; const sb = document.querySelector('#ap-form button[type=submit]'); if (sb) tutFocus(sb);
+  }, 120);
+}
+function exMine(){
+  const me = TUT.me || { studentNo: '20240101', phone: '01011112222' };
+  setVal('#m-sn', me.studentNo); setVal('#m-p4', me.phone.slice(-4));
+  const b = document.querySelector('#mine-form button[type=submit]'); if (b) tutFocus(b);
+}
+function exReview(){
+  const rc = document.querySelector('#v-review [data-rc]'); if (rc && rc.getAttribute('aria-checked') !== 'true') rc.click();
+  document.querySelectorAll('#v-review .scale').forEach((sc, i) => { const v = sc.dataset.key === 'difficulty' ? 3 : (i % 3 === 1 ? 4 : 5); const b = sc.querySelector(`button[data-v="${v}"]`); if (b) b.click(); });
+  const t = document.querySelector('#v-review textarea'); if (t) setVal(t, '처음 해 봤는데 끝까지 완성해서 뿌듯했어요!');
+  const sb = $('#rv-submit'); if (sb) tutFocus(sb);
+}
+
+/* ---------- 단계 ----------
+   wait: 이 이벤트가 오면 끝 / done: 이 조건이 맞으면 끝 / auto: 끝나면 저절로 다음 단계
+   opt: 안 해도 되는 단계 / ex: [예시로 채우기] */
+const T_CREATE_EX = ['예시로 채우기', exCreate];
+const TUT_STEPS = [
+  { part: 'intro', title: '반가워요! 튜토리얼을 시작할게요',
+    body: () => `<p>연습용 학습회를 하나 만들어 <b>만들기 → 신청 → 출석 → 만족도 조사 → 기록</b>까지 천천히 따라가 볼게요.</p>
+      <ul><li><b>1부 진행자 사용법</b> · <b>2부 참가자 사용 안내</b></li><li>칸이나 버튼을 하나씩 노란 테두리로 알려 드려요. 직접 해 보면 다음으로 넘어가요.</li>
+      <li>연습하는 동안 한 일은 실제 기록에 남지 않아요.</li></ul>
+      <p><b>마지막에 이 연습 학습회를 실제로 저장할 수도 있어요.</b> 곧 열 학습회가 있다면 그 내용으로 만들어 보세요.</p>`,
+    enter: () => tutList() },
+
+  // 1. 새 학습회 만들기
+  { part: 'host', title: '1. 새 학습회 만들기 · 제목', ex: T_CREATE_EX,
+    body: () => `<p>먼저 <b>학습회 제목</b>을 적어 볼게요. 참가자에게 보이는 이름이에요.</p><p class="hint">예: 나무 컵받침 만들기 · 한 번에 채우고 싶으면 [예시로 채우기]를 눌러요.</p>`,
+    enter: () => { tutList(); if ($('#create').hidden) $('#btn-new').click(); }, hl: () => fld('#c-title'),
+    done: () => S.cd && S.cd.title.trim(), doneMsg: '좋아요! 제목을 적었어요.' },
+  { part: 'host', title: '1. 새 학습회 만들기 · 회차', ex: T_CREATE_EX,
+    body: () => `<p><b>회차</b>마다 날짜, 시간, 정원을 정해요.</p><ul><li>같은 수업을 여러 번 열면 <b>[+ 회차 추가]</b></li><li>한 회차를 이틀에 나눠 들으면 <b>[+ 날짜 추가]</b></li><li>정원이 차면 다음 신청자는 대기로 들어가요.</li></ul><p>1회차 날짜를 골라 보세요.</p>`,
+    hl: () => fld('#create [data-classes]'), done: () => S.cd && S.cd.classes.some(c => (c.dates || []).some(Boolean)), doneMsg: '날짜를 골랐어요.' },
+  { part: 'host', title: '1. 새 학습회 만들기 · 대표 진행자', ex: T_CREATE_EX,
+    body: () => `<p><b>대표 진행자</b> 이름을 적어요. 보조 진행자가 있으면 옆의 <b>[+ 보조 추가]</b>로 넣고, 없으면 비워 둬요.</p>`,
+    hl: () => fld('#create [data-lead]'), done: () => S.cd && S.cd.lead && S.cd.lead.name.trim(), doneMsg: '대표 진행자를 적었어요.' },
+  { part: 'host', title: '1. 새 학습회 만들기 · 신청 열기 예약', ex: T_CREATE_EX, opt: true,
+    body: () => `<p><b>신청 열기 예약</b>은 정해 둔 시간에 신청이 저절로 열리게 해요.</p><p>비워 두면 만들자마자 신청을 받아요. 지금은 비워 두고 넘어가도 돼요.</p>`,
+    hl: () => fld('#c-openat') },
+  { part: 'host', title: '1. 새 학습회 만들기 · 신청 마감 예약', ex: T_CREATE_EX, opt: true,
+    body: () => `<p><b>신청 마감 예약</b>은 정해 둔 시간에 신청이 저절로 닫히게 해요.</p><p>비워 두면 진행자가 직접 마감할 때까지 열려 있어요.</p>`,
+    hl: () => fld('#c-closeat') },
+  { part: 'host', title: '1. 새 학습회 만들기 · 사용 장비', ex: T_CREATE_EX, opt: true,
+    body: () => `<p>쓰는 <b>장비</b>를 눌러 골라요. 목록에 없으면 아래 칸에 쉼표로 적어요.</p><p>테이블 쏘, 밴드 쏘처럼 위험한 전동 장비를 고르면 신청 화면에 안전 안내가 함께 나가요.</p>`,
+    hl: () => fld('#create [data-tools]') },
+  { part: 'host', title: '1. 새 학습회 만들기 · 유의사항', ex: T_CREATE_EX, opt: true,
+    body: () => `<p><b>유의사항</b>은 한 줄에 하나씩 적어요. 신청 화면과 공지글에 번호를 붙여 보여 줘요.</p><p class="hint">예: 완성한 작품은 전시회에 출품해야 합니다.</p>`,
+    hl: () => fld('#c-notes') },
+  { part: 'host', title: '1. 새 학습회 만들기 · 설명', ex: T_CREATE_EX, opt: true,
+    body: () => `<p><b>무엇을 만드나요?</b>에 학습회 소개를 적어요. 참가자가 신청하기 전에 읽는 글이에요.</p>`,
+    hl: () => fld('#c-desc') },
+  { part: 'host', title: '1. 새 학습회 만들기 · 만들기', ex: T_CREATE_EX, wait: 'created', auto: true, waitLabel: '만들면 넘어가요',
+    body: () => `<p>다 적었으면 맨 아래 <b>[만들고 신청 링크 받기]</b>를 눌러요.</p><p class="hint">빈 칸이 있으면 어디가 비었는지 알려 줘요.</p>`,
+    hl: '#c-submit' },
+
+  // 2. 링크와 정보 수정
+  { part: 'host', title: '2. 학습회가 만들어졌어요 · 링크와 QR',
+    body: () => `<p>학습회를 만들면 이 <b>링크 · 정보</b> 탭이 열려요.</p><ul><li><b>신청 링크</b>와 <b>만족도 조사 링크</b>, 각각의 QR이 생겨요.</li><li><b>[공지글 복사]</b>를 눌러 단톡방에 그대로 붙여 넣으면 돼요.</li></ul>`,
+    enter: () => openSession(TUT.sid, 'share'), hl: () => document.querySelector('#tab-share .links') || $('#tab-share') },
+  { part: 'host', title: '2. 학습회 정보 수정하기 · 열기', wait: 'infoOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>만든 뒤에도 정보를 고칠 수 있어요. <b>[학습회 정보 수정하기]</b>를 눌러 보세요.</p>`,
+    enter: () => { if (S.view !== 'session' || S.tab !== 'share') openSession(TUT.sid, 'share'); }, hl: () => document.querySelector('#tab-share [data-act="toggle-edit"][data-e="info"]'),
+    done: () => S.shareEdit === 'info' },
+  { part: 'host', title: '2. 학습회 정보 수정하기 · 고쳐 보기', ex: ['예시로 고치기', exInfoEdit],
+    body: () => `<p>고칠 칸을 바꿔 보세요. 예를 들어 <b>1회차 정원</b>을 늘리거나 <b>유의사항</b>을 한 줄 더 적어 봐요.</p><p class="hint">[예시로 고치기]를 누르면 정원을 2명 늘리고 유의사항을 한 줄 더해요.</p>`,
+    enter: () => { if (S.shareEdit !== 'info'){ const b = document.querySelector('#tab-share [data-act="toggle-edit"][data-e="info"]'); if (b) b.click(); } },
+    hl: () => document.querySelector('#info-form') },
+  { part: 'host', title: '2. 학습회 정보 수정하기 · 저장하기', wait: 'infoSaved', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>다 고쳤으면 <b>[저장하기]</b>를 눌러요. 신청 공지글도 새 정보로 바로 바뀌어요.</p>`,
+    hl: '#info-submit' },
+
+  // 3. 신청·출석
+  { part: 'host', title: '3. 신청·출석 관리',
+    body: () => `<p>연습용 참가자 3명이 신청했다고 해 볼게요.</p>
+      <ul><li>수업 날 이름 옆 <b>출석</b> 칸을 눌러 출석을 체크해요. 출석한 사람만 평가할 수 있어요.</li>
+      <li><b>[확정 안내 복사]</b>로 확정 문자를 보내요.</li>
+      <li>확정자를 취소하면 대기자가 신청 순서대로 자동 확정돼요. 취소는 진행자만 할 수 있어요.</li></ul>`,
+    enter: async () => { await tutSeedRegs(); openSession(TUT.sid, 'regs'); }, hl: '#tab-regs' },
+
+  // 4. QR
+  { part: 'host', title: '4. 만족도 조사 QR 띄우기', wait: 'qrOpen', auto: true, waitLabel: 'QR을 띄우면 넘어가요',
+    body: () => `<p>수업이 끝나면 목록에서 <b>[만족도 조사 QR 띄우기]</b>를 눌러요. 지금 눌러 보세요.</p>`,
+    enter: () => tutList(), hl: () => document.querySelector(`[data-qr="${TUT.sid}"]`) },
+  { part: 'host', title: '4. 만족도 조사 QR 닫기', wait: 'qrClose', auto: true, waitLabel: '닫으면 넘어가요',
+    body: () => `<p>참가자가 이 QR을 찍으면 바로 익명 평가가 열려요. 확인했으면 위의 <b>[닫기]</b>를 눌러요.</p>`,
+    enter: () => { if ($('#qrsheet').hidden) openQR(TUT.sid); }, hl: '#qrs-close' },
+
+  // 5. 결과
+  { part: 'host', title: '5. 만족도 결과 보기',
+    body: () => `<p>연습용 평가 4개가 들어왔어요.</p><ul><li>맨 위 큰 숫자가 <b>평균 별점</b>이에요.</li><li>문항별 점수와 <b>난이도</b>, 자유 의견이 모여요.</li><li>비슷한 의견은 묶어서 몇 명이 말했는지 보여 줘요.</li></ul>`,
+    enter: async () => { if (!$('#qrsheet').hidden) closeQR(); await tutSeedReviews(); openSession(TUT.sid, 'results'); }, hl: '#tab-results' },
+
+  // 6. 진행자 기록
+  { part: 'host', title: '6. 진행자 기록',
+    body: () => `<p>학습회를 마친 뒤 진행자가 남기는 기록이에요.</p><ul><li><b>대표 진행자</b>는 <b>[기록 남기기]</b>로 준비물, 시간 계획, 잘된 점과 어려웠던 점을 남겨요.</li><li>처음 저장할 때 정한 본인 PIN으로 잠겨서 본인만 고칠 수 있어요.</li></ul>`,
+    enter: () => openSession(TUT.sid, 'host'), hl: () => document.querySelector('#tab-host .hcard') },
+  { part: 'host', title: '6. 보조 진행자 추가해 보기', ex: ['예시로 채우기', exAssistName], wait: 'assistAdded', auto: true, waitLabel: '추가하면 넘어가요',
+    body: () => `<p>보조 진행자는 아래 <b>[보조 진행자 추가]</b>에 이름을 적고 <b>[추가]</b>를 누르면 바로 기록할 수 있어요. 이름을 적고 눌러 보세요.</p>`,
+    enter: () => { if (S.view !== 'session' || S.tab !== 'host') openSession(TUT.sid, 'host'); }, hl: '#as-add' },
+  { part: 'host', title: '6. 보조 진행자 기록 남기기', ex: ['예시로 채우기', exAssistLog], wait: 'logSaved', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>맡은 역할, 스스로 매긴 점수, 잘한 점과 아쉬운 점을 적어요.</p><p>마지막에 <b>PIN</b>(숫자 4~6자리)을 두 번 적고 <b>[저장하고 잠그기]</b>를 눌러요.</p>`,
+    hl: '#hd-form' },
+  { part: 'host', title: '6. 기록이 저장됐어요',
+    body: () => `<p>보조 진행자 카드에 <b>기록 완료</b>가 붙었어요. 고칠 때는 카드의 <b>[고치기 (PIN)]</b>를 누르고 PIN을 넣어요.</p>`,
+    enter: () => { if (S.view !== 'session' || S.tab !== 'host') openSession(TUT.sid, 'host'); }, hl: () => [...document.querySelectorAll('#tab-host .hcard')].pop() },
+
+  // 7. 진행 설명서
+  { part: 'host', title: '7. 진행 설명서 쓰기', wait: 'guideOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>다음에 같은 학습회를 열 후배를 위한 설명서예요. <b>[설명서 쓰기]</b>를 눌러 보세요.</p>`,
+    enter: () => openSession(TUT.sid, 'guide'), hl: () => document.querySelector('#tab-guide [data-act="guide-edit"]'),
+    done: () => !!document.querySelector('#gd-form') },
+  { part: 'host', title: '7. 진행 설명서 채우고 저장하기', ex: ['예시로 채우기', exGuide], wait: 'guideSaved', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>한 줄 소개, 소요 시간, 준비물, 준비 방법, <b>진행 순서</b>(단계마다 사진도 넣을 수 있어요), 안전 주의사항, 진행 팁을 적어요.</p><p>다 적었으면 맨 아래 <b>[설명서 저장하기]</b>를 눌러요.</p>`,
+    hl: '#gd-form' },
+  { part: 'host', title: '7. 설명서가 저장됐어요',
+    body: () => `<p>이렇게 정리돼서 보여요. <b>[인쇄]</b>를 누르면 설명서만 종이로 뽑을 수 있어요.</p><p>진행자 화면에 들어온 사람이면 누구나 고칠 수 있어요.</p>`,
+    hl: '#tab-guide' },
+
+  // 8. 목록
+  { part: 'host', title: '8. 목록 둘러보기',
+    body: () => `<ul><li><b>[만족도 추천순]</b>을 누르면 모든 학기의 학습회를 만족도 높은 순으로 보여 줘요. 카드마다 강점과 난이도가 나와요.</li>
+      <li><b>학기 목록</b>에서 학기를 골라 볼 수 있어요.</li><li>동아리 비밀번호는 맨 위 <b>'도각도각'</b> 글자를 누르면 바꿀 수 있어요.</li></ul><p>이제 참가자 화면을 볼게요.</p>`,
+    enter: () => tutList(), hl: '.sortbar' },
+
+  // 2부 참가자
+  { part: 'guest', title: '1. 신청하기', ex: ['예시로 채우기', exApply], done: () => !!document.querySelector('#ap-result'), auto: true, waitLabel: '신청하면 넘어가요',
+    body: () => `<p>참가자는 공지글의 <b>신청 링크</b>로 이 화면에 들어와요. 로그인은 필요 없어요.</p>
+      <ol><li>들을 <b>회차</b>를 눌러요.</li><li>이름, 학과, 학번, 전화번호를 적어요.</li><li>개인정보 동의에 체크하고 <b>[신청하기]</b>를 눌러요.</li></ol><p>직접 신청해 보세요.</p>`,
+    enter: async () => { await tutEnsureOpen(); await openApply(TUT.sid); }, hl: () => document.querySelector('#v-apply section.panel[data-s]') },
+  { part: 'guest', title: '1. 신청이 됐어요',
+    body: () => `<p>신청이 끝나면 이 화면이 나와요.</p><ul><li>자리가 있으면 <b>확정</b>, 정원이 찼으면 <b>대기 ○번</b>으로 신청돼요.</li><li>대기는 앞사람이 취소하면 차례대로 자동 확정돼요.</li></ul>`,
+    hl: '#ap-result' },
+  { part: 'guest', title: '2. 내 신청 확인', ex: ['예시로 채우기', exMine], done: () => !!document.querySelector('#mine .mine-list, #mine .empty'), auto: true, waitLabel: '확인을 누르면 넘어가요',
+    body: () => `<p>신청이 확정됐는지는 <b>내 신청 확인</b>에서 봐요.</p><p>신청할 때 쓴 <b>학번</b>과 <b>전화번호 뒤 4자리</b>를 적고 <b>[확인]</b>을 눌러 보세요.</p>`,
+    enter: async () => { if (S.view !== 'apply') await openApply(TUT.sid); }, hl: '#mine' },
+  { part: 'guest', title: '2. 신청 상태가 보여요',
+    body: () => `<p>내가 신청한 학습회와 <b>확정 · 대기</b> 상태가 보여요.</p><p>참석이 어려워지면 직접 취소하지 않고 <b>학술부장님께 연락</b>해요. 진행자가 취소하면 대기자에게 자리가 넘어가요.</p>`,
+    hl: '#mine' },
+  { part: 'guest', title: '3. 만족도 조사', ex: ['예시로 채우기', exReview], done: () => !!document.querySelector('#v-review .thanks'), auto: true, waitLabel: '평가를 보내면 넘어가요',
+    body: () => `<p>수업이 끝나면 <b>QR을 찍거나 만족도 조사 링크</b>를 눌러 이 화면에서 평가해요.</p>
+      <ul><li>이름을 받지 않는 <b>익명</b> 평가예요.</li><li>점수를 고르고, 하고 싶은 말을 적고 <b>[평가 보내기]</b>를 눌러요.</li></ul><p>직접 평가해 보세요.</p>`,
+    enter: () => openReview(TUT.sid), hl: '#v-review' },
+  { part: 'guest', title: '3. 평가를 보내면',
+    body: () => `<p>평가를 보내면 이렇게 <b>감사 화면</b>이 나와요.</p><p>같은 휴대폰으로 다시 열면 <b>'이미 평가를 보냈습니다'</b>가 나와서 한 번만 평가할 수 있어요. [다시 열어 보기]로 확인해 보세요.</p>`,
+    ex: ['다시 열어 보기', () => openReview(TUT.sid)], hl: () => document.querySelector('#v-review .thanks') },
+
+  { part: 'end', title: '튜토리얼을 마쳤어요',
+    body: () => { const s = tutSession(); return s
+      ? `<p>수고했어요! 연습으로 만든 <b>'${esc(s.title || '제목 없음')}'</b> 학습회를 실제로 저장할까요?</p>
+         <p class="hint" style="margin:0">저장하면 학습회 정보(제목·회차·장소·진행자·예약 시간)만 저장되고, 연습으로 넣은 신청·평가·기록·설명서는 지워져요. 저장하지 않으면 모두 지워져요.</p>`
+      : `<p>연습으로 만든 학습회가 없어요. 끝내면 원래 화면으로 돌아가요.</p>`; },
+    enter: () => { if (!$('#qrsheet').hidden) closeQR(); tutList(); } },
+];
+const TUT_HOST = TUT_STEPS.filter(s => s.part === 'host').length, TUT_GUEST = TUT_STEPS.filter(s => s.part === 'guest').length;
+function tutClearHL(){ document.querySelectorAll('.tut-hl').forEach(el => el.classList.remove('tut-hl')); }
+function tutTarget(st){ if (!st.hl) return null; try { return typeof st.hl === 'function' ? st.hl() : document.querySelector(st.hl); } catch(e){ return null; } }
+function tutFocus(el){ if (!el) return; const r = el.getBoundingClientRect(); const top = r.top + scrollY - (r.height > innerHeight * .45 ? 70 : Math.max(80, innerHeight * .22)); window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
+function tutCanNext(st){ return st.opt || (!st.wait && !st.done) || TUT.ok; }
+function tutRender(){
+  const box = $('#tut'); if (!TUT){ box.hidden = true; return; }
+  const st = TUT_STEPS[tutI]; const last = st.part === 'end';
+  const ch = part => new Set(TUT_STEPS.filter(s => s.part === part).map(s => parseInt(s.title))).size;
+  const label = st.part === 'host' ? `1부 · 진행자 사용법 ${parseInt(st.title)}/${ch('host')}` : st.part === 'guest' ? `2부 · 참가자 사용 안내 ${parseInt(st.title)}/${ch('guest')}` : st.part === 'intro' ? '앱 사용 튜토리얼' : '마무리';
+  const can = tutCanNext(st); const nx = TUT_STEPS[tutI + 1];
+  const nextLabel = !can ? (st.waitLabel || '해 보면 넘어가요') : tutI === 0 ? '시작하기 →' : (nx && st.part === 'host' && nx.part === 'guest') ? '2부로 →' : st.opt && !TUT.ok ? '다음 (건너뛰어도 돼요) →' : '다음 →';
+  const pct = Math.round(tutI / (TUT_STEPS.length - 1) * 100);
+  box.classList.toggle('folded', !!TUT.folded);
+  box.innerHTML = `<div class="t-top"><span>${label}</span><span class="t-practice" title="튜토리얼에서 한 일은 실제 기록에 남지 않아요">연습 중</span><span class="spacer"></span><button type="button" class="t-fold" data-t="fold">${TUT.folded ? '펼치기 ▲' : '접기 ▼'}</button></div>
+    <div class="t-bar"><i style="width:${pct}%"></i></div>
+    <h3>${st.title}${st.opt ? ' <span class="t-opt">(선택)</span>' : ''}</h3><div class="t-body">${st.body()}${TUT.ok && st.doneMsg ? `<p class="t-ok">✓ ${st.doneMsg}</p>` : ''}</div>
+    <div class="t-acts">${last
+      ? (tutSession() ? `<button type="button" class="btn primary" data-t="save">저장하기</button><button type="button" class="btn" data-t="discard">저장하지 않기</button>` : `<button type="button" class="btn primary" data-t="discard">끝내기</button>`)
+      : `${tutI > 0 ? '<button type="button" class="btn sm ghost" data-t="prev">← 이전</button>' : ''}${st.ex ? `<button type="button" class="btn sm" data-t="ex">${st.ex[0]}</button>` : ''}
+         <span class="spacer"></span><button type="button" class="t-end" data-t="end">튜토리얼 끝내기</button>
+         <button type="button" class="btn sm primary" data-t="next" ${can ? '' : 'disabled'}>${nextLabel}</button>`}</div>
+    <span class="msg" id="tut-msg" role="status"></span>`;
+  requestAnimationFrame(() => document.documentElement.style.setProperty('--tut-h', box.offsetHeight + 'px'));
+}
+function tutApplyHL(scroll){
+  const st = TUT_STEPS[tutI]; const el = tutTarget(st);
+  if (!el){ tutClearHL(); return; }
+  if (!el.classList.contains('tut-hl')){ tutClearHL(); el.classList.add('tut-hl'); if (scroll) tutFocus(el); }
+}
+async function tutGo(i){
+  if (!TUT) return;
+  tutI = Math.max(0, Math.min(TUT_STEPS.length - 1, i)); const gen = ++TUT.gen; TUT.ok = false; tutClearHL();
+  const st = TUT_STEPS[tutI]; tutRender();
+  try { if (st.enter) await st.enter(); } catch(e){}
+  if (!TUT || gen !== TUT.gen) return;
+  if ((st.done && st.done()) || TUT.doneSet.has(tutI)) TUT.ok = true;
+  tutRender();
+  setTimeout(() => { if (TUT && gen === TUT.gen) tutApplyHL(true); }, 200);
+}
+function tutDone(){
+  const st = TUT_STEPS[tutI]; if (TUT.ok) return; TUT.ok = true; TUT.doneSet.add(tutI);
+  if (st.auto){ const gen = TUT.gen; setTimeout(() => { if (TUT && gen === TUT.gen) tutGo(tutI + 1); }, 700); }
+  tutRender();
+}
+function tutTick(){
+  if (!TUT) return; const st = TUT_STEPS[tutI];
+  if (st.done && !TUT.ok && st.done()) tutDone();
+  tutApplyHL(false);   // 화면이 다시 그려져서 테두리가 사라졌으면 다시 붙여요
+}
+function tutStart(){
+  if (!S.pw || TUT) return;
+  TUT = makeSandbox(); document.body.classList.add('tut-on'); $('#tut').hidden = false; $('#pw-done').hidden = true;
+  TUT.timer = setInterval(tutTick, 400);
+  tutGo(0);
+}
+function tutEvent(name, val){
+  if (!TUT) return;
+  if (name === 'created'){
+    TUT.sid = val; const at = TUT_STEPS.findIndex(s => s.wait === 'created');
+    for (let k = 1; k <= at; k++) TUT.doneSet.add(k);
+    if (tutI !== at){ tutGo(at + 1); return; }
+  }
+  const st = TUT_STEPS[tutI];
+  if (st.wait === name) tutDone();
+}
+function tutClose(){ if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null; document.documentElement.style.removeProperty('--tut-h'); tutClearHL(); document.body.classList.remove('tut-on'); $('#tut').hidden = true; $('#tut').innerHTML = ''; }
+async function tutFinish(save){
+  const s = tutSession(); const m = $('#tut-msg');
+  let note = '튜토리얼을 마쳤어요. 연습한 내용은 지웠어요.';
+  if (save && s){
+    const sched = TUT.sched || {};
+    const draft = { title: s.title, term: s.term || '', places: s.places || [], desc: s.desc || '', tools: s.tools || [], notes: s.notes || '',
+      openAt: TUT.sched ? sched.openAt : (s.openAt || ''), closeAt: TUT.sched ? sched.closeAt : (s.closeAt || ''), review: s.review || null,
+      lead: s.lead ? { id: s.lead.id, name: s.lead.name } : { name: '' }, assistants: (s.assistants || []).map(a => ({ id: a.id, name: a.name })),
+      classes: (s.classes || []).map(c => ({ id: c.id, label: c.label, dates: c.dates, time: c.time, capacity: c.capacity })) };
+    if (m){ m.className = 'msg'; m.textContent = '저장하는 중…'; }
+    const keep = TUT; clearInterval(keep.timer); TUT = null;   // 여기서부터는 실제 서버로 보내요
+    try { const res = await api('saveSession', S.pw, draft); S.data = res.all; note = `'${s.title}' 학습회를 저장했어요. 연습으로 넣은 신청·평가·기록은 지웠어요.`; }
+    catch(e){ TUT = keep; TUT.timer = setInterval(tutTick, 400); if (m){ m.className = 'msg err'; m.textContent = '저장하지 못했어요: ' + e.message; } return; }
+  } else {
+    if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null;
+    try { S.data = await api('getAll', S.pw); } catch(e){}
+  }
+  tutClose(); S.sortMode = store('l', 'dg_sort') === 'rank' ? 'rank' : 'date'; openList();
+  const n = $('#pw-done'); n.hidden = false; n.textContent = note;
+}
+$('#tut').addEventListener('click', e => {
+  const b = e.target.closest('[data-t]'); if (!b || !TUT) return; const t = b.dataset.t;
+  if (t === 'fold'){ TUT.folded = !TUT.folded; tutRender(); return; }
+  if (t === 'next') return tutGo(tutI + 1);
+  if (t === 'prev') return tutGo(tutI - 1);
+  if (t === 'end') return tutGo(TUT_STEPS.length - 1);
+  if (t === 'save') return tutFinish(true);
+  if (t === 'discard') return tutFinish(false);
+  if (t === 'ex'){ const st = TUT_STEPS[tutI]; if (st.ex) st.ex[1](); setTimeout(tutTick, 150); }
+});
+
+/* =========================================================
    만족도 조사 QR 크게 보기
    ========================================================= */
 let qrBack = null, qrLock = null;
@@ -2664,10 +3055,11 @@ function openQR(sid, from){
   const box = $('#qrs-code'); box.innerHTML = '';
   if (window.QRCode){ try { new QRCode(box, {text:url, width:512, height:512, colorDark:'#1d2420', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M}); } catch(e){ box.textContent = 'QR을 만들지 못했어요'; } }
   else box.textContent = 'QR을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';
-  $('#qrsheet').hidden = false; document.body.style.overflow = 'hidden'; $('#qrs-close').focus();
+  $('#qrsheet').hidden = false; document.body.style.overflow = 'hidden'; $('#qrs-close').focus(); if (TUT) tutEvent('qrOpen');
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { qrLock = l; }).catch(() => {}); } catch(e){}   // 띄워 둔 동안 화면이 꺼지지 않게
 }
 function closeQR(){
+  if (TUT && !$('#qrsheet').hidden) setTimeout(() => tutEvent('qrClose'), 0);
   $('#qrsheet').hidden = true; document.body.style.overflow = '';
   try { if (qrLock) qrLock.release(); } catch(e){} qrLock = null;
   if (qrBack && document.body.contains(qrBack)) qrBack.focus(); qrBack = null;
