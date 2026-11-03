@@ -1942,7 +1942,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 24판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 25판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -2960,7 +2960,7 @@ const TUT_STEPS = [
   // 8. 목록
   { part: 'host', title: '8. 목록 둘러보기',
     body: () => `<ul><li><b>[만족도 추천순]</b>을 누르면 모든 학기의 학습회를 만족도 높은 순으로 보여 줘요. 카드마다 강점과 난이도가 나와요.</li>
-      <li><b>학기 목록</b>에서 학기를 골라 볼 수 있어요.</li><li>동아리 비밀번호는 맨 위 <b>'도각도각'</b> 글자를 누르면 바꿀 수 있어요.</li></ul><p>이제 참가자 화면을 볼게요.</p>`,
+      <li><b>학기 목록</b>에서 학기를 골라 볼 수 있어요.</li><li>동아리 비밀번호는 맨 위 <b>'도각도각'</b> 글자를 누르면 바꿀 수 있어요.</li></ul>${TUT.mod === 'all' ? '<p>이제 참가자 화면을 볼게요.</p>' : ''}`,
     enter: () => tutList(), hl: '.sortbar' },
 
   // 2부 참가자
@@ -2997,12 +2997,12 @@ const TUT_MODS = {
   create: { name: '학습회 추가하기', makes: true, desc: '제목부터 회차·진행자·예약까지 칸을 하나씩 채워 학습회를 만들고, 정보를 고쳐 저장해요.',
     intro: '학습회를 새로 만들고, 만든 뒤 정보를 고치는 방법을 천천히 따라가 볼게요.',
     pick: st => st.part === 'host' && /^1\. 새 학습회|^2\. /.test(st.title) },
-  apply: { name: '신청받기', desc: '신청 링크·QR과 공지글을 나누고, 신청·출석을 관리해요.',
-    intro: '신청 링크를 나누고 신청·출석을 관리하는 방법을 볼게요.',
-    pick: st => st.part === 'host' && /^2\. 링크와 QR|^3\. /.test(st.title) },
-  survey: { name: '만족도 조사 진행', desc: '수업이 끝나면 QR을 띄우고, 결과를 보고, 진행자 기록과 진행 설명서를 남겨요.',
-    intro: '수업이 끝난 뒤 만족도 조사를 받고 기록을 남기는 방법을 볼게요.',
-    pick: st => st.part === 'host' && /^[4-7]\. /.test(st.title) },
+  apply: { name: '신청받기·만족도 조사', desc: '신청 링크·QR을 나누고 출석을 관리한 뒤, 만족도 조사 QR을 띄우고 결과를 봐요.',
+    intro: '신청 링크를 나누고 신청·출석을 관리하고, 수업이 끝난 뒤 만족도 조사를 받는 방법까지 볼게요.',
+    pick: st => st.part === 'host' && /^2\. 링크와 QR|^[3458]\. /.test(st.title) },
+  guide: { name: '기록·설명서 쓰기', desc: '수업을 마친 뒤 진행자 기록(보조 진행자 포함)을 남기고, 후배를 위한 진행 설명서를 써요.',
+    intro: '수업을 마친 뒤 진행자 기록을 남기고, 다음에 같은 학습회를 열 후배를 위한 진행 설명서를 써 볼게요.',
+    pick: st => st.part === 'host' && /^[67]\. /.test(st.title) },
   guest: { name: '신청자 화면 연습', desc: '참가자가 보는 신청 · 내 신청 확인 · 만족도 조사 화면을 직접 해 봐요.',
     intro: '참가자 입장에서 신청하고, 신청을 확인하고, 평가해 볼게요.',
     pick: st => st.part === 'guest' },
@@ -3010,7 +3010,7 @@ const TUT_MODS = {
     intro: '학습회 만들기부터 신청, 출석, 만족도 조사, 기록, 참가자 화면까지 천천히 따라가 볼게요.',
     pick: st => st.part === 'host' || st.part === 'guest' },
 };
-const TUT_ORDER = ['create', 'apply', 'survey', 'guest', 'all'];
+const TUT_ORDER = ['create', 'apply', 'guide', 'guest', 'all'];
 function tutBuildRun(mod){
   const body = TUT_STEPS.filter(st => st.part !== 'intro' && st.part !== 'end' && TUT_MODS[mod].pick(st));
   return [TUT_STEPS.find(st => st.part === 'intro'), ...body, TUT_STEPS.find(st => st.part === 'end')];
