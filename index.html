@@ -104,7 +104,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label,.lbl{font-weight:600;font-size:14px}
 .hint{color:var(--muted);font-size:13px;margin:0;font-weight:400}
-input[type=text],input[type=date],input[type=number],select,textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 11px}
+input[type=text],input[type=search],input[type=date],input[type=number],select,textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 11px}
 textarea{min-height:84px;resize:vertical;line-height:1.55}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--soft)}
 .actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -648,8 +648,53 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .install .txt p{margin:2px 0 0}
 .install .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 @media (max-width:560px){ .install{flex-wrap:wrap} .install .btns{width:100%;justify-content:flex-start} }
+/* 부원용 설명서 열람 */
+.login.stackcol{gap:16px}
+.lib-entry{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;background:var(--surface);border:1.5px solid var(--wood);border-radius:14px;padding:18px;-webkit-tap-highlight-color:transparent}
+.lib-entry:hover{background:var(--paper)}
+.lib-entry:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.lib-entry .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.lib-entry b{font-size:18px}
+.lib-entry .grow>span{color:var(--muted);font-size:14px;word-break:keep-all}
+.lib-ic{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--wood);color:#fff}
+.lib-go{font-size:22px;color:var(--wood);flex:none}
+#login-form{display:flex;flex-direction:column;gap:12px}
+#login-form .tag{font-size:12px;color:var(--wood);font-weight:700;letter-spacing:.04em}
+#login-form h2{font-size:18px}
+.lib-tools-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lib-tools-row input{flex:1;min-width:200px;width:auto;-webkit-appearance:none;appearance:none}
+.lib-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.lib-card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.lib-card:hover{border-color:var(--wood)}
+.lib-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lib-th{aspect-ratio:16/9;background:var(--paper);display:grid;place-items:center;color:var(--wood);overflow:hidden}
+.lib-th img{width:100%;height:100%;object-fit:cover;display:block}
+.lib-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.lib-body h3{font-size:17px;word-break:keep-all}
+.lib-intro{margin:0;color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-chips{display:flex;gap:4px;flex-wrap:wrap}
+.lib-star{color:var(--wood)}
+.lib-star small{color:var(--muted)}
+.lib-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.lib-sum>div{display:flex;flex-direction:column;gap:2px}
+.lib-sum .wide{grid-column:1/-1}
+.lib-sum .lbl{font-size:12px;color:var(--muted)}
+.lib-sum small{font-weight:400;color:var(--muted)}
+.lib-tools{display:flex;gap:4px;flex-wrap:wrap;font-weight:400}
+.chip.danger{border-color:#d9a28c;color:#9a3d1f}
+#v-guides .manual{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.lib-msg:empty{display:none}
+.lib-foot{text-align:center;margin-top:8px}
+.linkish{all:unset;cursor:pointer;color:var(--wood);text-decoration:underline;text-underline-offset:3px}
+.lib-share{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:12px;margin-top:4px}
+.lib-share .btns{display:flex;gap:6px;flex-wrap:wrap}
+.lib-share .msg:empty{display:none}
+.lib-share .msg{flex-basis:100%;word-break:break-all}
+@media (max-width:560px){ .lib-list{grid-template-columns:1fr} .lib-entry{padding:16px} .lib-entry b{font-size:17px} }
 @media print{
   @page{margin:16mm 14mm}
+  #v-guides>*:not(.manual){display:none!important}
+  #v-guides .manual{border:0!important;padding:0!important}
   html,body{background:#fff!important;color:#111!important}
   .demobar,#install,#credit,#banner,#v-apply,#v-review,#v-login,#v-list,#s-head,#tabs,#v-session>.actions,#tab-results,#tab-regs,#tab-host,#tab-share{display:none!important}
   .wrap{padding:0!important;max-width:none!important}
@@ -774,6 +819,7 @@ window.dgWrite = function(root){
   <button type="button" data-demo="apply" aria-pressed="false">참가자 · 신청</button>
   <button type="button" data-demo="review" aria-pressed="false">참가자 · 만족도 조사</button>
   <button type="button" data-demo="host" aria-pressed="false">진행자 화면</button>
+  <button type="button" data-demo="guides" aria-pressed="false">부원 · 설명서 열람</button>
   <span class="sep" aria-hidden="true"></span>
   <button type="button" data-mobile aria-pressed="false">모바일 화면으로</button>
   <button type="button" data-splash>시작 화면 보기</button>
@@ -783,6 +829,7 @@ window.dgWrite = function(root){
   <section id="v-apply" class="stackcol narrow" hidden></section>
   <section id="v-review" class="stackcol narrow" hidden></section>
   <section id="v-login" class="stackcol" hidden></section>
+  <section id="v-guides" class="stackcol" hidden></section>
 
   <section id="v-list" class="stackcol" hidden>
     <div class="top">
@@ -814,6 +861,9 @@ window.dgWrite = function(root){
     <p class="msg ok" id="pw-done" role="status" hidden></p>
     <form class="panel" id="pwform" hidden novalidate></form>
     <div class="list" id="list"></div>
+    <div class="lib-share"><span class="hint">부원들에게는 설명서 열람 링크를 보내면 비밀번호 없이 진행 설명서를 볼 수 있어요.</span>
+      <span class="btns"><button type="button" class="btn sm ghost" data-act="open-lib">열람 화면 보기</button><button type="button" class="btn sm" data-act="copy-lib">설명서 열람 링크 복사</button></span>
+      <span class="msg ok" id="lib-copy-msg" role="status"></span></div>
     <p class="hint" id="ver" style="text-align:right"></p>
   </section>
 
@@ -925,6 +975,39 @@ function applyState(s, t) {
   if (s.openAt && t < Number(s.openAt)) return 'soon';
   if (s.closeAt && t >= Number(s.closeAt)) return 'closed';
   return 'open';
+}
+/* 부원용 설명서 모음: 설명서가 있는 학습회만 골라, 설명서와 만족도 요약(평균·난이도·응답 수)만 내보내요.
+   신청자 이름·연락처, 자유 의견, 진행자 기록은 넣지 않아요. (Api.gs의 buildGuideLibrary와 같은 내용) */
+function buildGuideLibrary(all) {
+  all = all || {};
+  var hasG = function (g) { return !!(g && (g.intro || (g.prep || []).length || (g.cutting || []).length || (g.flow || []).length || g.safety || g.tips)); };
+  var mean = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
+  var out = [];
+  (all.sessions || []).forEach(function (s) {
+    var row = (all.guides || []).filter(function (x) { return x.sid === s.id; })[0];
+    var g = row && row.guide, at = row && row.updatedAt;
+    if (!hasG(g)) {
+      var L = s.lead ? (all.hostlogs || []).filter(function (l) { return l.sid === s.id && l.hostId === s.lead.id; })[0] : null;
+      if (!L || !hasG(L.guide)) return;
+      g = L.guide; at = L.updatedAt;
+    }
+    var dates = {}; (s.classes || []).forEach(function (c) { (c.dates || []).forEach(function (d) { dates[d] = 1; }); });
+    var rs = (all.reviews || []).filter(function (r) { return r.sid === s.id; });
+    var ov = rs.map(function (r) { return Number(r.overall); }).filter(function (v) { return v >= 1 && v <= 5; });
+    var df = rs.map(function (r) { var v = Number(r.difficulty); if (!(v >= 1 && v <= 5)) return null; return (r.answers && r.answers.dv === 2) ? 6 - v : v; })
+      .filter(function (v) { return v != null; });
+    out.push({ id: s.id, title: s.title || '', term: s.term || '', places: s.places || [], tools: s.tools || [],
+      lead: { name: (s.lead && s.lead.name) || '' }, classes: [{ dates: Object.keys(dates).sort() }],
+      guide: g, at: at || null, n: ov.length, overall: mean(ov), difficulty: mean(df) });
+  });
+  return out;
+}
+function guideLibraryPhotos(lib) {
+  var ids = [];
+  (lib || []).forEach(function (x) { var g = x.guide || {};
+    (g.flow || []).forEach(function (f) { (f.photos || []).forEach(function (id) { ids.push(String(id)); }); });
+    (g.finalPhotos || []).forEach(function (id) { ids.push(String(id)); }); });
+  return ids;
 }
 function makeCore(store, env) {
   const PLACES = ['1동방', '2동방'];
@@ -1309,6 +1392,8 @@ function makeCore(store, env) {
     getApplyInfo, apply, myRegs, cancelMine, getPublicSession, submitReview, changePassword,
     hostLogin: getAll, getAll, saveSession, deleteSession, setApplyOpen, setAttendance, hostCancelReg, promoteReg, moveReg, addReg,
     checkHostPin, saveHostLog, deleteHostLog, saveGuide, deleteReview, flipDifficulty, uploadPhoto, getPhoto,
+    getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword())),
+    getGuidePhoto: id => { if (guideLibraryPhotos(buildGuideLibrary(getAll(env.getPassword()))).indexOf(String(id)) < 0) fail('사진을 찾을 수 없어요.'); return env.readPhoto(String(id)); },
   };
 }
 
@@ -1320,7 +1405,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const API = String(window.DOGAK_API || '').trim();
 const LIVE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
 const QS = new URLSearchParams(location.search);
-const BOOT = LIVE ? { view: ({a:'apply', r:'review'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
+const BOOT = LIVE ? { view: ({a:'apply', r:'review', g:'guides'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
 const STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 const SITE = location.origin + location.pathname.replace(/index\.html$/, '');   // 신청·만족도 링크는 이 사이트 주소로 만들어요
 const PWK = STANDALONE ? 'l' : 's';   // 홈 화면 앱에서는 로그인을 기억하고, 브라우저에서는 창을 닫으면 잊어요
@@ -1531,7 +1616,7 @@ const S = {
   notice:{}, regMsg:'', regMsgCls:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null, rawComments:false,
   ap:null, rv:null,
 };
-const VIEWS = ['apply','review','login','list','session'];
+const VIEWS = ['apply','review','login','list','session','guides'];
 ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
 function show(v){ S.view = v; document.body.dataset.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
@@ -1756,16 +1841,25 @@ rvBox.addEventListener('submit', async e => {
 function openLogin(note){
   show('login');
   $('#v-login').innerHTML = `
-  <form class="panel login" id="login-form" novalidate>
-    <div class="brand">${BRAND_SVG(40)}<div><div class="tag">진행자 화면</div><h1>도각도각</h1></div></div>
+  <div class="login stackcol">
+  <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방</div><h1>도각도각</h1></div></div>
+  <button type="button" class="lib-entry" data-act="open-guides">
+    <span class="lib-ic" aria-hidden="true">${BOOK_ICON}</span>
+    <span class="grow"><b>목공 설명서 열람하기</b><span>부원 누구나 · 비밀번호 없이 들어가요. 지금까지 연 학습회의 준비물, 진행 순서, 사진을 보고 해 보고 싶은 작업을 골라 보세요.</span></span>
+    <span class="lib-go" aria-hidden="true">→</span>
+  </button>
+  <form class="panel" id="login-form" novalidate>
+    <div><div class="tag">임원진 전용</div><h2>진행자 화면</h2></div>
     <p class="sub" style="margin:0">학습회를 열고 신청·출석을 관리하려면 동아리 비밀번호를 입력해 주세요. 참가자는 신청 링크와 만족도 조사 링크로만 들어와요.</p>
     <div class="field"><label for="pw">동아리 비밀번호</label>
       <div class="pw-row"><input type="password" id="pw" autocomplete="current-password"><button class="btn primary" type="submit" id="pw-go">들어가기</button></div></div>
     <span class="msg err" id="pw-msg" role="status">${esc(note||'')}</span>
     ${LIVE ? '' : '<p class="hint">미리보기 비밀번호는 <b>1234</b>예요.</p>'}
-  </form>`;
-  $('#pw').focus();
+  </form>
+  </div>`;
+  if (!matchMedia('(pointer: coarse)').matches) $('#pw').focus();
 }
+$('#v-login').addEventListener('click', e => { if (e.target.closest('[data-act="open-guides"]')) openGuides(); });
 $('#v-login').addEventListener('submit', async e => {
   e.preventDefault();
   const pw = $('#pw').value; const msg = $('#pw-msg');
@@ -1776,7 +1870,89 @@ $('#v-login').addEventListener('submit', async e => {
   S.pw = pw; store(PWK, 'dg_pw', pw);
   openList();
 });
-async function reload(){ try { S.data = await api('getAll', S.pw); banner(''); } catch(e){ banner(e.message); } }
+/* =========================================================
+   부원용: 목공 설명서 열람 (비밀번호 없음)
+   ========================================================= */
+const BOOK_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>';
+const LIB = { list: null, q: '', sort: store('l', 'dg_libsort') === 'new' ? 'new' : 'rank', sid: null, msg: '' };
+const libTotal = g => (g.flow || []).reduce((n, f) => n + (Number(f.min) || 0), 0);
+const libTime = x => x.guide.duration || (libTotal(x.guide) ? `${libTotal(x.guide)}분` : '');
+const libThumb = x => { const g = x.guide; return (g.finalPhotos || [])[0] || ((g.flow || []).find(f => (f.photos || []).length) || {photos: []}).photos[0] || ''; };
+const libStars = x => x.n ? `<span class="lib-star">★ <b class="num">${f1(x.overall)}</b><small> (${x.n}명)</small></span>` : '<span class="hint">평가 없음</span>';
+async function openGuides(sid){
+  show('guides'); LIB.sid = sid || null; banner('');
+  if (!LIB.list){
+    $('#v-guides').innerHTML = `<div class="empty">설명서를 불러오는 중…</div>`;
+    try { LIB.list = await api('getGuideLibrary'); }
+    catch(e){ const old = /알 수 없는 요청/.test(e.message); $('#v-guides').innerHTML = `<div class="empty">${old ? '설명서 열람을 아직 준비하는 중이에요. 임원진이 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}<br><button type="button" class="btn sm" data-act="lib-retry" style="margin-top:12px">다시 시도</button></div>`; return; }
+  }
+  renderGuides();
+}
+function renderGuides(){
+  const v = $('#v-guides'); const all = LIB.list || [];
+  const x = LIB.sid ? all.find(i => i.id === LIB.sid) : null;
+  if (x){
+    v.innerHTML = `
+      <div class="actions lib-bar"><button type="button" class="btn ghost sm" data-act="lib-back">← 설명서 목록</button><span class="spacer"></span>
+        <button type="button" class="btn sm ghost" data-act="lib-link">링크 복사</button><button type="button" class="btn sm" data-act="print">인쇄하기</button></div>
+      <span class="msg ok lib-msg" role="status">${esc(LIB.msg)}</span>
+      <div class="lib-sum">
+        <div><span class="lbl">학기</span><b>${esc(termLabel(termFor(x)))}</b></div>
+        ${libTime(x) ? `<div><span class="lbl">걸리는 시간</span><b>${esc(libTime(x))}</b></div>` : ''}
+        <div><span class="lbl">만족도</span><b>${x.n ? `★ ${f1(x.overall)} <small>(${x.n}명)</small>` : '<small>평가 없음</small>'}</b></div>
+        ${x.difficulty != null ? `<div><span class="lbl">난이도</span><b>${esc(DIFF_LABEL(x.difficulty))}</b></div>` : ''}
+        ${(x.tools || []).length ? `<div class="wide"><span class="lbl">사용 장비</span><b class="lib-tools">${x.tools.map(t => `<span class="chip${DANGER.includes(t) ? ' danger' : ''}">${esc(t)}</span>`).join('')}</b></div>` : ''}
+      </div>
+      ${manualHTML(x, {g: x.guide, at: x.at})}`;
+    LIB.msg = ''; window.scrollTo(0, 0); loadPhotos(); return;
+  }
+  LIB.sid = null;
+  v.innerHTML = `
+    <div class="top lib-head"><div>
+      <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>목공 설명서</h1></div></div>
+      <p class="sub">임원진이 학습회를 마치고 남긴 진행 설명서예요. 준비물과 진행 순서를 보고 해 보고 싶은 작업을 골라 보세요.</p></div></div>
+    <div class="lib-tools-row">
+      <input type="search" id="lib-q" placeholder="찾기 (예: 도마, 카빙, 호두나무)" value="${esc(LIB.q)}" aria-label="설명서 찾기">
+      <div class="seg" role="radiogroup" aria-label="보는 순서" id="lib-sort">
+        <button type="button" role="radio" data-sort="rank" aria-checked="${LIB.sort === 'rank'}">만족도순</button>
+        <button type="button" role="radio" data-sort="new" aria-checked="${LIB.sort === 'new'}">최신순</button></div>
+    </div>
+    <div class="lib-list" id="lib-list">${libCards()}</div>
+    <p class="hint lib-foot">임원진이세요? <button type="button" class="linkish" data-act="lib-host">진행자 화면으로 가기</button></p>`;
+  loadPhotos();
+}
+function libCards(){
+  const all = LIB.list || []; const total = all.length;
+  const q = LIB.q.trim().toLowerCase();
+  const hay = i => [i.title, i.guide.intro, (i.tools || []).join(' '), (i.guide.prep || []).join(' '), i.lead.name, termLabel(termFor(i))].join(' ').toLowerCase();
+  const shown = all.filter(i => !q || q.split(/\s+/).every(w => hay(i).includes(w)));
+  const newest = (a, b) => (sDates(b)[0] || '').localeCompare(sDates(a)[0] || '') || (b.at || 0) - (a.at || 0);
+  shown.sort(LIB.sort === 'new' ? newest : (a, b) => ((b.n >= 3) - (a.n >= 3)) || ((b.overall || 0) - (a.overall || 0)) || newest(a, b));
+  if (!total) return `<div class="empty">아직 올라온 설명서가 없어요. 학습회를 마친 임원진이 진행 설명서를 쓰면 여기에 모여요.</div>`;
+  if (!shown.length) return `<div class="empty">'${esc(LIB.q)}'에 맞는 설명서가 없어요.</div>`;
+  return shown.map(x => { const th = libThumb(x); const t = libTime(x);
+    return `<button type="button" class="lib-card" data-g="${esc(x.id)}">
+      <div class="lib-th">${th ? phImg(th, `${x.title} 사진`) : `<span aria-hidden="true">${BOOK_ICON}</span>`}</div>
+      <div class="lib-body"><h3>${esc(x.title || '제목 없음')}</h3>
+        <div class="c-meta"><span class="num">${esc(termLabel(termFor(x)))}</span>${t ? `<span>${esc(t)}</span>` : ''}${x.difficulty != null ? `<span>난이도 ${esc(DIFF_LABEL(x.difficulty).replace('했어요','함').replace('웠어요','움'))}</span>` : ''}${libStars(x)}</div>
+        ${x.guide.intro ? `<p class="lib-intro">${esc(x.guide.intro)}</p>` : ''}
+        ${(x.tools || []).length ? `<div class="lib-chips">${x.tools.slice(0, 5).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}</div>
+    </button>`; }).join('');
+}
+/* 찾기 칸은 그대로 두고 목록만 바꿔요 (한글 입력이 끊기지 않게) */
+$('#v-guides').addEventListener('input', e => { if (e.target.id !== 'lib-q') return; LIB.q = e.target.value; const l = $('#lib-list'); if (l){ l.innerHTML = libCards(); loadPhotos(); } });
+$('#v-guides').addEventListener('click', async e => {
+  const c = e.target.closest('.lib-card'); if (c){ LIB.sid = c.dataset.g; renderGuides(); return; }
+  const sb = e.target.closest('#lib-sort button'); if (sb){ LIB.sort = sb.dataset.sort; store('l', 'dg_libsort', LIB.sort); renderGuides(); return; }
+  if (e.target.closest('[data-act="lib-back"]')){ LIB.sid = null; renderGuides(); window.scrollTo(0, 0); return; }
+  if (e.target.closest('[data-act="print"]')){ window.print(); return; }
+  if (e.target.closest('[data-act="lib-retry"]')){ openGuides(LIB.sid); return; }
+  if (e.target.closest('[data-act="lib-host"]')){ if (S.pw && S.data) openList(); else openLogin(); return; }
+  if (e.target.closest('[data-act="lib-link"]')){ const u = `${SITE}?v=g&s=${encodeURIComponent(LIB.sid)}`;
+    try { await navigator.clipboard.writeText(u); LIB.msg = '이 설명서 링크를 복사했어요.'; } catch(err){ LIB.msg = u; }
+    const m = $('#v-guides .lib-msg'); if (m) m.textContent = LIB.msg; LIB.msg = ''; return; }
+});
+async function reload(){ LIB.list = null; try { S.data = await api('getAll', S.pw); banner(''); } catch(e){ banner(e.message); } }
 
 /* =========================================================
    진행자: 학습회 정보 입력 (만들기·고치기 공용)
@@ -1942,7 +2118,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 25판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 26판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -1974,6 +2150,11 @@ $('#v-list').addEventListener('click', async e => {
   const sb = e.target.closest('#sort-seg button'); if (sb){ S.sortMode = sb.dataset.sort; store('l', 'dg_sort', S.sortMode); renderList(); return; }
   const qb = e.target.closest('[data-qr]'); if (qb){ openQR(qb.dataset.qr, qb); return; }
   const c = e.target.closest('.card'); if (c){ openSession(c.dataset.sid, 'regs'); return; }
+  if (e.target.closest('[data-act="open-lib"]')){ openGuides(); return; }
+  if (e.target.closest('[data-act="copy-lib"]')){ const m = $('#lib-copy-msg');
+    try { await navigator.clipboard.writeText(SITE + '?v=g'); m.className = 'msg ok'; m.textContent = '링크를 복사했어요. 단톡방에 붙여 넣어 주세요.'; }
+    catch(err){ m.className = 'msg'; m.textContent = SITE + '?v=g'; }
+    return; }
   if (e.target.closest('[data-act="refresh"]')){ await reload(); renderList(); return; }
   if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
   if (e.target.closest('[data-act="pw-open"]')){
@@ -2177,7 +2358,7 @@ function loadPhotos(){
   document.querySelectorAll('img[data-ph]:not([src])').forEach(img => { const id = img.dataset.ph; if (!PH[id] && !phQueue.includes(id)) phQueue.push(id); });
   while (phBusy < 3 && phQueue.length){
     const id = phQueue.shift(); PH[id] = 'x'; phBusy++;
-    api('getPhoto', S.pw, id).then(src => { PH[id] = src; }).catch(() => { PH[id] = ''; }).finally(() => {
+    (S.view === 'guides' ? api('getGuidePhoto', id) : api('getPhoto', S.pw, id)).then(src => { PH[id] = src; }).catch(() => { PH[id] = ''; }).finally(() => {
       phBusy--; document.querySelectorAll(`img[data-ph="${id}"]`).forEach(im => { if (PH[id]) im.src = PH[id]; else im.classList.add('broken'); }); loadPhotos(); });
   }
 }
@@ -2723,6 +2904,7 @@ function setDemo(which, sid){
   banner('');
   if (which === 'apply') openApply(sid || '');
   else if (which === 'review') openReview(sid || 'sexjewel');
+  else if (which === 'guides') openGuides();
   else { if (S.pw) { reload().then(openList); } else openLogin(); }
 }
 /* =========================================================
@@ -3236,6 +3418,7 @@ async function init(){
   if (LIVE){
     if (BOOT.view === 'apply'){ await openApply(BOOT.sid); hideSplash(); return; }
     if (BOOT.view === 'review'){ await openReview(BOOT.sid); hideSplash(); return; }
+    if (BOOT.view === 'guides'){ await openGuides(BOOT.sid); hideSplash(); return; }
     const saved = store(PWK, 'dg_pw');
     if (saved){ try { S.data = await api('hostLogin', saved); S.pw = saved; openList(); hideSplash(); return; } catch(e){ store(PWK,'dg_pw', null); } }
     openLogin(); hideSplash(); return;
