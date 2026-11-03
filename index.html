@@ -572,6 +572,13 @@ body.mobile-sim .qr-btn .l-short{display:none} body.mobile-sim .qr-btn .l-long{d
   #splash .sp-p{fill-opacity:1;stroke-dashoffset:0}
   #splash .wr{display:none!important} #splash .sp-all{opacity:1!important} #splash .sp-name{opacity:1!important} #splash .sp-word{display:none!important}
 }
+/* 진행자 기록: 보조 바로 추가 */
+.as-add{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:14px}
+.as-add label{font-size:14px;display:flex;flex-direction:column;gap:2px}
+.as-add .pw-row{max-width:420px}
+/* 개발자 표시 */
+.credit{font-size:12px;color:var(--muted);text-align:center;margin:-8px 0 0;letter-spacing:.02em}
+body[data-view="list"] .credit{text-align:right;margin-top:-20px}
 /* 학기 고르기 (목록) */
 /* 브라우저마다 다르게 그리는 기본 모양을 끄고, 옆 버튼(새로고침·로그아웃)과 같은 크기로 맞춰요 */
 select.term-sel{-webkit-appearance:none;appearance:none;width:auto;min-width:0;height:36px;margin:0;padding:0 34px 0 12px;font-size:14px;font-weight:500;line-height:normal;color:var(--ink);
@@ -595,7 +602,7 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 @media print{
   @page{margin:16mm 14mm}
   html,body{background:#fff!important;color:#111!important}
-  .demobar,#install,#banner,#v-apply,#v-review,#v-login,#v-list,#s-head,#tabs,#v-session>.actions,#tab-results,#tab-regs,#tab-host,#tab-share{display:none!important}
+  .demobar,#install,#credit,#banner,#v-apply,#v-review,#v-login,#v-list,#s-head,#tabs,#v-session>.actions,#tab-results,#tab-regs,#tab-host,#tab-share{display:none!important}
   .wrap{padding:0!important;max-width:none!important}
   #tab-guide{border:0!important;padding:0!important;background:#fff!important}
   #tab-guide>*:not(.manual){display:none!important}
@@ -790,6 +797,8 @@ window.dgWrite = function(root){
       <span class="msg" id="qrs-msg" role="status"></span>
     </div>
   </div>
+
+  <p class="credit" id="credit">2026 개발 목방 38기 장소현</p>
 
   <div class="install" id="install" hidden>
     <img src="icon-192.png" alt="">
@@ -1468,7 +1477,7 @@ const S = {
   ap:null, rv:null,
 };
 const VIEWS = ['apply','review','login','list','session'];
-function show(v){ S.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
+function show(v){ S.view = v; document.body.dataset.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
 function banner(t){ const b = $('#banner'); b.hidden = !t; b.textContent = t || ''; }
 const D = () => S.data || {sessions:[], regs:[], reviews:[], hostlogs:[], url:''};
 const reviewsFor = sid => D().reviews.filter(r => r.sid === sid);
@@ -1876,7 +1885,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 16판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 19판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -1962,7 +1971,7 @@ $('#create').addEventListener('submit', async e => {
 /* =========================================================
    진행자: 학습회 상세
    ========================================================= */
-function resetSessionUI(){ Object.assign(S, {flipArmed:false, rvList:false, armedRv:null, rvListMsg:'', notice:{}, quick:null, quickMsg:'', shareEdit:null, justOpened:false, hdOpen:false, hd:null, hdKind:null, hdPin:'', hdMsg:'', pinFor:null, pinMsg:'', inf:null, infMsg:'', delArmed:false, regMsg:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null}); }
+function resetSessionUI(){ Object.assign(S, {asAddName:'', asAddMsg:'', flipArmed:false, rvList:false, armedRv:null, rvListMsg:'', notice:{}, quick:null, quickMsg:'', shareEdit:null, justOpened:false, hdOpen:false, hd:null, hdKind:null, hdPin:'', hdMsg:'', pinFor:null, pinMsg:'', inf:null, infMsg:'', delArmed:false, regMsg:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null}); }
 function openSession(sid, tab){ S.sid = sid; S.tab = tab || 'regs'; resetSessionUI(); show('session'); renderSession(); }
 function renderSession(){
   const s = cur(); if (!s){ S.sid = null; openList(); return; }
@@ -2277,7 +2286,12 @@ function renderHost(){
   p.innerHTML = `
     <div><h2>진행자 기록</h2><p class="hint" style="margin-top:4px">대표 진행자는 진행 전체를 길게, 보조는 자기 보조 역할을 간단히 평가해요. 처음 저장할 때 정한 본인 PIN이 있어야 고치거나 지울 수 있어요.</p></div>
     <span class="msg ${S.hdMsgCls}" role="status">${esc(S.hdMsg)}</span>
-    <div class="hcards">${lead ? card(lead, 'lead') : '<div class="empty">링크 · 정보 탭에서 대표 진행자를 넣어 주세요.</div>'}${(s.assistants||[]).filter(a=>a.name).map(a => card(a, 'assist')).join('')}</div>`;
+    <div class="hcards">${lead ? card(lead, 'lead') : '<div class="empty">링크 · 정보 탭에서 대표 진행자를 넣어 주세요.</div>'}${(s.assistants||[]).filter(a=>a.name).map(a => card(a, 'assist')).join('')}</div>
+    <form class="as-add" id="as-add" novalidate>
+      <label for="as-add-name"><b>보조 진행자 추가</b></label>
+      <div class="pw-row"><input type="text" id="as-add-name" maxlength="20" autocomplete="off" placeholder="이름" value="${esc(S.asAddName || '')}"><button class="btn sm primary" type="submit" id="as-add-go">추가</button></div>
+      <span class="msg err" id="as-add-msg" role="status">${esc(S.asAddMsg || '')}</span>
+    </form>`;
   if (S.pinFor) { const i = $('#pin-in'); if (i) i.focus(); }
 }
 function logForm(s){
@@ -2350,8 +2364,31 @@ async function hostClick(e, panelKind){
     S.hdOpen = false; S.hd = null; S.hdPin = ''; S.hdMsg = '내 기록을 지웠어요.'; S.hdMsgCls = 'ok'; renderSession();
   }
 }
+/* 보조 진행자를 이 자리에서 추가하고 바로 보조 기록 쓰기 화면을 열어요 */
+async function addAssistantAndWrite(){
+  const s = cur(); if (!s) return;
+  const name = $('#as-add-name').value.trim(); S.asAddName = name;
+  const msg = $('#as-add-msg'); const go = $('#as-add-go');
+  if (!name){ msg.className = 'msg err'; msg.textContent = '이름을 적어 주세요.'; $('#as-add-name').focus(); return; }
+  const same = [s.lead].concat(s.assistants || []).find(h => h && String(h.name).trim() === name);
+  if (same){
+    const isLead = s.lead && same.id === s.lead.id;
+    msg.className = 'msg err'; msg.textContent = isLead ? `${name} 님은 대표 진행자예요. 위의 대표 카드에서 기록해 주세요.` : `${name} 님은 이미 위에 있어요. 위 카드에서 기록해 주세요.`; return;
+  }
+  if ((s.assistants || []).length >= 10){ msg.className = 'msg err'; msg.textContent = '보조 진행자는 10명까지 넣을 수 있어요.'; return; }
+  const id = rid('h');
+  go.disabled = true; msg.className = 'msg'; msg.textContent = '추가하는 중…';
+  let res;
+  try { res = await api('saveSession', S.pw, Object.assign({}, s, { id: s.id, assistants: (s.assistants || []).concat({ id, name }), tools: toolsOf(s) })); }
+  catch(err){ go.disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
+  S.data = res.all; S.asAddName = ''; S.asAddMsg = '';
+  const added = (cur().assistants || []).find(a => a.id === id) || (cur().assistants || []).filter(a => a.name === name).pop();
+  if (!added){ S.asAddMsg = '추가는 됐는데 기록 화면을 열지 못했어요. 위 카드에서 기록해 주세요.'; renderSession(); return; }
+  S.hdPin = ''; openForm('assist', null, added.id);
+}
 async function hostSubmit(e){
   e.preventDefault();
+  if (e.target.id === 'as-add'){ await addAssistantAndWrite(); return; }
   const pf = e.target.closest('[data-pinform]');
   if (pf){
     const id = pf.dataset.pinform; const pin = $('#pin-in').value.trim();
