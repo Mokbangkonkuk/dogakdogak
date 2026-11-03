@@ -603,6 +603,13 @@ body.tut-on .qrsheet .box{max-height:100%;padding:16px 16px 14px;gap:8px}
 body.tut-on .qrsheet .qbig{width:min(62vw, 26vh, 240px);padding:10px}
 body.tut-on .qrsheet .url,body.tut-on .qrsheet .box>.hint{display:none}
 .tut .t-ok{color:var(--good);font-weight:600;margin:4px 0 0}
+.tut .t-picks{display:flex;flex-direction:column;gap:8px;max-height:min(56vh, 460px);overflow:auto}
+.tut .t-pick{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 12px;cursor:pointer;font:inherit;color:var(--ink)}
+.tut .t-pick:hover{border-color:var(--accent)}
+.tut .t-pick b{font-size:15px}
+.tut .t-pick span{grid-column:1;font-size:13px;color:var(--muted);line-height:1.5}
+.tut .t-pick em{grid-column:2;grid-row:1;font-style:normal;font-size:12px;color:var(--wood);font-weight:600;white-space:nowrap}
+.tut .t-pick.all{border-color:var(--accent);background:var(--soft)}
 /* 튜토리얼 중: 안내하는 칸만 또렷하게, 나머지 화면은 반투명하게 덮어요 (누르는 건 그대로 돼요) */
 body.tut-on .tut-hl{position:relative;z-index:55;background-clip:padding-box;
   box-shadow:0 0 0 200vmax rgba(238,240,235,.72);box-shadow:0 0 0 200vmax color-mix(in srgb, var(--paper) 74%, transparent)}
@@ -1935,7 +1942,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 22판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 24판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -1983,7 +1990,7 @@ $('#v-list').addEventListener('click', async e => {
     f.hidden = false; f.scrollIntoView({block:'center', behavior:'smooth'}); $('#pw-cur').focus({preventScroll:true}); return;
   }
   if (e.target.closest('[data-act="pw-close"]')){ $('#pwform').hidden = true; return; }
-  if (e.target.closest('#btn-tut')){ tutStart(); return; }
+  if (e.target.closest('#btn-tut')){ if (!$('#tut').hidden && !TUT) tutClose(); else tutChooser(); return; }
   if (e.target.closest('#btn-new')){
     const f = $('#create'); if (!f.hidden){ f.hidden = true; return; }
     S.cd = newDraft();
@@ -2838,11 +2845,13 @@ function exReview(){
 const T_CREATE_EX = ['예시로 채우기', exCreate];
 const TUT_STEPS = [
   { part: 'intro', title: '반가워요! 튜토리얼을 시작할게요',
-    body: () => `<p>연습용 학습회를 하나 만들어 <b>만들기 → 신청 → 출석 → 만족도 조사 → 기록</b>까지 천천히 따라가 볼게요.</p>
-      <ul><li><b>1부 진행자 사용법</b> · <b>2부 참가자 사용 안내</b></li><li>칸이나 버튼을 하나씩 노란 테두리로 알려 드려요. 직접 해 보면 다음으로 넘어가요.</li>
+    body: () => { const m = TUT_MODS[TUT.mod];
+      return `<p><b>${m.name}</b>${m.name.endsWith('튜토리얼') ? '이에요' : ' 튜토리얼이에요'}. ${m.intro}</p>
+      <ul><li>칸이나 버튼을 하나씩 노란 테두리로 알려 드려요. 직접 해 보면 다음으로 넘어가요.</li>
       <li>연습하는 동안 한 일은 실제 기록에 남지 않아요.</li></ul>
-      <p><b>마지막에 이 연습 학습회를 실제로 저장할 수도 있어요.</b> 곧 열 학습회가 있다면 그 내용으로 만들어 보세요.</p>`,
-    enter: () => tutList() },
+      ${m.makes ? '<p><b>마지막에 이 연습 학습회를 실제로 저장할 수도 있어요.</b> 곧 열 학습회가 있다면 그 내용으로 만들어 보세요.</p>'
+                : `<p>연습용 학습회 <b>'${esc((tutSession() || {}).title || '')}'</b>를 미리 만들어 뒀어요. 이걸로 연습해요.</p>`}`; },
+    enter: async () => { await tutPrepare(); tutList(); } },
 
   // 1. 새 학습회 만들기
   { part: 'host', title: '1. 새 학습회 만들기 · 제목', ex: T_CREATE_EX,
@@ -2875,7 +2884,7 @@ const TUT_STEPS = [
     hl: '#c-submit' },
 
   // 2. 링크와 정보 수정
-  { part: 'host', title: '2. 학습회가 만들어졌어요 · 링크와 QR',
+  { part: 'host', title: '2. 링크와 QR 나누기',
     body: () => `<p>학습회를 만들면 이 <b>링크 · 정보</b> 탭이 열려요.</p><ul><li><b>신청 링크</b>와 <b>만족도 조사 링크</b>, 각각의 QR이 생겨요.</li><li><b>[공지글 복사]</b>를 눌러 단톡방에 그대로 붙여 넣으면 돼요.</li></ul>`,
     enter: () => openSession(TUT.sid, 'share'), hl: () => document.querySelector('#tab-share .links') || $('#tab-share') },
   { part: 'host', title: '2. 학습회 정보 수정하기 · 열기', wait: 'infoOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
@@ -2897,6 +2906,17 @@ const TUT_STEPS = [
       <li><b>[확정 안내 복사]</b>로 확정 문자를 보내요.</li>
       <li>확정자를 취소하면 대기자가 신청 순서대로 자동 확정돼요. 취소는 진행자만 할 수 있어요.</li></ul>`,
     enter: async () => { await tutSeedRegs(); openSession(TUT.sid, 'regs'); }, hl: '#tab-regs' },
+  { part: 'host', title: '3. 출석 체크해 보기', wait: 'x', auto: true, waitLabel: '체크하면 넘어가요',
+    body: () => `<p>수업 날 온 사람은 이름 줄의 <b>출석</b> 칸을 눌러 체크해요. 날짜가 여러 개인 회차는 날짜마다 체크해요.</p><p>연습 참가자 한 명을 체크해 보세요.</p>`,
+    enter: () => { if (S.view !== 'session' || S.tab !== 'regs') openSession(TUT.sid, 'regs'); },
+    hl: () => { const i = document.querySelector('#tab-regs input[data-att]'); return i ? (i.closest('td') || i) : null; },
+    done: () => D().regs.some(r => r.sid === TUT.sid && (r.attended || []).length), doneMsg: '출석을 체크했어요.' },
+  { part: 'host', title: '3. 확정 안내 보내기', opt: true,
+    body: () => `<p><b>[확정 안내 복사]</b>를 누르면 확정 문자 문구가 복사돼요. <b>[전화번호 복사]</b>로 확정자 번호를 모아 단톡방이나 문자로 보내요.</p><p class="hint">안내 문구에는 "참석이 어려워지면 학술부장님께 연락 부탁드립니다"가 들어가요.</p>`,
+    hl: () => document.querySelector('#tab-regs [data-act="copy-msg"]') },
+  { part: 'host', title: '3. 신청 마감하기', opt: true,
+    body: () => `<p>정원이 다 찼거나 신청 기간이 끝나면 <b>[지금 마감하기]</b>를 눌러요. 마감한 뒤 다시 열 수도 있어요.</p><p class="hint">마감·오픈 시간을 미리 정해 두려면 링크 · 정보 탭의 예약을 써요.</p>`,
+    hl: () => document.querySelector('#tab-regs [data-act="toggle-open"]') },
 
   // 4. QR
   { part: 'host', title: '4. 만족도 조사 QR 띄우기', wait: 'qrOpen', auto: true, waitLabel: 'QR을 띄우면 넘어가요',
@@ -2966,31 +2986,84 @@ const TUT_STEPS = [
     ex: ['다시 열어 보기', () => openReview(TUT.sid)], hl: () => document.querySelector('#v-review .thanks') },
 
   { part: 'end', title: '튜토리얼을 마쳤어요',
-    body: () => { const s = tutSession(); return s
+    body: () => { const s = tutSession(); return s && !TUT.autoMade
       ? `<p>수고했어요! 연습으로 만든 <b>'${esc(s.title || '제목 없음')}'</b> 학습회를 실제로 저장할까요?</p>
          <p class="hint" style="margin:0">저장하면 학습회 정보(제목·회차·장소·진행자·예약 시간)만 저장되고, 연습으로 넣은 신청·평가·기록·설명서는 지워져요. 저장하지 않으면 모두 지워져요.</p>`
-      : `<p>연습으로 만든 학습회가 없어요. 끝내면 원래 화면으로 돌아가요.</p>`; },
+      : `<p>수고했어요! <b>${TUT_MODS[TUT.mod].name}</b> 튜토리얼을 마쳤어요.</p><p>연습으로 한 일은 모두 지워져요. 다른 튜토리얼도 해 볼 수 있어요.</p>`; },
     enter: () => { if (!$('#qrsheet').hidden) closeQR(); tutList(); } },
 ];
-const TUT_HOST = TUT_STEPS.filter(s => s.part === 'host').length, TUT_GUEST = TUT_STEPS.filter(s => s.part === 'guest').length;
+/* 튜토리얼 묶음: 단계 제목 앞 번호(장)로 나눠요 */
+const TUT_MODS = {
+  create: { name: '학습회 추가하기', makes: true, desc: '제목부터 회차·진행자·예약까지 칸을 하나씩 채워 학습회를 만들고, 정보를 고쳐 저장해요.',
+    intro: '학습회를 새로 만들고, 만든 뒤 정보를 고치는 방법을 천천히 따라가 볼게요.',
+    pick: st => st.part === 'host' && /^1\. 새 학습회|^2\. /.test(st.title) },
+  apply: { name: '신청받기', desc: '신청 링크·QR과 공지글을 나누고, 신청·출석을 관리해요.',
+    intro: '신청 링크를 나누고 신청·출석을 관리하는 방법을 볼게요.',
+    pick: st => st.part === 'host' && /^2\. 링크와 QR|^3\. /.test(st.title) },
+  survey: { name: '만족도 조사 진행', desc: '수업이 끝나면 QR을 띄우고, 결과를 보고, 진행자 기록과 진행 설명서를 남겨요.',
+    intro: '수업이 끝난 뒤 만족도 조사를 받고 기록을 남기는 방법을 볼게요.',
+    pick: st => st.part === 'host' && /^[4-7]\. /.test(st.title) },
+  guest: { name: '신청자 화면 연습', desc: '참가자가 보는 신청 · 내 신청 확인 · 만족도 조사 화면을 직접 해 봐요.',
+    intro: '참가자 입장에서 신청하고, 신청을 확인하고, 평가해 볼게요.',
+    pick: st => st.part === 'guest' },
+  all: { name: '전체 튜토리얼', makes: true, desc: '처음부터 끝까지 모두 해 봐요. 1부 진행자 사용법 · 2부 참가자 사용 안내',
+    intro: '학습회 만들기부터 신청, 출석, 만족도 조사, 기록, 참가자 화면까지 천천히 따라가 볼게요.',
+    pick: st => st.part === 'host' || st.part === 'guest' },
+};
+const TUT_ORDER = ['create', 'apply', 'survey', 'guest', 'all'];
+function tutBuildRun(mod){
+  const body = TUT_STEPS.filter(st => st.part !== 'intro' && st.part !== 'end' && TUT_MODS[mod].pick(st));
+  return [TUT_STEPS.find(st => st.part === 'intro'), ...body, TUT_STEPS.find(st => st.part === 'end')];
+}
+/* 학습회 추가하기가 아닌 튜토리얼은 연습용 학습회를 미리 만들어 둬요 */
+async function tutPrepare(){
+  if (TUT.makes || TUT.sid) return;
+  try {
+    const res = TUT.core.saveSession(S.pw, { title: '나무 컵받침 만들기 (연습)', places: ['1동방'], desc: '편백 판재로 컵받침 두 개를 재단하고 사포질과 오일 마감까지 해요.',
+      tools: ['밴드 쏘'], notes: '완성한 컵받침은 가져가셔도 됩니다.', lead: { name: '김목방' }, assistants: [],
+      classes: [{ label: '1회차', dates: [tutDate(7)], time: '19:00~21:00', capacity: 6 }], review: null });
+    TUT.sid = res.id; TUT.autoMade = true;
+  } catch(e){}
+  await tutRefresh();
+}
 function tutClearHL(){ document.querySelectorAll('.tut-hl').forEach(el => el.classList.remove('tut-hl')); }
 function tutTarget(st){ if (!st.hl) return null; try { return typeof st.hl === 'function' ? st.hl() : document.querySelector(st.hl); } catch(e){ return null; } }
 function tutFocus(el){ if (!el) return; const r = el.getBoundingClientRect(); const top = r.top + scrollY - (r.height > innerHeight * .45 ? 70 : Math.max(80, innerHeight * .22)); window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
 function tutCanNext(st){ return st.opt || (!st.wait && !st.done) || TUT.ok; }
+const tutStep = () => TUT.run[tutI];
+/* 어떤 튜토리얼을 할지 고르는 창 */
+function tutChooser(){
+  if (TUT) return;
+  const box = $('#tut'); box.hidden = false; box.classList.remove('folded'); document.body.classList.add('tut-pick');
+  const count = mod => tutBuildRun(mod).length - 2;
+  box.innerHTML = `<div class="t-top"><span>앱 사용 튜토리얼</span><span class="spacer"></span><button type="button" class="t-fold" data-t="pick-close">닫기 ✕</button></div>
+    <h3>어떤 튜토리얼을 진행하시겠습니까?</h3>
+    <div class="t-picks">${TUT_ORDER.map(k => `<button type="button" class="t-pick${k === 'all' ? ' all' : ''}" data-t="pick" data-mod="${k}">
+      <b>${TUT_MODS[k].name}</b><span>${TUT_MODS[k].desc}</span><em>${count(k)}단계</em></button>`).join('')}</div>
+    <p class="hint" style="margin:0">연습하는 동안 한 일은 실제 기록에 남지 않아요.</p>`;
+  requestAnimationFrame(() => document.documentElement.style.setProperty('--tut-h', box.offsetHeight + 'px'));
+}
 function tutRender(){
   const box = $('#tut'); if (!TUT){ box.hidden = true; return; }
-  const st = TUT_STEPS[tutI]; const last = st.part === 'end';
-  const ch = part => new Set(TUT_STEPS.filter(s => s.part === part).map(s => parseInt(s.title))).size;
-  const label = st.part === 'host' ? `1부 · 진행자 사용법 ${parseInt(st.title)}/${ch('host')}` : st.part === 'guest' ? `2부 · 참가자 사용 안내 ${parseInt(st.title)}/${ch('guest')}` : st.part === 'intro' ? '앱 사용 튜토리얼' : '마무리';
-  const can = tutCanNext(st); const nx = TUT_STEPS[tutI + 1];
-  const nextLabel = !can ? (st.waitLabel || '해 보면 넘어가요') : tutI === 0 ? '시작하기 →' : (nx && st.part === 'host' && nx.part === 'guest') ? '2부로 →' : st.opt && !TUT.ok ? '다음 (건너뛰어도 돼요) →' : '다음 →';
-  const pct = Math.round(tutI / (TUT_STEPS.length - 1) * 100);
+  const st = tutStep(); const last = st.part === 'end'; const mod = TUT_MODS[TUT.mod];
+  const inner = TUT.run.filter(s => s.part !== 'intro' && s.part !== 'end'); const k = inner.indexOf(st) + 1;
+  let label;
+  if (TUT.mod === 'all'){
+    const ch = part => new Set(TUT_STEPS.filter(s => s.part === part).map(s => parseInt(s.title))).size;
+    label = st.part === 'host' ? `1부 · 진행자 사용법 ${parseInt(st.title)}/${ch('host')}` : st.part === 'guest' ? `2부 · 참가자 사용 안내 ${parseInt(st.title)}/${ch('guest')}` : st.part === 'intro' ? mod.name : '마무리';
+  } else label = st.part === 'intro' ? mod.name : st.part === 'end' ? '마무리' : `${mod.name} ${k}/${inner.length}`;
+  const title = TUT.mod === 'all' ? st.title : st.title.replace(/^\d+\.\s*/, '');
+  const can = tutCanNext(st); const nx = TUT.run[tutI + 1];
+  const nextLabel = !can ? (st.waitLabel || '해 보면 넘어가요') : tutI === 0 ? '시작하기 →' : (TUT.mod === 'all' && nx && st.part === 'host' && nx.part === 'guest') ? '2부로 →' : st.opt && !TUT.ok ? '다음 (건너뛰어도 돼요) →' : '다음 →';
+  const pct = Math.round(tutI / (TUT.run.length - 1) * 100);
+  const saveAsk = last && tutSession() && !TUT.autoMade;
   box.classList.toggle('folded', !!TUT.folded);
   box.innerHTML = `<div class="t-top"><span>${label}</span><span class="t-practice" title="튜토리얼에서 한 일은 실제 기록에 남지 않아요">연습 중</span><span class="spacer"></span><button type="button" class="t-fold" data-t="fold">${TUT.folded ? '펼치기 ▲' : '접기 ▼'}</button></div>
     <div class="t-bar"><i style="width:${pct}%"></i></div>
-    <h3>${st.title}${st.opt ? ' <span class="t-opt">(선택)</span>' : ''}</h3><div class="t-body">${st.body()}${TUT.ok && st.doneMsg ? `<p class="t-ok">✓ ${st.doneMsg}</p>` : ''}</div>
+    <h3>${title}${st.opt ? ' <span class="t-opt">(선택)</span>' : ''}</h3><div class="t-body">${st.body()}${TUT.ok && st.doneMsg ? `<p class="t-ok">✓ ${st.doneMsg}</p>` : ''}</div>
     <div class="t-acts">${last
-      ? (tutSession() ? `<button type="button" class="btn primary" data-t="save">저장하기</button><button type="button" class="btn" data-t="discard">저장하지 않기</button>` : `<button type="button" class="btn primary" data-t="discard">끝내기</button>`)
+      ? (saveAsk ? `<button type="button" class="btn primary" data-t="save">저장하기</button><button type="button" class="btn" data-t="discard">저장하지 않기</button>`
+                 : `<button type="button" class="btn" data-t="again">다른 튜토리얼 보기</button><button type="button" class="btn primary" data-t="discard">끝내기</button>`)
       : `${tutI > 0 ? '<button type="button" class="btn sm ghost" data-t="prev">← 이전</button>' : ''}${st.ex ? `<button type="button" class="btn sm" data-t="ex">${st.ex[0]}</button>` : ''}
          <span class="spacer"></span><button type="button" class="t-end" data-t="end">튜토리얼 끝내기</button>
          <button type="button" class="btn sm primary" data-t="next" ${can ? '' : 'disabled'}>${nextLabel}</button>`}</div>
@@ -2998,14 +3071,14 @@ function tutRender(){
   requestAnimationFrame(() => document.documentElement.style.setProperty('--tut-h', box.offsetHeight + 'px'));
 }
 function tutApplyHL(scroll){
-  const st = TUT_STEPS[tutI]; const el = tutTarget(st);
+  const el = tutTarget(tutStep());
   if (!el){ tutClearHL(); return; }
   if (!el.classList.contains('tut-hl')){ tutClearHL(); el.classList.add('tut-hl'); if (scroll) tutFocus(el); }
 }
 async function tutGo(i){
   if (!TUT) return;
-  tutI = Math.max(0, Math.min(TUT_STEPS.length - 1, i)); const gen = ++TUT.gen; TUT.ok = false; tutClearHL();
-  const st = TUT_STEPS[tutI]; tutRender();
+  tutI = Math.max(0, Math.min(TUT.run.length - 1, i)); const gen = ++TUT.gen; TUT.ok = false; tutClearHL();
+  const st = tutStep(); tutRender();
   try { if (st.enter) await st.enter(); } catch(e){}
   if (!TUT || gen !== TUT.gen) return;
   if ((st.done && st.done()) || TUT.doneSet.has(tutI)) TUT.ok = true;
@@ -3013,36 +3086,38 @@ async function tutGo(i){
   setTimeout(() => { if (TUT && gen === TUT.gen) tutApplyHL(true); }, 200);
 }
 function tutDone(){
-  const st = TUT_STEPS[tutI]; if (TUT.ok) return; TUT.ok = true; TUT.doneSet.add(tutI);
+  const st = tutStep(); if (TUT.ok) return; TUT.ok = true; TUT.doneSet.add(tutI);
   if (st.auto){ const gen = TUT.gen; setTimeout(() => { if (TUT && gen === TUT.gen) tutGo(tutI + 1); }, 700); }
   tutRender();
 }
 function tutTick(){
-  if (!TUT) return; const st = TUT_STEPS[tutI];
+  if (!TUT) return; const st = tutStep();
   if (st.done && !TUT.ok && st.done()) tutDone();
   tutApplyHL(false);   // 화면이 다시 그려져서 테두리가 사라졌으면 다시 붙여요
 }
-function tutStart(){
+function tutStart(mod){
   if (!S.pw || TUT) return;
-  TUT = makeSandbox(); document.body.classList.add('tut-on'); $('#tut').hidden = false; $('#pw-done').hidden = true;
+  document.body.classList.remove('tut-pick');
+  TUT = makeSandbox(); TUT.before = clone(D()); TUT.mod = TUT_MODS[mod] ? mod : 'all'; TUT.makes = !!TUT_MODS[TUT.mod].makes; TUT.run = tutBuildRun(TUT.mod);
+  document.body.classList.add('tut-on'); $('#tut').hidden = false; $('#pw-done').hidden = true;
   TUT.timer = setInterval(tutTick, 400);
   tutGo(0);
 }
 function tutEvent(name, val){
   if (!TUT) return;
   if (name === 'created'){
-    TUT.sid = val; const at = TUT_STEPS.findIndex(s => s.wait === 'created');
+    TUT.sid = val; const at = TUT.run.findIndex(s => s.wait === 'created');
     for (let k = 1; k <= at; k++) TUT.doneSet.add(k);
-    if (tutI !== at){ tutGo(at + 1); return; }
+    if (at >= 0 && tutI !== at){ tutGo(at + 1); return; }
   }
-  const st = TUT_STEPS[tutI];
+  const st = tutStep();
   if (st.wait === name) tutDone();
 }
-function tutClose(){ if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null; document.documentElement.style.removeProperty('--tut-h'); tutClearHL(); document.body.classList.remove('tut-on'); $('#tut').hidden = true; $('#tut').innerHTML = ''; }
-async function tutFinish(save){
+function tutClose(){ if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null; document.documentElement.style.removeProperty('--tut-h'); tutClearHL(); document.body.classList.remove('tut-on', 'tut-pick'); $('#tut').hidden = true; $('#tut').innerHTML = ''; }
+async function tutFinish(save, again){
   const s = tutSession(); const m = $('#tut-msg');
   let note = '튜토리얼을 마쳤어요. 연습한 내용은 지웠어요.';
-  if (save && s){
+  if (save && s && !TUT.autoMade){
     const sched = TUT.sched || {};
     const draft = { title: s.title, term: s.term || '', places: s.places || [], desc: s.desc || '', tools: s.tools || [], notes: s.notes || '',
       openAt: TUT.sched ? sched.openAt : (s.openAt || ''), closeAt: TUT.sched ? sched.closeAt : (s.closeAt || ''), review: s.review || null,
@@ -3052,22 +3127,29 @@ async function tutFinish(save){
     const keep = TUT; clearInterval(keep.timer); TUT = null;   // 여기서부터는 실제 서버로 보내요
     try { const res = await api('saveSession', S.pw, draft); S.data = res.all; note = `'${s.title}' 학습회를 저장했어요. 연습으로 넣은 신청·평가·기록은 지웠어요.`; }
     catch(e){ TUT = keep; TUT.timer = setInterval(tutTick, 400); if (m){ m.className = 'msg err'; m.textContent = '저장하지 못했어요: ' + e.message; } return; }
-  } else {
-    if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null;
-    try { S.data = await api('getAll', S.pw); } catch(e){}
+    tutClose(); S.sortMode = store('l', 'dg_sort') === 'rank' ? 'rank' : 'date'; openList();
+    const n = $('#pw-done'); n.hidden = false; n.textContent = note; return;
   }
-  tutClose(); S.sortMode = store('l', 'dg_sort') === 'rank' ? 'rank' : 'date'; openList();
-  const n = $('#pw-done'); n.hidden = false; n.textContent = note;
+  // 저장하지 않을 때는 기다리지 않고 바로 나가요: 시작 전 화면으로 돌려 두고, 최신 데이터는 뒤에서 받아 와요
+  const before = TUT && TUT.before; tutClose(); if (before) S.data = before;
+  S.sortMode = store('l', 'dg_sort') === 'rank' ? 'rank' : 'date'; openList();
+  if (again){ tutChooser(); }
+  else { const n = $('#pw-done'); n.hidden = false; n.textContent = note; }
+  api('getAll', S.pw).then(d => { if (!TUT && d){ S.data = d; if (S.view === 'list') renderList(); } }).catch(() => {});
 }
 $('#tut').addEventListener('click', e => {
-  const b = e.target.closest('[data-t]'); if (!b || !TUT) return; const t = b.dataset.t;
+  const b = e.target.closest('[data-t]'); if (!b) return; const t = b.dataset.t;
+  if (t === 'pick'){ return tutStart(b.dataset.mod); }
+  if (t === 'pick-close'){ tutClose(); return; }
+  if (!TUT) return;
   if (t === 'fold'){ TUT.folded = !TUT.folded; tutRender(); return; }
   if (t === 'next') return tutGo(tutI + 1);
   if (t === 'prev') return tutGo(tutI - 1);
-  if (t === 'end') return tutGo(TUT_STEPS.length - 1);
+  if (t === 'end') return tutGo(TUT.run.length - 1);
   if (t === 'save') return tutFinish(true);
   if (t === 'discard') return tutFinish(false);
-  if (t === 'ex'){ const st = TUT_STEPS[tutI]; if (st.ex) st.ex[1](); setTimeout(tutTick, 150); }
+  if (t === 'again') return tutFinish(false, true);
+  if (t === 'ex'){ const st = tutStep(); if (st.ex) st.ex[1](); setTimeout(tutTick, 150); }
 });
 
 /* =========================================================
