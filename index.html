@@ -718,7 +718,7 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .exh-entry{border-color:#5f6b52}
 .exh-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .exh-head b{font-size:17px}
-.exh-note{margin:0}
+.exh-note{margin:0;white-space:pre-line;word-break:keep-all}
 .exh-start,.exh-look,.exh-form,.exh-set{display:flex;flex-direction:column;gap:12px}
 .exh-form .row3{display:grid;grid-template-columns:1.2fr 1.4fr .8fr;gap:10px}
 .xf-gen{display:flex;align-items:center;gap:6px}
@@ -1202,9 +1202,9 @@ function exhClean(f) {
   if (r.sn.length < 6) throw new Error('학번을 숫자로 적어 주세요.');
   if (!r.gen) throw new Error('기수를 숫자로 적어 주세요. (예: 38)');
   if (!r.work) throw new Error('작품 제목을 적어 주세요.');
-  if (!objs.length) throw new Error('오브제를 하나 이상 적어 주세요.');
-  if (objs.some(function (o) { return !o.n; })) throw new Error('오브제마다 이름을 적어 주세요. (예: 작은 접시)');
-  if (objs.some(function (o) { return !o.w || !o.d || !o.h; })) throw new Error('오브제마다 크기(가로 · 세로 · 높이)를 mm 숫자로 적어 주세요.');
+  if (!objs.length) throw new Error('작품(오브제)을 하나 이상 적어 주세요.');
+  if (objs.some(function (o) { return !o.n; })) throw new Error('작품(오브제)마다 이름을 적어 주세요. (예: 작은 접시)');
+  if (objs.some(function (o) { return !o.w || !o.d || !o.h; })) throw new Error('작품(오브제)마다 크기(가로 · 세로 · 높이)를 mm 숫자로 적어 주세요.');
   return r;
 }
 /* 기획서 모양: "120*70*20, 70*50*150" / "작은 접시, 사과: 호두" */
@@ -1652,7 +1652,7 @@ function makeCore(store, env) {
     exhAdmin: pw => { auth(pw); return { settings: Object.assign({}, EXS, { title: EXS.title || exhDefaultTitle() }), openNow: exhOpenNow(EXS, now()), list: store.list('exh').map(exhPub) }; },
     exhSaveSettings: (pw, ns) => { auth(pw); ns = ns || {};
       const title = cut(ns.title, 60); if (!title) fail('전시회 이름을 적어 주세요.');
-      EXS = { id: EXS.id || ('e' + env.uid()), title: title, open: !!ns.open, closeAt: Number(ns.closeAt) > 0 ? Number(ns.closeAt) : '', note: cut(ns.note, 300) };
+      EXS = { id: EXS.id || ('e' + env.uid()), title: title, open: !!ns.open, closeAt: Number(ns.closeAt) > 0 ? Number(ns.closeAt) : '', note: cut(ns.note, 1000) };
       store.list('exh').filter(x => x.exh === EXS.id && x.exhTitle !== title).forEach(x => store.update('exh', Object.assign({}, x, { exhTitle: title })));
       return Demo_exhAdmin(pw); },
     exhNew: (pw, title) => { auth(pw); title = cut(title, 60) || exhDefaultTitle(); EXS = { id: 'e' + env.uid(), title: title, open: false, closeAt: '', note: '' }; return Demo_exhAdmin(pw); },
@@ -2385,7 +2385,7 @@ function exhDocHTML(rec, title){
     <div class="xd-row xd-title">${esc(title || rec.exhTitle || '')} 전시기획서</div>
     <div class="xd-row xd-3"><div>이름: ${esc(rec.name)}</div><div>학번: ${esc(rec.sn)}</div><div>기수: ${esc(rec.gen)}기</div></div>
     <div class="xd-row xd-c">제목: ${esc(rec.work)}</div>
-    <div class="xd-row xd-2"><div>오브제 개수: ${(rec.objs || []).length}</div><div class="xd-c">각 오브제의 사이즈(w*d*h, mm):<small>${esc(exhSizes(rec.objs))}</small></div></div>
+    <div class="xd-row xd-2"><div>작품(오브제) 개수: ${(rec.objs || []).length}</div><div class="xd-c">각 작품(오브제)의 사이즈(w*d*h, mm):<small>${esc(exhSizes(rec.objs))}</small></div></div>
     <div class="xd-row xd-head">작품 설명</div>
     <div class="xd-row xd-desc">${lines.map(l => `<div>${esc(l)}</div>`).join('')}${rec.desc ? `<div class="xd-text">${esc(rec.desc)}</div>` : ''}</div>
   </article>`;
@@ -2425,7 +2425,7 @@ function renderExhibit(){
   v.innerHTML = head + msg + `
     <div class="panel exh-start">
       <h2>새로 출품 신청하기</h2>
-      <p class="sub" style="margin:0">전시기획서 양식 그대로 칸을 채워요. 이름, 학번, 기수, 작품 제목, 오브제(이름 · 재료 · 크기), 작품 설명이에요.</p>
+      <p class="sub" style="margin:0">전시기획서 양식 그대로 칸을 채워요. 이름, 학번, 기수, 작품 제목, 작품(오브제)마다 이름 · 재료 · 크기, 작품 설명이에요.</p>
       <div><button type="button" class="btn primary" data-x="new" ${I.open ? '' : 'disabled'}>출품 신청서 쓰기</button></div>
       ${I.open ? '' : `<p class="hint">${I.ready ? '지금은 출품 신청을 받지 않아요.' : '아직 출품 신청을 받기 전이에요.'}</p>`}
     </div>
@@ -2441,18 +2441,18 @@ function renderExhibit(){
 }
 function exhObjRows(objs){
   return objs.map((o, i) => `<div class="xo-row" data-xi="${i}">
-    <input type="text" data-xo="n" maxlength="30" value="${esc(o.n)}" placeholder="오브제 이름 (예: 작은 접시)" aria-label="오브제 ${i+1} 이름">
-    <input type="text" data-xo="m" maxlength="30" value="${esc(o.m)}" placeholder="재료 (예: 호두)" aria-label="오브제 ${i+1} 재료">
-    <span class="xo-size"><input type="text" inputmode="numeric" data-xo="w" value="${esc(o.w)}" placeholder="가로" aria-label="오브제 ${i+1} 가로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="d" value="${esc(o.d)}" placeholder="세로" aria-label="오브제 ${i+1} 세로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="h" value="${esc(o.h)}" placeholder="높이" aria-label="오브제 ${i+1} 높이(mm)"></span>
-    <button type="button" class="icon-x" data-x="rm-obj" aria-label="오브제 ${i+1} 빼기">✕</button>
+    <input type="text" data-xo="n" maxlength="30" value="${esc(o.n)}" placeholder="작품 이름 (예: 작은 접시)" aria-label="작품(오브제) ${i+1} 이름">
+    <input type="text" data-xo="m" maxlength="30" value="${esc(o.m)}" placeholder="재료 (예: 호두)" aria-label="작품(오브제) ${i+1} 재료">
+    <span class="xo-size"><input type="text" inputmode="numeric" data-xo="w" value="${esc(o.w)}" placeholder="가로" aria-label="작품(오브제) ${i+1} 가로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="d" value="${esc(o.d)}" placeholder="세로" aria-label="작품(오브제) ${i+1} 세로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="h" value="${esc(o.h)}" placeholder="높이" aria-label="작품(오브제) ${i+1} 높이(mm)"></span>
+    <button type="button" class="icon-x" data-x="rm-obj" aria-label="작품(오브제) ${i+1} 빼기">✕</button>
   </div>`).join('');
 }
-/* 오브제를 적으면 개수 · 사이즈 · 재료 줄이 바로 채워져요 */
+/* 작품(오브제)을 적으면 개수 · 사이즈 · 재료 줄이 바로 채워져요 */
 function exhLive(){
   const f = EXM.f; if (!f) return;
   const objs = f.objs.filter(o => (o.n || '').trim() || (o.w || o.d || o.h)).map(o => ({ n: (o.n || '').trim(), m: (o.m || '').trim(), w: o.w, d: o.d, h: o.h }));
   const c = $('#xf-count'); if (c) c.textContent = String(objs.length);
-  const s = $('#xf-sizes'); if (s) s.textContent = objs.length ? exhSizes(objs) : '아래 오브제 칸에 적으면 채워져요';
+  const s = $('#xf-sizes'); if (s) s.textContent = objs.length ? exhSizes(objs) : '아래 작품(오브제) 칸에 적으면 채워져요';
   const l = $('#xf-lines'); if (l) l.innerHTML = exhMatLines(objs.filter(o => o.n)).map(x => `<div>${esc(x)}</div>`).join('');
 }
 function exhFormHTML(){
@@ -2467,11 +2467,11 @@ function exhFormHTML(){
         <label>기수: <input type="text" id="xf-gen" data-xf="gen" inputmode="numeric" maxlength="3" value="${esc(f.gen)}" placeholder="38" class="xd-short">기</label>
       </div>
       <div class="xd-row xd-c"><label class="xd-wide">제목: <input type="text" id="xf-work" data-xf="work" maxlength="60" value="${esc(f.work)}" placeholder="작품 제목"></label></div>
-      <div class="xd-row xd-2"><div><span>오브제 개수: <b id="xf-count"></b></span></div><div class="xd-c">각 오브제의 사이즈(w*d*h, mm):<small id="xf-sizes"></small></div></div>
+      <div class="xd-row xd-2"><div><span>작품(오브제) 개수: <b id="xf-count"></b></span></div><div class="xd-c">각 작품(오브제)의 사이즈(w*d*h, mm):<small id="xf-sizes"></small></div></div>
       <div class="xd-row xd-objs">
-        <div class="xd-objs-h"><b>오브제 적는 칸</b><span class="hint">한 줄에 하나 · 크기는 mm · 기획서에는 위 개수 · 사이즈 칸과 아래 재료 줄로 들어가요</span></div>
+        <div class="xd-objs-h"><b>작품(오브제) 적는 칸</b><span class="hint">한 줄에 하나 · 크기는 mm · 기획서에는 위 개수 · 사이즈 칸과 아래 재료 줄로 들어가요</span></div>
         <div class="xo-list" id="xo-list">${exhObjRows(f.objs)}</div>
-        <div><button type="button" class="btn ghost sm" data-x="add-obj">+ 오브제 추가</button></div>
+        <div><button type="button" class="btn ghost sm" data-x="add-obj">+ 작품(오브제) 추가</button></div>
       </div>
       <div class="xd-row xd-head">작품 설명</div>
       <div class="xd-row xd-desc"><div id="xf-lines" class="xd-lines"></div>
@@ -2489,7 +2489,7 @@ function exhWordHTML(recs, title){
     <tr><td colspan="4" style="${B}text-align:center;font-size:22pt;padding:16pt 10pt">${esc(title || r.exhTitle || '')} 전시기획서</td></tr>
     <tr><td style="${B}">이름: ${esc(r.name)}</td><td colspan="2" style="${B}">학번: ${esc(r.sn)}</td><td style="${B}">기수: ${esc(r.gen)}기</td></tr>
     <tr><td colspan="4" style="${B}text-align:center">제목: ${esc(r.work)}</td></tr>
-    <tr><td colspan="2" style="${B}">오브제 개수: ${(r.objs || []).length}</td><td colspan="2" style="${B}text-align:center">각 오브제의 사이즈(w*d*h, mm):<br><span style="font-size:10pt">${esc(exhSizes(r.objs))}</span></td></tr>
+    <tr><td colspan="2" style="${B}">작품(오브제) 개수: ${(r.objs || []).length}</td><td colspan="2" style="${B}text-align:center">각 작품(오브제)의 사이즈(w*d*h, mm):<br><span style="font-size:10pt">${esc(exhSizes(r.objs))}</span></td></tr>
     <tr><td colspan="4" style="${B}text-align:center;font-size:17pt">작품 설명</td></tr>
     <tr><td colspan="4" style="${B}vertical-align:top;height:330pt">${exhMatLines(r.objs).map(x => esc(x)).join('<br>')}${r.desc ? '<br>' + esc(r.desc).replace(/\n/g, '<br>') : ''}</td></tr>
   </table>`;
@@ -2586,8 +2586,8 @@ function renderExhAdmin(){
       <div class="row">
         <div class="field"><label for="ex-close">마감 예약 <span class="hint">비우면 직접 닫을 때까지</span></label>
           <div class="pw-row">${dtPick('ex-close', 'closeAt', s.closeAt)}<button type="button" class="btn sm ghost" data-xa="clear-close">비우기</button></div></div>
-        <div class="field"><label for="ex-note">안내 문구 <span class="hint">출품 화면 위에 보여요 (선택)</span></label><input type="text" id="ex-note" maxlength="300" value="${esc(s.note || '')}" placeholder="예: 출품작은 전시 하루 전까지 1동방으로 가져와 주세요."></div>
       </div>
+      <div class="field"><label for="ex-note">안내 문구 <span class="hint">출품 화면 위에 보여요 (선택) · 줄바꿈은 그대로 보여요</span></label><textarea id="ex-note" rows="4" maxlength="1000" placeholder="예: 출품작은 전시 하루 전까지 1동방으로 가져와 주세요.&#10;작품 설명은 3~5문장 정도로 적어 주세요.&#10;궁금한 점은 학술부장에게 연락 주세요.">${esc(s.note || '')}</textarea></div>
       <div class="actions"><button class="btn primary" type="submit" id="ex-save">${s.id ? '설정 저장하기' : '전시회 시작하기'}</button>
         <span class="msg ${EXA.msgCls}" id="ex-msg" role="status">${esc(EXA.msg)}</span><span class="spacer"></span>
         ${s.id ? `<button type="button" class="btn sm ghost ${EXA.newArmed ? 'danger armed' : ''}" data-xa="new">${EXA.newArmed ? '한 번 더 누르면 새 전시회가 시작돼요' : '새 전시회 시작'}</button>` : ''}</div>
@@ -2596,7 +2596,7 @@ function renderExhAdmin(){
     <div class="toolbar"><h2>출품 목록</h2><div class="right">
       ${groups.length > 1 ? `<select id="ex-sel" class="term-sel" aria-label="전시회 고르기">${groups.map(g => `<option value="${esc(g.id)}"${g.id === sel ? ' selected' : ''}>${esc(g.title)}</option>`).join('')}</select>` : ''}
       <button type="button" class="btn sm ghost" data-xa="refresh">새로고침</button></div></div>
-    <div class="exh-sum"><span><b class="num">${list.length}</b>명 출품</span><span><b class="num">${objN}</b>개 오브제</span><span class="spacer"></span>
+    <div class="exh-sum"><span><b class="num">${list.length}</b>명 출품</span><span><b class="num">${objN}</b>개 작품(오브제)</span><span class="spacer"></span>
       ${isCur ? '<button type="button" class="btn sm ghost" data-xa="copy-link">출품 신청 링크 복사</button><button type="button" class="btn sm ghost" data-xa="preview">출품 화면 보기</button>' : ''}
       ${list.length ? '<button type="button" class="btn sm ghost" data-xa="word-all">전체 Word로 받기</button><button type="button" class="btn sm" data-xa="print-all">전체 기획서 인쇄</button>' : ''}</div>
     <span class="msg ok" id="ex-link-msg" role="status"></span>
@@ -2607,7 +2607,7 @@ function exhItemHTML(r, no){
   return `<article class="exh-item${open ? ' open' : ''}">
     <button type="button" class="exh-ih" data-xa="toggle" data-id="${esc(r.id)}" aria-expanded="${open}">
       <span class="exh-no num">${no}</span>
-      <span class="grow"><b>${esc(r.work)}</b><span class="c-meta"><span>${esc(r.name)}</span><span class="num">${esc(r.sn)}</span><span>${esc(r.gen)}기</span><span>오브제 ${(r.objs || []).length}개</span><span class="hint">${esc(r.upd && r.upd !== r.at ? r.upd + ' 수정' : r.at + ' 신청')}</span></span></span>
+      <span class="grow"><b>${esc(r.work)}</b><span class="c-meta"><span>${esc(r.name)}</span><span class="num">${esc(r.sn)}</span><span>${esc(r.gen)}기</span><span>작품(오브제) ${(r.objs || []).length}개</span><span class="hint">${esc(r.upd && r.upd !== r.at ? r.upd + ' 수정' : r.at + ' 신청')}</span></span></span>
       <span class="exh-caret" aria-hidden="true">${open ? '▴' : '▾'}</span></button>
     ${open ? `<div class="exh-ib">${exhDocHTML(r)}
       <div class="actions"><button type="button" class="btn sm" data-xa="print" data-id="${esc(r.id)}">기획서 인쇄</button>
@@ -2813,7 +2813,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 37판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 38판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
