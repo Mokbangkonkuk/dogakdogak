@@ -18,7 +18,7 @@
 <title>도각도각 목공 학습회</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">   <!-- 37판: 글꼴을 기다리지 않고 먼저 그려요 -->
 <style>
 
 :root{
@@ -352,7 +352,7 @@ table.regs select{width:auto;padding:4px 6px;font-size:13px}
 .cls-edit .meta input[data-cf="time"]{width:150px}
 .cls-edit .meta input[data-cf="capacity"]{width:80px}
 .cls-edit .rm{grid-column:1;align-self:end}
-/* 목공 설명서 */
+/* 작업 설명서 */
 .manual{display:flex;flex-direction:column;gap:18px}
 .manual>header{border-bottom:2px solid var(--wood);padding-bottom:12px;display:flex;flex-direction:column;gap:4px}
 .manual .tag{font-size:12px;letter-spacing:.08em;color:var(--wood);font-weight:700}
@@ -708,6 +708,92 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .took-other .hint{margin-right:4px}
 .lib-took .msg:empty,#took-read:empty{display:none}
 @media (max-width:560px){ .rate-stats{grid-template-columns:1fr} .rate-avg{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 10px;min-width:0} .rate-avg small{max-width:none;flex-basis:100%} }
+/* 진행자 화면: 학습회 | 전시회 관리 */
+.main-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.main-tabs button{all:unset;cursor:pointer;padding:10px 16px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1px;-webkit-tap-highlight-color:transparent}
+.main-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--wood)}
+.main-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+/* 전시회 출품 */
+.exh-entry .lib-ic{background:#5f6b52}
+.exh-entry{border-color:#5f6b52}
+.exh-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.exh-head b{font-size:17px}
+.exh-note{margin:0}
+.exh-start,.exh-look,.exh-form,.exh-set{display:flex;flex-direction:column;gap:12px}
+.exh-form .row3{display:grid;grid-template-columns:1.2fr 1.4fr .8fr;gap:10px}
+.xf-gen{display:flex;align-items:center;gap:6px}
+.xf-gen input{width:100%;min-width:0}
+.xo-list{display:flex;flex-direction:column;gap:8px}
+.xo-row{display:grid;grid-template-columns:1.3fr 1fr 1.5fr auto;gap:6px;align-items:center}
+.xo-size{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.xo-size input{min-width:0;text-align:center}
+.exh-mine{display:flex;flex-direction:column;gap:12px}
+@media (max-width:560px){
+  .exh-form .row3{grid-template-columns:1fr 1fr}
+  .exh-form .row3 .field:first-child{grid-column:1/-1}
+  .xo-row{grid-template-columns:1fr 1fr auto;padding:8px;border:1px dashed var(--line);border-radius:10px}
+  .xo-row .xo-size{grid-column:1/3;grid-row:2}
+  .xo-row .icon-x{grid-row:1/3;grid-column:3}
+}
+/* 전시기획서 (양식) */
+.exh-doc{border:1.5px solid #222;background:#fff;color:#111;font-size:15px}
+.exh-doc .xd-row{border-bottom:1px solid #222;padding:10px 14px}
+.exh-doc .xd-row:last-child{border-bottom:0}
+.exh-doc .xd-title{font-size:22px;font-weight:600;text-align:center;padding:16px 14px}
+.exh-doc .xd-3,.exh-doc .xd-2{display:grid;padding:0}
+.exh-doc .xd-3{grid-template-columns:30fr 40fr 30fr}
+.exh-doc .xd-2{grid-template-columns:40fr 60fr}
+.exh-doc .xd-3>div,.exh-doc .xd-2>div{padding:10px 14px;border-left:1px solid #222;display:flex;flex-direction:column;justify-content:center;word-break:break-all}
+.exh-doc .xd-3>div:first-child,.exh-doc .xd-2>div:first-child{border-left:0}
+.exh-doc .xd-c{text-align:center;align-items:center}
+.exh-doc small{font-size:12.5px;margin-top:2px}
+.exh-doc .xd-head{font-size:19px;font-weight:600;text-align:center}
+.exh-doc .xd-desc{min-height:150px;display:flex;flex-direction:column;gap:3px;font-size:14px}
+.exh-doc .xd-text{margin-top:2px;white-space:pre-wrap}
+@media (max-width:560px){ .exh-doc{font-size:13.5px} .exh-doc .xd-title{font-size:17px} .exh-doc .xd-3,.exh-doc .xd-2{grid-template-columns:1fr} .exh-doc .xd-3>div,.exh-doc .xd-2>div{border-left:0;border-top:1px solid #222} .exh-doc .xd-3>div:first-child,.exh-doc .xd-2>div:first-child{border-top:0} }
+/* 출품 신청서: 전시기획서 표에 바로 적기 */
+.exh-form-wrap{display:flex;flex-direction:column;gap:12px}
+.exh-form-wrap h2{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.exh-doc.xd-edit label{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.exh-doc.xd-edit .xd-wide{justify-content:center}
+.exh-doc.xd-edit input[type=text],.exh-doc.xd-edit textarea{border:0;border-bottom:1.5px dashed #9aa39c;border-radius:0;background:#fbfaf6;color:#111;font:inherit;padding:3px 6px;width:100%;min-width:0;outline:none}
+.exh-doc.xd-edit input[type=text]:focus,.exh-doc.xd-edit textarea:focus{border-bottom-color:var(--wood);background:#fff8ee}
+.exh-doc.xd-edit input:disabled{background:transparent;border-bottom-color:transparent;color:#111;-webkit-text-fill-color:#111}
+.exh-doc.xd-edit .xd-short{max-width:4.5em;text-align:center}
+.exh-doc.xd-edit .xd-wide input{max-width:24em;text-align:center}
+.exh-doc.xd-edit textarea{border:1.5px dashed #c9cec9;border-radius:6px;min-height:120px;resize:vertical;margin-top:4px}
+.exh-doc .xd-lines{display:flex;flex-direction:column;gap:3px}
+.exh-doc .xd-objs{background:#f6f4ee;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.exh-doc .xd-objs-h{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.exh-doc .xd-objs .xo-row{display:grid;grid-template-columns:1.3fr 1fr auto auto;gap:6px;align-items:center}
+.exh-doc .xd-objs .xo-size{display:flex;align-items:center;gap:2px}
+.exh-doc .xd-objs .xo-size input{width:4.2em!important;text-align:center}
+.exh-doc .xd-objs .xo-size i{font-style:normal;color:#666}
+@media (max-width:560px){
+  .exh-doc.xd-edit .xd-3>label{border-left:0;border-top:1px solid #222}
+  .exh-doc.xd-edit .xd-3>label:first-child{border-top:0}
+  .exh-doc .xd-objs .xo-row{grid-template-columns:1fr 1fr auto;padding:8px;border:1px dashed #c9cec9;border-radius:8px;background:#fff}
+  .exh-doc .xd-objs .xo-row .xo-size{grid-column:1/3;grid-row:2}
+  .exh-doc .xd-objs .xo-row .icon-x{grid-row:1/3;grid-column:3}
+  .exh-doc .xd-objs .xo-size input{width:auto!important;flex:1}
+}
+.exh-doc.xd-edit .xd-3>label{padding:10px 14px;border-left:1px solid #222}
+.exh-doc.xd-edit .xd-3>label:first-child{border-left:0}
+/* 전시회 관리 */
+.exh-sum{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.exh-sum b{font-size:20px;color:var(--wood)}
+.exh-list{display:flex;flex-direction:column;gap:8px}
+.exh-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.exh-item.open{border-color:var(--wood)}
+.exh-ih{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;gap:12px;align-items:center;padding:14px 16px;-webkit-tap-highlight-color:transparent}
+.exh-ih:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.exh-ih .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.exh-ih b{font-size:16px;word-break:keep-all}
+.exh-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-weight:700;color:var(--wood)}
+.exh-caret{color:var(--muted)}
+.exh-ib{padding:0 16px 16px;display:flex;flex-direction:column;gap:12px}
+.danger-t{color:#b3261e}
+#print-area{display:none}
 /* 부원용 설명서 열람 */
 .login.stackcol{gap:16px}
 .lib-entry{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;background:var(--surface);border:1.5px solid var(--wood);border-radius:14px;padding:18px;-webkit-tap-highlight-color:transparent}
@@ -754,6 +840,16 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 @media print{
   @page{margin:16mm 14mm}
   #v-guides>*:not(.manual){display:none!important}
+  body.print-area>*:not(#print-area){display:none!important}
+  body.print-area #print-area{display:block!important}
+  #print-area .exh-doc{break-after:page;font-size:12pt;margin:0}
+  #print-area .exh-doc:last-child{break-after:auto}
+  #print-area .exh-doc .xd-3{grid-template-columns:30fr 40fr 30fr!important}
+  #print-area .exh-doc .xd-2{grid-template-columns:40fr 60fr!important}
+  #print-area .exh-doc .xd-3>div,#print-area .exh-doc .xd-2>div{border-top:0!important;border-left:1px solid #222!important}
+  #print-area .exh-doc .xd-3>div:first-child,#print-area .exh-doc .xd-2>div:first-child{border-left:0!important}
+  #print-area .exh-doc .xd-title{font-size:20pt}
+  #print-area .exh-doc .xd-desc{min-height:110mm}
   .lib-eval{display:none!important}
   #v-guides .manual{border:0!important;padding:0!important}
   html,body{background:#fff!important;color:#111!important}
@@ -870,7 +966,7 @@ window.dgWrite = function(root){
   var live = /^https:\/\/script\.google/.test(String(window.DOGAK_API || '').trim());
   var app = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   // 신청·만족도 조사 링크로 들어온 참가자는 오래 기다리지 않게, 불러오는 대로 닫아요 (최소 1초)
-  if (/[?&]v=[ar]/.test(location.search)) window.__splashMinAll = 1000;
+  if (/[?&]v=[arx]/.test(location.search)) window.__splashMinAll = 1000;
   window.dgWrite(sp);
 })();
 </script>
@@ -881,6 +977,7 @@ window.dgWrite = function(root){
   <button type="button" data-demo="review" aria-pressed="false">참가자 · 만족도 조사</button>
   <button type="button" data-demo="host" aria-pressed="false">진행자 화면</button>
   <button type="button" data-demo="guides" aria-pressed="false">부원 · 설명서 열람</button>
+  <button type="button" data-demo="exhibit" aria-pressed="false">부원 · 전시회 출품</button>
   <span class="sep" aria-hidden="true"></span>
   <button type="button" data-mobile aria-pressed="false">모바일 화면으로</button>
   <button type="button" data-splash>시작 화면 보기</button>
@@ -891,6 +988,8 @@ window.dgWrite = function(root){
   <section id="v-review" class="stackcol narrow" hidden></section>
   <section id="v-login" class="stackcol" hidden></section>
   <section id="v-guides" class="stackcol" hidden></section>
+  <section id="v-exhibit" class="stackcol narrow" hidden></section>
+  <section id="v-exh" class="stackcol" hidden></section>
 
   <section id="v-list" class="stackcol" hidden>
     <div class="top">
@@ -899,10 +998,11 @@ window.dgWrite = function(root){
           <img class="logo" src="logo.png" alt="" width="56" height="48">
           <div><div class="tag">목방 목공 학습회 · 진행자 화면</div><h1><button type="button" class="title-btn" data-act="pw-open" aria-label="도각도각 (동아리 비밀번호 바꾸기)">도각도각</button></h1></div>
         </div>
-        <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 목공 설명서를 남겨요.</p>
+        <p class="sub">학습회를 열고 신청을 받아요. 출석한 사람만 익명으로 평가하고, 대표 진행자는 작업 설명서를 남겨요.</p>
       </div>
       <div class="top-acts"><button class="btn" id="btn-tut" type="button">앱 사용 튜토리얼</button><button class="btn primary" id="btn-new" type="button">새 학습회 만들기</button></div>
     </div>
+    <div class="main-tabs" role="tablist" aria-label="진행자 화면"><button type="button" role="tab" data-main="list" aria-selected="true">학습회</button><button type="button" role="tab" data-main="exh" aria-selected="false">전시회 관리</button></div>
     <form class="panel" id="create" hidden novalidate></form>
     <div class="toolbar">
       <h2 id="list-title">학습회</h2>
@@ -922,7 +1022,7 @@ window.dgWrite = function(root){
     <p class="msg ok" id="pw-done" role="status" hidden></p>
     <form class="panel" id="pwform" hidden novalidate></form>
     <div class="list" id="list"></div>
-    <div class="lib-share"><span class="hint">부원들에게 설명서 열람 링크를 보내면 비밀번호 없이 목공 설명서를 볼 수 있어요.</span>
+    <div class="lib-share"><span class="hint">부원들에게 설명서 열람 링크를 보내면 비밀번호 없이 작업 설명서를 볼 수 있어요.</span>
       <span class="btns"><button type="button" class="btn sm ghost" data-act="open-lib">열람 화면 보기</button><button type="button" class="btn sm" data-act="copy-lib">설명서 열람 링크 복사</button></span>
       <span class="msg ok" id="lib-copy-msg" role="status"></span></div>
     <p class="hint" id="ver" style="text-align:right"></p>
@@ -934,7 +1034,7 @@ window.dgWrite = function(root){
     <div class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" id="t-results" aria-controls="tab-results" data-tab="results" type="button">만족도 조사<span class="n num" id="t-count"></span></button>
       <button class="tab" role="tab" id="t-regs" aria-controls="tab-regs" data-tab="regs" type="button">신청 · 출석<span class="n num" id="t-regcount"></span></button>
-      <button class="tab" role="tab" id="t-guide" aria-controls="tab-guide" data-tab="guide" type="button">목공 설명서</button>
+      <button class="tab" role="tab" id="t-guide" aria-controls="tab-guide" data-tab="guide" type="button">작업 설명서</button>
       <button class="tab" role="tab" id="t-host" aria-controls="tab-host" data-tab="host" type="button">진행자 기록</button>
       <button class="tab" role="tab" id="t-share" aria-controls="tab-share" data-tab="share" type="button">링크 · 정보</button>
     </div>
@@ -968,7 +1068,7 @@ window.dgWrite = function(root){
     <div class="btns"><button type="button" class="btn sm primary" id="install-go" hidden>앱 설치</button><button type="button" class="btn sm ghost" id="install-x">닫기</button></div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>   <!-- 37판: 화면을 막지 않게 나중에 불러와요 (QR은 누를 때만 써요) -->
 <script>
 /* ============================================================
    도각도각 핵심 규칙 (서버와 미리보기가 똑같이 씀)
@@ -1052,6 +1152,7 @@ function buildGuideLibrary(all, ratings, times) {
       if (!L || !hasG(L.guide)) return;
       g = L.guide; at = L.updatedAt;
     }
+    g = { intro: g.intro || '', makeTime: g.makeTime || '', prep: g.prep || [], flow: g.flow || [], safety: g.safety || '', finalPhotos: (g.finalPhotos || []).slice(0, 1) };   // 학습회 준비 단계 · 진행 팁은 임원진만
     var dates = {}; (s.classes || []).forEach(function (c) { (c.dates || []).forEach(function (d) { dates[d] = 1; }); });
     var rs = (all.reviews || []).filter(function (r) { return r.sid === s.id; });
     var ov = rs.map(function (r) { return Number(r.overall); }).filter(function (v) { return v >= 1 && v <= 5; });
@@ -1087,6 +1188,41 @@ function tookList(list) {
   return (Array.isArray(list) ? list : []).filter(function (e) { return Array.isArray(e) && e[2]; })
     .map(function (e) { return { m: e[1] == null ? null : Number(e[1]), t: String(e[2]) }; });
 }
+/* 전시회 출품: 받은 내용을 정리하고 빠진 게 있으면 알려 줘요 */
+function exhClean(f) {
+  f = f || {};
+  var cut = function (v, n) { return String(v == null ? '' : v).trim().slice(0, n); };
+  var num = function (v) { var s = String(v == null ? '' : v).replace(/[^\d.]/g, ''); if (!s) return ''; var n = Math.round(Number(s)); return n > 0 && n <= 10000 ? n : ''; };
+  var objs = (Array.isArray(f.objs) ? f.objs : []).slice(0, 30).map(function (o) {
+    o = o || {}; return { n: cut(o.n, 30), m: cut(o.m, 30), w: num(o.w), d: num(o.d), h: num(o.h) };
+  }).filter(function (o) { return o.n || o.m || o.w || o.d || o.h; });
+  var r = { name: cut(f.name, 20), sn: String(f.sn == null ? '' : f.sn).replace(/\D/g, '').slice(0, 12),
+    gen: String(f.gen == null ? '' : f.gen).replace(/\D/g, '').slice(0, 3), work: cut(f.work, 60), objs: objs, desc: cut(f.desc, 1500) };
+  if (!r.name) throw new Error('이름을 적어 주세요.');
+  if (r.sn.length < 6) throw new Error('학번을 숫자로 적어 주세요.');
+  if (!r.gen) throw new Error('기수를 숫자로 적어 주세요. (예: 38)');
+  if (!r.work) throw new Error('작품 제목을 적어 주세요.');
+  if (!objs.length) throw new Error('오브제를 하나 이상 적어 주세요.');
+  if (objs.some(function (o) { return !o.n; })) throw new Error('오브제마다 이름을 적어 주세요. (예: 작은 접시)');
+  if (objs.some(function (o) { return !o.w || !o.d || !o.h; })) throw new Error('오브제마다 크기(가로 · 세로 · 높이)를 mm 숫자로 적어 주세요.');
+  return r;
+}
+/* 기획서 모양: "120*70*20, 70*50*150" / "작은 접시, 사과: 호두" */
+function exhSizes(objs) {
+  return (objs || []).map(function (o) { return [o.w, o.d, o.h].map(function (v) { return v || '?'; }).join('*'); }).join(', ');
+}
+function exhMatLines(objs) {
+  var order = [], by = {};
+  (objs || []).forEach(function (o) { var k = o.m || ''; if (!by[k]) { by[k] = []; order.push(k); } by[k].push(o.n); });
+  return order.map(function (k) { return by[k].join(', ') + (k ? ': ' + k : ''); });
+}
+function exhStamp(ms) {
+  var d = new Date(Number(ms)); if (isNaN(d)) return '';
+  var z = function (n) { return (n < 10 ? '0' : '') + n; };
+  return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes());
+}
+function exhSameName(a, b) { var n = function (v) { return String(v == null ? '' : v).replace(/\s+/g, '').toLowerCase(); }; return !!n(a) && n(a) === n(b); }
+function exhOpenNow(s, t) { return !!(s && s.id && s.open && (!s.closeAt || t < Number(s.closeAt))); }
 function rateSum(c) {
   c = Array.isArray(c) ? c : []; var n = 0, t = 0;
   var cnt = [];
@@ -1100,9 +1236,21 @@ function guideLibraryPhotos(lib) {
     (g.finalPhotos || []).forEach(function (id) { ids.push(String(id)); }); });
   return ids;
 }
+function exhDefaultTitle() { return new Date().getFullYear() + '학년도 목방 전시회'; }
+function exhPub(rec) { var o = {}; Object.keys(rec || {}).forEach(function (k) { if (k !== 'pin') o[k] = rec[k]; }); return o; }
 function makeCore(store, env) {
+  function exhMine(sn, name) {
+    sn = String(sn || '').replace(/\D/g, '');
+    const key = 'exhfail_' + sn; const fails = Number(env.cacheGet(key) || 0);
+    if (fails >= 5) fail('여러 번 틀려서 10분 동안 잠겼어요. 잠시 후 다시 시도해 주세요.');
+    const rec = store.list('exh').find(x => x.exh === EXS.id && x.sn === sn);
+    if (!rec || !exhSameName(rec.name, name)){ env.cachePut(key, String(fails + 1), 600); fail('학번과 이름이 맞는 출품 신청이 없어요. 신청할 때 적은 학번과 이름을 확인해 주세요.'); }
+    env.cacheRemove(key); return rec;
+  }
+  const Demo_exhAdmin = pw => ({ settings: Object.assign({}, EXS, { title: EXS.title || exhDefaultTitle() }), openNow: exhOpenNow(EXS, now()), list: store.list('exh').map(exhPub) });
   const RATED = env.ratings || {};   // 미리보기용 부원 난이도 평가
   const TOOK = env.times || {};      // 미리보기용 부원 걸린 시간
+  let EXS = env.exh || { id: '', title: '', open: false, closeAt: '', note: '' };   // 미리보기용 전시회 설정
   const PLACES = ['1동방', '2동방'];
   const SELF_KEYS = ['selfScore', 'prepScore', 'planScore'];
   const STATUS = ['ok', 'short', 'none'];
@@ -1414,7 +1562,7 @@ function makeCore(store, env) {
       safety: cut(g.safety, 1000), tips: cut(g.tips, 1000),
     };
   }
-  /* 목공 설명서: 진행자 화면에 들어온 사람이면 누구나 쓰고 고쳐요 (PIN 없음) */
+  /* 작업 설명서: 진행자 화면에 들어온 사람이면 누구나 쓰고 고쳐요 (PIN 없음) */
   function saveGuide(pw, sid, guide) {
     auth(pw);
     const g = cleanGuide(guide); let removed = [];
@@ -1486,6 +1634,30 @@ function makeCore(store, env) {
     hostLogin: getAll, getAll, saveSession, deleteSession, setApplyOpen, setAttendance, hostCancelReg, promoteReg, moveReg, addReg,
     checkHostPin, saveHostLog, deleteHostLog, saveGuide, deleteReview, flipDifficulty, uploadPhoto, getPhoto,
     getGuideLibrary: () => buildGuideLibrary(getAll(env.getPassword()), RATED, TOOK),
+    /* ---------- 전시회 출품 ---------- */
+    exhInfo: () => ({ ready: !!EXS.id, title: EXS.title || exhDefaultTitle(), open: exhOpenNow(EXS, now()), closeAt: EXS.closeAt || '', note: EXS.note || '' }),
+    exhSubmit: f => {
+      if (!exhOpenNow(EXS, now())) fail('지금은 출품 신청을 받지 않아요.');
+      const r = exhClean(f);
+      if (store.list('exh').some(x => x.exh === EXS.id && x.sn === r.sn)) fail('이 학번으로 이미 출품 신청했어요. [신청한 내용 보기 · 수정]에서 학번과 이름으로 들어와 주세요.');
+      const rec = Object.assign({ id: 'x' + env.uid(), exh: EXS.id, exhTitle: EXS.title, at: exhStamp(now()), upd: exhStamp(now()), pin: '' }, r);
+      store.insert('exh', rec); return exhPub(rec);
+    },
+    exhFind: (sn, name) => { const rec = exhMine(sn, name); return { rec: exhPub(rec), canEdit: exhOpenNow(EXS, now()) }; },
+    exhUpdate: (sn, name, f) => {
+      const rec = exhMine(sn, name); if (!exhOpenNow(EXS, now())) fail('출품 신청이 마감돼서 고칠 수 없어요. 임원진에게 연락해 주세요.');
+      const r = exhClean(Object.assign({}, f, { sn: rec.sn })); const nx = Object.assign({}, rec, r, { upd: exhStamp(now()) });
+      store.update('exh', nx); return exhPub(nx);
+    },
+    exhAdmin: pw => { auth(pw); return { settings: Object.assign({}, EXS, { title: EXS.title || exhDefaultTitle() }), openNow: exhOpenNow(EXS, now()), list: store.list('exh').map(exhPub) }; },
+    exhSaveSettings: (pw, ns) => { auth(pw); ns = ns || {};
+      const title = cut(ns.title, 60); if (!title) fail('전시회 이름을 적어 주세요.');
+      EXS = { id: EXS.id || ('e' + env.uid()), title: title, open: !!ns.open, closeAt: Number(ns.closeAt) > 0 ? Number(ns.closeAt) : '', note: cut(ns.note, 300) };
+      store.list('exh').filter(x => x.exh === EXS.id && x.exhTitle !== title).forEach(x => store.update('exh', Object.assign({}, x, { exhTitle: title })));
+      return Demo_exhAdmin(pw); },
+    exhNew: (pw, title) => { auth(pw); title = cut(title, 60) || exhDefaultTitle(); EXS = { id: 'e' + env.uid(), title: title, open: false, closeAt: '', note: '' }; return Demo_exhAdmin(pw); },
+    exhDelete: (pw, id) => { auth(pw); store.remove('exh', String(id)); return Demo_exhAdmin(pw); },
+    /* 37판: PIN 대신 학번 + 이름으로 고쳐요 (PIN 초기화는 없어졌어요) */
     timeGuide: (sid, who, text) => { who = String(who || '').replace(/[^a-z0-9]/gi, '').slice(0, 8); text = cut(text, 20); if (!who) fail('다시 시도해 주세요.');
       if (!buildGuideLibrary(getAll(env.getPassword())).some(x => x.id === String(sid))) fail('설명서를 찾을 수 없어요.');
       const L = (TOOK[sid] || []).filter(e => e[0] !== who); if (text) L.push([who, parseMinutes(text), text]); TOOK[sid] = L.slice(-80); return tookList(TOOK[sid]); },
@@ -1504,7 +1676,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const API = String(window.DOGAK_API || '').trim();
 const LIVE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
 const QS = new URLSearchParams(location.search);
-const BOOT = LIVE ? { view: ({a:'apply', r:'review', g:'guides'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
+const BOOT = LIVE ? { view: ({a:'apply', r:'review', g:'guides', x:'exhibit'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
 const STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 const SITE = location.origin + location.pathname.replace(/index\.html$/, '');   // 신청·만족도 링크는 이 사이트 주소로 만들어요
 const PWK = STANDALONE ? 'l' : 's';   // 홈 화면 앱에서는 로그인을 기억하고, 브라우저에서는 창을 닫으면 잊어요
@@ -1687,13 +1859,22 @@ function fakePhoto(label, hue){
 }
 const Demo = (() => {
   const T = demoSeed();
+  const dexh = (id, at, name, sn, gen, work, objs, desc) => ({ id, exh: 'edemo', exhTitle: '2026학년도 목방 전시회', at, upd: at, name, sn, gen, work, objs, desc, pin: '' });
+  T.exh = [
+    dexh('xd1', '2026-11-02 21:14', '김목방', '202400118', '39', '칼, 끌, 나무', [
+      { n: '작은 접시', m: '호두', w: 120, d: 70, h: 20 }, { n: '사과', m: '호두', w: 70, d: 50, h: 150 },
+      { n: '수달', m: '은행', w: 60, d: 60, h: 60 }, { n: '돌고래', m: '은행', w: 40, d: 40, h: 50 }, { n: '호박', m: '은행, led', w: 170, d: 50, h: 70 }],
+      '칼과 끌을 통해 나무를 깎은 작품입니다. 사포로 마감하지 않고 칼의 거친 느낌을 드러낸 제품입니다.'),
+    dexh('xd2', '2026-11-03 10:02', '박도윤', '202300542', '38', '결', [
+      { n: '스툴', m: '오크', w: 350, d: 350, h: 450 }],
+      '판재를 짜맞춤으로 이어 만든 스툴입니다. 오크의 결이 잘 보이도록 오일로만 마감했습니다.')];
   const mem = { list: k => clone(T[k]), insert: (k,o) => T[k].push(clone(o)),
     update: (k,o) => { const i = T[k].findIndex(x => x.id === o.id); if (i < 0) throw new Error('찾을 수 없어요.'); T[k][i] = clone(o); },
     remove: (k,id) => { T[k] = T[k].filter(x => x.id !== id); } };
   const cache = {}; const photos = {};
   const demoLabels = {pdemoCut:['재단 중',28], pdemoHinge:['경첩 달기',24], pdemoBox1:['완성한 보석함',30], pdemoBox2:['뚜껑을 연 모습',32], pdemoRabbit:['완성한 토끼',38]};
   let demoPw = '1234';
-  return makeCore(mem, { ratings: { sexjewel: [0, 1, 3, 4, 1], sexrabbit: [1, 2, 3, 0, 0] },
+  return makeCore(mem, { exh: { id: 'edemo', title: '2026학년도 목방 전시회', open: true, closeAt: new Date(new Date().getFullYear(), 10, 20, 23, 50).getTime(), note: '출품작은 전시 하루 전까지 1동방으로 가져와 주세요.' }, ratings: { sexjewel: [0, 1, 3, 4, 1], sexrabbit: [1, 2, 3, 0, 0] },
     times: { sexjewel: [['d1',300,'5시간'],['d2',270,'4시간 30분'],['d3',360,'6시간 정도'],['d4',null,'2~3시간씩 두 번'],['d5',null,'이틀'],['d6',330,'5시간반'],['d7',240,'4시간'],['d8',420,'7시간']],
              sexrabbit: [['e1',120,'2시간'],['e2',150,'2시간 30분'],['e3',100,'100분'],['e4',120,'두 시간']] }, getPassword: () => demoPw, setPassword: v => { demoPw = v; }, uid: () => Math.random().toString(36).slice(2,10), hash: (pin, salt) => (salt||'demo') + ':' + pin,
     cacheGet: k => cache[k] ?? null, cachePut: (k,v) => { cache[k] = v; }, cacheRemove: k => { delete cache[k]; }, url: () => DEMO_URL, version: '18판', lock: fn => fn(),
@@ -1701,6 +1882,7 @@ const Demo = (() => {
     readPhoto: id => { if (!photos[id] && demoLabels[id]) photos[id] = fakePhoto(...demoLabels[id]); if (!photos[id]) throw new Error('사진을 찾을 수 없어요.'); return photos[id]; },
     trashPhoto: id => { delete photos[id]; } });
 })();
+if (!LIVE) window.__DG_DEMO = Demo;   // 미리보기에서만: 속도 시험용
 
 /* 화면을 불러오는 동안 시작 화면과 같은 로고 애니메이션을 띄워요.
    0.2초 안에 끝나면 띄우지 않고, 한번 뜨면 깜빡이지 않게 0.9초는 보여 줘요. */
@@ -1712,14 +1894,43 @@ function loaderOn(){
     document.body.insertAdjacentHTML('afterbegin', window.__splashHTML);
     const sp = document.getElementById('splash'); sp.dataset.loader = '1'; sp.setAttribute('aria-label', '불러오는 중');
     loadT0 = Date.now(); if (window.dgWrite) window.dgWrite(sp);
-  }, LIVE ? 200 : 0);   // 미리보기는 가짜 서버가 너무 빨라서 바로 띄워 보여 줘요
+  }, LIVE ? 350 : 0);   // 0.35초 안에 끝나면 안 띄워요 (미리보기는 가짜 서버가 너무 빨라서 바로 띄워 보여 줘요)
 }
 function loaderOff(){
   LOADN = Math.max(0, LOADN - 1); if (LOADN) return;
   clearTimeout(loadTimer);
   const sp = document.getElementById('splash'); if (!sp || !sp.dataset.loader || sp.dataset.closing) return;
   sp.dataset.closing = '1';
-  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 420); }, Math.max(0, 900 - (Date.now() - loadT0)));
+  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 300); }, Math.max(0, 450 - (Date.now() - loadT0)));
+}
+/* 빠르게 보이기: 마지막으로 받은 내용을 기기에 저장해 두고, 다음에 열 때 먼저 보여 준 뒤 최신 내용을 뒤에서 받아 바꿔 넣어요.
+   - 진행자 데이터(신청자 이름 등)는 로그인을 기억하는 곳(홈 화면 앱: 기기, 브라우저: 창을 닫으면 지워짐)에만, 로그아웃하면 지워요.
+   - 부원용 설명서 목록 · 전시회 안내는 누구나 보는 내용이라 기기에 저장해요. */
+const CACHE_V = 'v1';
+function cacheGet(kind, k){ try { const v = store(kind, 'dg_c_' + k); if (!v) return null; const o = JSON.parse(v); return o && o.v === CACHE_V ? o.d : null; } catch(e){ return null; } }
+function cacheSet(kind, k, d){ if (!LIVE) return; try { store(kind, 'dg_c_' + k, JSON.stringify({ v: CACHE_V, t: Date.now(), d })); } catch(e){ try { store(kind, 'dg_c_' + k, null); } catch(e2){} } }
+function cacheClearHost(){ ['s','l'].forEach(k => { store(k, 'dg_c_all', null); store(k, 'dg_c_exha', null); }); }
+/* 진행자 데이터가 들어올 때마다(로그인 · 새로고침 · 저장) 저장해 둬요 */
+function rememberAll(d){
+  if (TUT || !S.pw) return;
+  const a = d && Array.isArray(d.sessions) && Array.isArray(d.regs) ? d : (d && d.all && Array.isArray(d.all.sessions) ? d.all : null);
+  if (a) cacheSet(PWK, 'all', a);
+}
+/* 뒤에서 받은 최신 내용으로 지금 화면을 다시 그려요 (뭔가 적는 중이면 건드리지 않아요) */
+function typingIn(sel){ const a = document.activeElement; return !!(a && a.closest && a.closest(sel) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); }
+function refreshHostView(){
+  if (TUT) return;
+  if (S.view === 'list'){ if (!typingIn('#v-list')) renderList(); return; }
+  if (S.view === 'session'){ if (S.hdOpen || S.inf || S.quick || S.addFor || S.pinFor || typingIn('#v-session')) return; const y = window.scrollY; renderSession(); window.scrollTo(0, y); }
+}
+let bgAllBusy = false;
+function bgRefreshAll(){
+  if (bgAllBusy || !S.pw) return; bgAllBusy = true; const pw = S.pw;
+  api('hostLogin', pw).then(d => { if (S.pw !== pw) return; S.data = d; banner(''); refreshHostView(); })
+    .catch(e => {
+      if (/비밀번호/.test(e.message)){ cacheClearHost(); store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; if (S.view === 'list' || S.view === 'session' || S.view === 'exh') openLogin('동아리 비밀번호가 바뀌었어요. 새 비밀번호로 다시 들어와 주세요.'); }
+      else banner('최신 내용을 받지 못해서 마지막으로 받은 내용을 보여 주고 있어요. ' + e.message);
+    }).finally(() => { bgAllBusy = false; });
 }
 async function withLoader(p){ loaderOn(); try { return await p; } finally { loaderOff(); } }
 async function api(fn, ...args){
@@ -1738,6 +1949,7 @@ async function api(fn, ...args){
     let j = null; try { j = await r.json(); } catch(e){}
     if (!j) throw new Error('서버 응답을 읽지 못했어요. 앱스 스크립트에 Api.gs를 넣고 [새 버전]으로 배포했는지, 액세스가 [모든 사용자]인지 확인해 주세요.');
     if (!j.ok) throw new Error(String(j.error || '요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.').replace('에서 상태를 보거나 취소할 수 있어요.', '에서 상태를 볼 수 있어요.'));
+    rememberAll(j.data);
     return j.data;
   }
   return new Promise((res, rej) => setTimeout(() => { try { res(clone(Demo[fn](...args))); } catch(e){ rej(e); } }, 160));
@@ -1751,7 +1963,7 @@ const S = {
   notice:{}, regMsg:'', regMsgCls:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null, rawComments:false,
   ap:null, rv:null,
 };
-const VIEWS = ['apply','review','login','list','session','guides'];
+const VIEWS = ['apply','review','login','list','session','guides','exhibit','exh'];
 ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
 function show(v){ S.view = v; document.body.dataset.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
@@ -1988,13 +2200,18 @@ function openLogin(note){
   </form>
   <button type="button" class="lib-entry" data-act="open-guides">
     <span class="lib-ic" aria-hidden="true">${BOOK_ICON}</span>
-    <span class="grow"><b>목공 설명서 열람하기</b><span>설명서를 보고 원하는 작업을 골라 진행해 보세요.</span></span>
+    <span class="grow"><b>작업 설명서 열람하기</b><span>설명서를 보고 원하는 작업을 골라 진행해 보세요.</span></span>
+    <span class="lib-go" aria-hidden="true">→</span>
+  </button>
+  <button type="button" class="lib-entry exh-entry" data-act="open-exhibit">
+    <span class="lib-ic" aria-hidden="true">${FRAME_ICON}</span>
+    <span class="grow"><b>전시회 출품 신청 및 수정하기</b><span>전시회에 낼 작품을 신청하고, 신청한 내용을 고칠 수 있어요.</span></span>
     <span class="lib-go" aria-hidden="true">→</span>
   </button>
   </div>`;
   if (!matchMedia('(pointer: coarse)').matches) $('#pw').focus();
 }
-$('#v-login').addEventListener('click', e => { if (e.target.closest('[data-act="open-guides"]')) openGuides(); });
+$('#v-login').addEventListener('click', e => { if (e.target.closest('[data-act="open-guides"]')) openGuides(); if (e.target.closest('[data-act="open-exhibit"]')) openExhibit(); });
 $('#v-login').addEventListener('submit', async e => {
   e.preventDefault();
   const pw = $('#pw').value; const msg = $('#pw-msg');
@@ -2002,11 +2219,11 @@ $('#v-login').addEventListener('submit', async e => {
   $('#pw-go').disabled = true; msg.className = 'msg'; msg.textContent = '확인하는 중…';
   try { S.data = await withLoader(api('hostLogin', pw)); }
   catch(err){ $('#pw-go').disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
-  S.pw = pw; store(PWK, 'dg_pw', pw);
+  S.pw = pw; store(PWK, 'dg_pw', pw); rememberAll(S.data);
   openList();
 });
 /* =========================================================
-   부원용: 목공 설명서 열람 (비밀번호 없음)
+   부원용: 작업 설명서 열람 (비밀번호 없음)
    ========================================================= */
 const BOOK_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>';
 const LIB = { list: null, q: '', sort: store('l', 'dg_libsort') === 'new' ? 'new' : 'rank', sid: null, msg: '' };
@@ -2016,12 +2233,24 @@ const libThumb = x => { const g = x.guide; return (g.finalPhotos || [])[0] || ((
 const libStars = x => x.n ? `<span class="lib-star">★ <b class="num">${f1(x.overall)}</b><small> (${x.n}명)</small></span>` : '<span class="hint">평가 없음</span>';
 async function openGuides(sid){
   show('guides'); LIB.sid = sid || null; banner('');
+  if (!LIB.list){ const c = cacheGet('l', 'lib'); if (c){ LIB.list = c; renderGuides(); libRefresh(); return; } }
+  else if (Date.now() - (LIB.at || 0) > 60000) libRefresh();
   if (!LIB.list){
     $('#v-guides').innerHTML = `<div class="empty">설명서를 불러오는 중…</div>`;
-    try { LIB.list = await withLoader(api('getGuideLibrary')); }
+    try { LIB.list = await withLoader(api('getGuideLibrary')); LIB.at = Date.now(); cacheSet('l', 'lib', LIB.list); }
     catch(e){ const old = /알 수 없는 요청/.test(e.message); $('#v-guides').innerHTML = `<div class="empty">${old ? '설명서 열람을 아직 준비하는 중이에요. 임원진이 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}<br><button type="button" class="btn sm" data-act="lib-retry" style="margin-top:12px">다시 시도</button></div>`; return; }
   }
   renderGuides();
+}
+let libBusy = false;
+function libRefresh(){
+  if (libBusy) return; libBusy = true;
+  api('getGuideLibrary').then(l => {
+    LIB.list = l; LIB.at = Date.now(); cacheSet('l', 'lib', l);
+    if (S.view !== 'guides' || typingIn('#lib-took')) return;
+    if (typingIn('#lib-tools-row') || document.activeElement && document.activeElement.id === 'lib-q'){ const L = $('#lib-list'); if (L){ L.innerHTML = libCards(); loadPhotos(); } return; }
+    const y = window.scrollY; renderGuides(); window.scrollTo(0, y);
+  }).catch(() => {}).finally(() => { libBusy = false; });
 }
 function renderGuides(){
   const v = $('#v-guides'); const all = LIB.list || [];
@@ -2038,15 +2267,15 @@ function renderGuides(){
         ${x.difficulty != null ? `<div><span class="lbl">참가자 난이도</span><b>${esc(DIFF_LABEL(x.difficulty))}</b></div>` : ''}
         ${(x.tools || []).length ? `<div class="wide"><span class="lbl">사용 장비</span><b class="lib-tools">${x.tools.map(t => `<span class="chip${DANGER.includes(t) ? ' danger' : ''}">${esc(t)}</span>`).join('')}</b></div>` : ''}
       </div>
-      ${manualHTML(x, {g: x.guide, at: x.at})}
+      ${manualHTML(x, {g: x.guide, at: x.at}, true)}
       <div class="lib-eval">${libRateHTML(x)}${libTookHTML(x)}</div>`;
     LIB.msg = ''; window.scrollTo(0, 0); loadPhotos(); return;
   }
   LIB.sid = null;
   v.innerHTML = `
     <div class="top lib-head"><div>
-      <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>목공 설명서</h1></div></div>
-      <p class="sub">다양한 목공 설명서를 열람할 수 있어요.<br>원하는 작업을 골라 진행해 보아요.</p></div></div>
+      <div class="brand">${BRAND_SVG(40)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>작업 설명서</h1></div></div>
+      <p class="sub">다양한 작업 설명서를 열람할 수 있어요.<br>원하는 작업을 골라 진행해 보아요.</p></div></div>
     <div class="lib-tools-row">
       <input type="search" id="lib-q" placeholder="찾기 (예: 도마, 카빙, 호두나무)" value="${esc(LIB.q)}" aria-label="설명서 찾기">
       <div class="seg" role="radiogroup" aria-label="보는 순서" id="lib-sort">
@@ -2094,7 +2323,7 @@ function libCards(){
   const shown = all.filter(i => !q || q.split(/\s+/).every(w => hay(i).includes(w)));
   const newest = (a, b) => (sDates(b)[0] || '').localeCompare(sDates(a)[0] || '') || (b.at || 0) - (a.at || 0);
   shown.sort(LIB.sort === 'new' ? newest : (a, b) => ((b.n >= 3) - (a.n >= 3)) || ((b.overall || 0) - (a.overall || 0)) || newest(a, b));
-  if (!total) return `<div class="empty">아직 올라온 설명서가 없어요. 학습회를 마친 임원진이 목공 설명서를 쓰면 여기에 모여요.</div>`;
+  if (!total) return `<div class="empty">아직 올라온 설명서가 없어요. 학습회를 마친 임원진이 작업 설명서를 쓰면 여기에 모여요.</div>`;
   if (!shown.length) return `<div class="empty">'${esc(LIB.q)}'에 맞는 설명서가 없어요.</div>`;
   return shown.map(x => { const th = libThumb(x); const t = libTime(x);
     return `<button type="button" class="lib-card" data-g="${esc(x.id)}">
@@ -2115,7 +2344,7 @@ $('#v-guides').addEventListener('submit', async e => {
   let who = store('l', 'dg_tmid'); if (!who){ who = Math.random().toString(36).slice(2, 10); store('l', 'dg_tmid', who); }
   $('#took-go').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
   try { const r = await api('timeGuide', sid, who, t); store('l', 'dg_tm_' + sid, t || null);
-    const it = (LIB.list || []).find(i => i.id === sid); if (it) it.took = r;
+    const it = (LIB.list || []).find(i => i.id === sid); if (it) it.took = r; cacheSet('l', 'lib', LIB.list);
     $('#lib-took').outerHTML = libTookHTML(it || {id: sid, took: r}); const mm = $('#took-msg'); mm.textContent = t ? (prev ? '고쳤어요.' : '보냈어요.') : '지웠어요.'; }
   catch(err){ $('#took-go').disabled = false; m.className = 'msg err'; m.textContent = /알 수 없는 요청/.test(err.message) ? '걸린 시간은 서버(Api.gs)를 새 판으로 바꾸면 모을 수 있어요.' : err.message; }
 });
@@ -2125,7 +2354,7 @@ $('#v-guides').addEventListener('click', async e => {
     if (prev === v){ m.textContent = '이미 이 난이도로 평가했어요.'; return; }
     document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = true); m.className = 'msg'; m.textContent = '보내는 중…';
     try { const r = await api('rateGuide', sid, v, prev || null); store('l', 'dg_rt_' + sid, String(v));
-      const it = (LIB.list || []).find(i => i.id === sid); if (it) it.rated = r;
+      const it = (LIB.list || []).find(i => i.id === sid); if (it) it.rated = r; cacheSet('l', 'lib', LIB.list);
       const y = window.scrollY; renderGuides(); window.scrollTo(0, y); $('#rate-msg').textContent = prev ? '바꿨어요.' : '평가했어요.'; }
     catch(err){ document.querySelectorAll('#lib-rate [data-rate]').forEach(b => b.disabled = false); m.className = 'msg err'; m.textContent = /알 수 없는 요청/.test(err.message) ? '난이도 평가는 서버(Api.gs)를 새 판으로 바꾸면 열려요.' : err.message; }
     return; }
@@ -2137,6 +2366,286 @@ $('#v-guides').addEventListener('click', async e => {
   if (e.target.closest('[data-act="lib-link"]')){ const u = `${SITE}?v=g&s=${encodeURIComponent(LIB.sid)}`;
     try { await navigator.clipboard.writeText(u); LIB.msg = '이 설명서 링크를 복사했어요.'; } catch(err){ LIB.msg = u; }
     const m = $('#v-guides .lib-msg'); if (m) m.textContent = LIB.msg; LIB.msg = ''; return; }
+});
+/* =========================================================
+   전시회 출품 (부원: 비밀번호 없이 신청·수정 / 임원진: 전시회 관리 탭)
+   ========================================================= */
+const FRAME_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="13" rx="1.5"/><path d="M7 13l3.2-3.6 2.6 2.6 1.8-1.8L17 13"/><path d="M9 20.5l3-4 3 4"/></svg>';
+const EXM = { info: null, mode: 'home', f: null, sn: '', nm: '', rec: null, canEdit: false, msg: '', msgCls: '', lk: { sn: '', name: '' } };
+const exhBlank = () => ({ name: '', sn: '', gen: '', work: '', objs: [{ n: '', m: '', w: '', d: '', h: '' }], desc: '' });
+function exhStateText(I){
+  if (!I || !I.ready) return { cls: 'todo', t: '아직 준비 중이에요' };
+  if (I.open) return { cls: 'done', t: I.closeAt ? `신청 받는 중 · ${fmtDT(I.closeAt)} 마감` : '신청 받는 중' };
+  return { cls: 'todo', t: '신청 마감' };
+}
+/* 기획서 (전시기획서 양식 그대로) */
+function exhDocHTML(rec, title){
+  const lines = exhMatLines(rec.objs);
+  return `<article class="exh-doc">
+    <div class="xd-row xd-title">${esc(title || rec.exhTitle || '')} 전시기획서</div>
+    <div class="xd-row xd-3"><div>이름: ${esc(rec.name)}</div><div>학번: ${esc(rec.sn)}</div><div>기수: ${esc(rec.gen)}기</div></div>
+    <div class="xd-row xd-c">제목: ${esc(rec.work)}</div>
+    <div class="xd-row xd-2"><div>오브제 개수: ${(rec.objs || []).length}</div><div class="xd-c">각 오브제의 사이즈(w*d*h, mm):<small>${esc(exhSizes(rec.objs))}</small></div></div>
+    <div class="xd-row xd-head">작품 설명</div>
+    <div class="xd-row xd-desc">${lines.map(l => `<div>${esc(l)}</div>`).join('')}${rec.desc ? `<div class="xd-text">${esc(rec.desc)}</div>` : ''}</div>
+  </article>`;
+}
+function exhPrint(docsHTML){
+  let a = document.getElementById('print-area'); if (!a){ a = document.createElement('div'); a.id = 'print-area'; document.body.appendChild(a); }
+  a.innerHTML = docsHTML; document.body.classList.add('print-area');
+  const done = () => { document.body.classList.remove('print-area'); a.innerHTML = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done); window.print();
+}
+
+/* ---------------- 부원: 출품 신청 · 수정 ---------------- */
+async function openExhibit(){
+  show('exhibit'); banner(''); Object.assign(EXM, { mode: 'home', f: null, rec: null, msg: '', msgCls: '' });
+  const ci = cacheGet('l', 'exh');
+  if (ci){ EXM.info = ci; renderExhibit();
+    api('exhInfo').then(I => { EXM.info = I; cacheSet('l', 'exh', I); if (S.view === 'exhibit' && EXM.mode === 'home' && !typingIn('#v-exhibit')) renderExhibit(); }).catch(() => {});
+    return; }
+  $('#v-exhibit').innerHTML = `<div class="empty">전시회 출품 화면을 여는 중…</div>`;
+  try { EXM.info = await withLoader(api('exhInfo')); cacheSet('l', 'exh', EXM.info); }
+  catch(e){ $('#v-exhibit').innerHTML = `<div class="panel"><h1>출품 화면을 열지 못했어요</h1><p class="sub">${/알 수 없는 요청/.test(e.message) ? '전시회 출품은 임원진이 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}</p></div>`; return; }
+  renderExhibit();
+}
+function renderExhibit(){
+  const I = EXM.info || {}; const st = exhStateText(I); const v = $('#v-exhibit');
+  const head = `<div class="brand">${BRAND_SVG(36)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>전시회 출품</h1></div></div>
+    <div class="exh-head"><b>${esc(I.title || '')}</b><span class="chip ${st.cls}">${esc(st.t)}</span></div>
+    ${I.note ? `<p class="sub exh-note">${esc(I.note)}</p>` : ''}`;
+  const msg = EXM.msg ? `<p class="msg ${EXM.msgCls || 'ok'}" role="status">${esc(EXM.msg)}</p>` : '';
+  if (EXM.mode === 'new' || EXM.mode === 'edit'){ v.innerHTML = head + exhFormHTML(); return; }
+  if (EXM.mode === 'view' && EXM.rec){
+    v.innerHTML = head + msg + `<div class="panel exh-mine">${exhDocHTML(EXM.rec, I.title)}
+      <div class="actions">${EXM.canEdit ? '<button type="button" class="btn primary" data-x="edit">수정하기</button>' : ''}<button type="button" class="btn" data-x="print">인쇄하기</button><button type="button" class="btn" data-x="word">Word로 받기</button><span class="spacer"></span><button type="button" class="btn ghost" data-x="home">처음으로</button></div>
+      <p class="hint">${EXM.canEdit ? '나중에 고칠 때는 [신청한 내용 보기 · 수정]에 학번과 이름을 넣어 주세요.' : '출품 신청이 마감돼서 지금은 고칠 수 없어요. 고칠 게 있으면 임원진에게 연락해 주세요.'}</p></div>`;
+    return;
+  }
+  v.innerHTML = head + msg + `
+    <div class="panel exh-start">
+      <h2>새로 출품 신청하기</h2>
+      <p class="sub" style="margin:0">전시기획서 양식 그대로 칸을 채워요. 이름, 학번, 기수, 작품 제목, 오브제(이름 · 재료 · 크기), 작품 설명이에요.</p>
+      <div><button type="button" class="btn primary" data-x="new" ${I.open ? '' : 'disabled'}>출품 신청서 쓰기</button></div>
+      ${I.open ? '' : `<p class="hint">${I.ready ? '지금은 출품 신청을 받지 않아요.' : '아직 출품 신청을 받기 전이에요.'}</p>`}
+    </div>
+    <form class="panel exh-look" id="exh-look" novalidate>
+      <h2>신청한 내용 보기 · 수정</h2>
+      <div class="row">
+        <div class="field"><label for="xl-sn">학번</label><input type="text" id="xl-sn" inputmode="numeric" autocomplete="off" value="${esc(EXM.lk.sn)}"></div>
+        <div class="field"><label for="xl-name">이름 <span class="hint">신청할 때 적은 이름</span></label><input type="text" id="xl-name" maxlength="20" autocomplete="off" value="${esc(EXM.lk.name || '')}"></div>
+      </div>
+      <div class="actions"><button class="btn" type="submit" id="xl-go">불러오기</button><span class="msg err" id="xl-msg" role="status"></span></div>
+    </form>
+    <p class="hint lib-foot"><button type="button" class="linkish" data-x="first">첫 화면으로</button></p>`;
+}
+function exhObjRows(objs){
+  return objs.map((o, i) => `<div class="xo-row" data-xi="${i}">
+    <input type="text" data-xo="n" maxlength="30" value="${esc(o.n)}" placeholder="오브제 이름 (예: 작은 접시)" aria-label="오브제 ${i+1} 이름">
+    <input type="text" data-xo="m" maxlength="30" value="${esc(o.m)}" placeholder="재료 (예: 호두)" aria-label="오브제 ${i+1} 재료">
+    <span class="xo-size"><input type="text" inputmode="numeric" data-xo="w" value="${esc(o.w)}" placeholder="가로" aria-label="오브제 ${i+1} 가로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="d" value="${esc(o.d)}" placeholder="세로" aria-label="오브제 ${i+1} 세로(mm)"><i>*</i><input type="text" inputmode="numeric" data-xo="h" value="${esc(o.h)}" placeholder="높이" aria-label="오브제 ${i+1} 높이(mm)"></span>
+    <button type="button" class="icon-x" data-x="rm-obj" aria-label="오브제 ${i+1} 빼기">✕</button>
+  </div>`).join('');
+}
+/* 오브제를 적으면 개수 · 사이즈 · 재료 줄이 바로 채워져요 */
+function exhLive(){
+  const f = EXM.f; if (!f) return;
+  const objs = f.objs.filter(o => (o.n || '').trim() || (o.w || o.d || o.h)).map(o => ({ n: (o.n || '').trim(), m: (o.m || '').trim(), w: o.w, d: o.d, h: o.h }));
+  const c = $('#xf-count'); if (c) c.textContent = String(objs.length);
+  const s = $('#xf-sizes'); if (s) s.textContent = objs.length ? exhSizes(objs) : '아래 오브제 칸에 적으면 채워져요';
+  const l = $('#xf-lines'); if (l) l.innerHTML = exhMatLines(objs.filter(o => o.n)).map(x => `<div>${esc(x)}</div>`).join('');
+}
+function exhFormHTML(){
+  const f = EXM.f; const edit = EXM.mode === 'edit'; const title = (EXM.info || {}).title || '';
+  return `<div class="exh-form-wrap">
+    <h2>${edit ? '출품 신청 수정' : '출품 신청서'} <span class="hint">칸을 눌러 바로 적어요</span></h2>
+    <form class="exh-doc xd-edit" id="exh-form" novalidate>
+      <div class="xd-row xd-title">${esc(title)} 전시기획서</div>
+      <div class="xd-row xd-3">
+        <label>이름: <input type="text" id="xf-name" data-xf="name" maxlength="20" value="${esc(f.name)}" autocomplete="name"></label>
+        <label>학번: <input type="text" id="xf-sn" data-xf="sn" inputmode="numeric" maxlength="12" value="${esc(f.sn)}" ${edit ? 'disabled' : ''}></label>
+        <label>기수: <input type="text" id="xf-gen" data-xf="gen" inputmode="numeric" maxlength="3" value="${esc(f.gen)}" placeholder="38" class="xd-short">기</label>
+      </div>
+      <div class="xd-row xd-c"><label class="xd-wide">제목: <input type="text" id="xf-work" data-xf="work" maxlength="60" value="${esc(f.work)}" placeholder="작품 제목"></label></div>
+      <div class="xd-row xd-2"><div><span>오브제 개수: <b id="xf-count"></b></span></div><div class="xd-c">각 오브제의 사이즈(w*d*h, mm):<small id="xf-sizes"></small></div></div>
+      <div class="xd-row xd-objs">
+        <div class="xd-objs-h"><b>오브제 적는 칸</b><span class="hint">한 줄에 하나 · 크기는 mm · 기획서에는 위 개수 · 사이즈 칸과 아래 재료 줄로 들어가요</span></div>
+        <div class="xo-list" id="xo-list">${exhObjRows(f.objs)}</div>
+        <div><button type="button" class="btn ghost sm" data-x="add-obj">+ 오브제 추가</button></div>
+      </div>
+      <div class="xd-row xd-head">작품 설명</div>
+      <div class="xd-row xd-desc"><div id="xf-lines" class="xd-lines"></div>
+        <textarea id="xf-desc" data-xf="desc" rows="5" maxlength="1500" placeholder="예: 칼과 끌을 통해 나무를 깎은 작품입니다. 사포로 마감하지 않고 칼의 거친 느낌을 드러낸 제품입니다." aria-label="작품 설명">${esc(f.desc)}</textarea></div>
+    </form>
+    <div class="actions"><button class="btn primary" type="submit" form="exh-form" id="xf-go">${edit ? '수정 저장하기' : '출품 신청하기'}</button><button class="btn ghost" type="button" data-x="${edit ? 'view' : 'home'}">취소</button><span class="msg err" id="xf-msg" role="status"></span></div>
+    ${edit ? '' : '<p class="hint">고칠 때는 [신청한 내용 보기 · 수정]에 지금 적은 학번과 이름을 넣으면 돼요.</p>'}
+  </div>`;
+}
+/* Word 파일(.doc)로 받기: 전시기획서 표 그대로, 여러 명이면 한 장에 한 명씩 */
+function exhWordHTML(recs, title){
+  const B = 'border:1px solid #000;padding:9pt 10pt;font-size:12pt;vertical-align:middle;';
+  const one = r => `<table style="width:100%;border-collapse:collapse;table-layout:fixed;font-family:'맑은 고딕','Malgun Gothic',sans-serif">
+    <colgroup><col style="width:30%"><col style="width:10%"><col style="width:30%"><col style="width:30%"></colgroup>
+    <tr><td colspan="4" style="${B}text-align:center;font-size:22pt;padding:16pt 10pt">${esc(title || r.exhTitle || '')} 전시기획서</td></tr>
+    <tr><td style="${B}">이름: ${esc(r.name)}</td><td colspan="2" style="${B}">학번: ${esc(r.sn)}</td><td style="${B}">기수: ${esc(r.gen)}기</td></tr>
+    <tr><td colspan="4" style="${B}text-align:center">제목: ${esc(r.work)}</td></tr>
+    <tr><td colspan="2" style="${B}">오브제 개수: ${(r.objs || []).length}</td><td colspan="2" style="${B}text-align:center">각 오브제의 사이즈(w*d*h, mm):<br><span style="font-size:10pt">${esc(exhSizes(r.objs))}</span></td></tr>
+    <tr><td colspan="4" style="${B}text-align:center;font-size:17pt">작품 설명</td></tr>
+    <tr><td colspan="4" style="${B}vertical-align:top;height:330pt">${exhMatLines(r.objs).map(x => esc(x)).join('<br>')}${r.desc ? '<br>' + esc(r.desc).replace(/\n/g, '<br>') : ''}</td></tr>
+  </table>`;
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(title || '')} 전시기획서</title>
+    <style>@page{size:21cm 29.7cm;margin:2cm}</style></head><body>${recs.map((r, i) => (i ? '<br style="page-break-before:always" clear="all">' : '') + one(r)).join('')}</body></html>`;
+}
+function exhWordDownload(recs, title, name){
+  const blob = new Blob(['﻿' + exhWordHTML(recs, title)], { type: 'application/msword' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = String(name).replace(/[\\/:*?"<>|]/g, '_') + '.doc';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+const exV = $('#v-exhibit');
+exV.addEventListener('input', e => {
+  const t = e.target; const f = EXM.f; if (!f) return;
+  if (t.dataset.xf){ f[t.dataset.xf] = t.value; return; }
+  const row = t.closest('.xo-row'); if (row && t.dataset.xo){ f.objs[Number(row.dataset.xi)][t.dataset.xo] = t.value; exhLive(); }
+});
+exV.addEventListener('click', e => {
+  const b = e.target.closest('[data-x]'); if (!b) return; const a = b.dataset.x;
+  if (a === 'first'){ openLogin(); return; }
+  if (a === 'home'){ Object.assign(EXM, { mode: 'home', f: null, msg: '' }); renderExhibit(); window.scrollTo(0,0); return; }
+  if (a === 'new'){ EXM.mode = 'new'; EXM.f = exhBlank(); EXM.msg = ''; renderExhibit(); exhLive(); window.scrollTo(0,0); $('#xf-name').focus({preventScroll:true}); return; }
+  if (a === 'edit'){ const r = EXM.rec; EXM.mode = 'edit'; EXM.f = { name: r.name, sn: r.sn, gen: r.gen, work: r.work, objs: clone(r.objs), desc: r.desc || '' }; EXM.msg = ''; renderExhibit(); exhLive(); window.scrollTo(0,0); return; }
+  if (a === 'view'){ EXM.mode = 'view'; EXM.f = null; EXM.msg = ''; renderExhibit(); return; }
+  if (a === 'print'){ exhPrint(exhDocHTML(EXM.rec, (EXM.info || {}).title)); return; }
+  if (a === 'word'){ const t = (EXM.info || {}).title || EXM.rec.exhTitle; exhWordDownload([EXM.rec], t, `${t} 전시기획서_${EXM.rec.name}`); return; }
+  if (a === 'add-obj'){ if (EXM.f.objs.length >= 30) return; EXM.f.objs.push({ n: '', m: '', w: '', d: '', h: '' }); $('#xo-list').innerHTML = exhObjRows(EXM.f.objs); exhLive(); const ins = $('#xo-list').querySelectorAll('[data-xo="n"]'); ins[ins.length-1].focus(); return; }
+  if (a === 'rm-obj'){ EXM.f.objs.splice(Number(b.closest('.xo-row').dataset.xi), 1); if (!EXM.f.objs.length) EXM.f.objs.push({ n: '', m: '', w: '', d: '', h: '' }); $('#xo-list').innerHTML = exhObjRows(EXM.f.objs); exhLive(); return; }
+});
+exV.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (e.target.id === 'exh-look'){
+    const sn = $('#xl-sn').value.trim(), name = $('#xl-name').value.trim(), m = $('#xl-msg'); EXM.lk.sn = sn; EXM.lk.name = name;
+    if (!sn || !name){ m.textContent = '학번과 이름을 넣어 주세요.'; return; }
+    $('#xl-go').disabled = true; m.className = 'msg'; m.textContent = '찾는 중…';
+    try { const r = await withLoader(api('exhFind', sn, name)); Object.assign(EXM, { sn, nm: name, rec: r.rec, canEdit: r.canEdit, mode: 'view', msg: '' }); renderExhibit(); window.scrollTo(0,0); }
+    catch(err){ $('#xl-go').disabled = false; m.className = 'msg err'; m.textContent = err.message; }
+    return;
+  }
+  if (e.target.id !== 'exh-form') return;
+  const f = EXM.f; const m = $('#xf-msg'); const edit = EXM.mode === 'edit';
+  let body; try { body = exhClean(Object.assign({}, f, edit ? { sn: EXM.rec.sn } : {})); } catch(err){ m.textContent = err.message; return; }
+  $('#xf-go').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
+  try {
+    const rec = edit ? await api('exhUpdate', EXM.sn, EXM.nm, body) : await api('exhSubmit', body);
+    EXM.sn = rec.sn; EXM.nm = rec.name;   // 이름을 고쳤으면 다음부터는 고친 이름으로 들어와요
+    Object.assign(EXM, { rec, canEdit: true, mode: 'view', f: null, msg: edit ? '고친 내용을 저장했어요.' : '출품 신청을 받았어요. 아래 기획서를 확인해 주세요.', msgCls: 'ok' });
+    renderExhibit(); window.scrollTo(0,0);
+  } catch(err){ $('#xf-go').disabled = false; m.className = 'msg err'; m.textContent = err.message; }
+});
+
+/* ---------------- 임원진: 전시회 관리 탭 ---------------- */
+const EXA = { d: null, sel: null, open: {}, msg: '', msgCls: 'ok', armed: null, newArmed: false, pinMsg: {} };
+const mainTabsHTML = cur => `<div class="main-tabs" role="tablist" aria-label="진행자 화면"><button type="button" role="tab" data-main="list" aria-selected="${cur === 'list'}">학습회</button><button type="button" role="tab" data-main="exh" aria-selected="${cur === 'exh'}">전시회 관리</button></div>`;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-main]'); if (!b) return;
+  if (b.dataset.main === 'list'){ if (S.view !== 'list') openList(); return; }
+  if (S.view !== 'exh') openExhAdmin();
+});
+async function openExhAdmin(){
+  if (TUT) tutClose();
+  show('exh'); EXA.msg = ''; EXA.armed = null; EXA.newArmed = false;
+  const ca = EXA.d || cacheGet(PWK, 'exha');
+  if (ca){ EXA.d = ca; EXA.sel = EXA.sel || ca.settings.id || null; renderExhAdmin();
+    api('exhAdmin', S.pw).then(d => { EXA.d = d; cacheSet(PWK, 'exha', d); if (S.view === 'exh' && !typingIn('#v-exh') && !EXA.newArmed && !EXA.armed) renderExhAdmin(); }).catch(() => {});
+    return; }
+  $('#v-exh').innerHTML = `${exhAdminTop()}<div class="empty">불러오는 중…</div>`;
+  try { EXA.d = await withLoader(api('exhAdmin', S.pw)); cacheSet(PWK, 'exha', EXA.d); }
+  catch(e){ $('#v-exh').innerHTML = `${exhAdminTop()}<div class="empty">${/알 수 없는 요청/.test(e.message) ? '전시회 관리는 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}</div>`; return; }
+  EXA.sel = EXA.d.settings.id || null; renderExhAdmin();
+}
+const exhAdminTop = () => `<div class="top"><div><div class="brand"><img class="logo" src="logo.png" alt="" width="56" height="48"><div><div class="tag">목방 목공 학습회 · 진행자 화면</div><h1>도각도각</h1></div></div>
+  <p class="sub">전시회 출품 신청을 열고 닫고, 들어온 전시기획서를 모아 보고 인쇄해요.</p></div></div>${mainTabsHTML('exh')}`;
+function renderExhAdmin(){
+  if (EXA.d) cacheSet(PWK, 'exha', EXA.d);
+  const D2 = EXA.d; const s = D2.settings; const all = D2.list || [];
+  const groups = []; const seen = {};
+  if (s.id){ groups.push({ id: s.id, title: s.title + ' (지금)' }); seen[s.id] = 1; }
+  all.forEach(r => { if (!seen[r.exh]){ seen[r.exh] = 1; groups.push({ id: r.exh, title: r.exhTitle || '이전 전시회' }); } });
+  const sel = EXA.sel || (groups[0] && groups[0].id) || null;
+  const list = all.filter(r => r.exh === sel).sort((a, b) => String(a.at).localeCompare(String(b.at)));
+  const objN = list.reduce((n, r) => n + (r.objs || []).length, 0);
+  const st = exhStateText({ ready: !!s.id, open: D2.openNow, closeAt: s.closeAt });
+  const isCur = sel && sel === s.id;
+  $('#v-exh').innerHTML = `${exhAdminTop()}
+    <form class="panel exh-set" id="exh-set" novalidate>
+      <div class="qs-head"><h2>전시회 설정</h2><span class="chip ${st.cls}">${esc(st.t)}</span></div>
+      ${s.id ? '' : '<p class="hint" style="margin:0">아직 연 전시회가 없어요. 이름을 정하고 출품 신청을 받기로 한 뒤 저장하면 시작돼요.</p>'}
+      <div class="row">
+        <div class="field"><label for="ex-title">전시회 이름 <span class="hint">기획서 맨 위에 들어가요</span></label><input type="text" id="ex-title" maxlength="60" value="${esc(s.title)}"></div>
+        <div class="field"><div class="lbl" id="ex-open-l">출품 신청</div>
+          <div class="seg" role="radiogroup" aria-labelledby="ex-open-l" id="ex-open"><button type="button" role="radio" data-open="1" aria-checked="${!!s.open}">받기</button><button type="button" role="radio" data-open="0" aria-checked="${!s.open}">닫기</button></div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="ex-close">마감 예약 <span class="hint">비우면 직접 닫을 때까지</span></label>
+          <div class="pw-row">${dtPick('ex-close', 'closeAt', s.closeAt)}<button type="button" class="btn sm ghost" data-xa="clear-close">비우기</button></div></div>
+        <div class="field"><label for="ex-note">안내 문구 <span class="hint">출품 화면 위에 보여요 (선택)</span></label><input type="text" id="ex-note" maxlength="300" value="${esc(s.note || '')}" placeholder="예: 출품작은 전시 하루 전까지 1동방으로 가져와 주세요."></div>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit" id="ex-save">${s.id ? '설정 저장하기' : '전시회 시작하기'}</button>
+        <span class="msg ${EXA.msgCls}" id="ex-msg" role="status">${esc(EXA.msg)}</span><span class="spacer"></span>
+        ${s.id ? `<button type="button" class="btn sm ghost ${EXA.newArmed ? 'danger armed' : ''}" data-xa="new">${EXA.newArmed ? '한 번 더 누르면 새 전시회가 시작돼요' : '새 전시회 시작'}</button>` : ''}</div>
+      ${s.id && EXA.newArmed ? '<p class="hint" style="margin:0">지금 전시회의 출품 목록은 그대로 남고, 아래 목록에서 "이전 전시회"로 볼 수 있어요. 새 전시회는 출품 신청이 닫힌 채로 시작돼요.</p>' : ''}
+    </form>
+    <div class="toolbar"><h2>출품 목록</h2><div class="right">
+      ${groups.length > 1 ? `<select id="ex-sel" class="term-sel" aria-label="전시회 고르기">${groups.map(g => `<option value="${esc(g.id)}"${g.id === sel ? ' selected' : ''}>${esc(g.title)}</option>`).join('')}</select>` : ''}
+      <button type="button" class="btn sm ghost" data-xa="refresh">새로고침</button></div></div>
+    <div class="exh-sum"><span><b class="num">${list.length}</b>명 출품</span><span><b class="num">${objN}</b>개 오브제</span><span class="spacer"></span>
+      ${isCur ? '<button type="button" class="btn sm ghost" data-xa="copy-link">출품 신청 링크 복사</button><button type="button" class="btn sm ghost" data-xa="preview">출품 화면 보기</button>' : ''}
+      ${list.length ? '<button type="button" class="btn sm ghost" data-xa="word-all">전체 Word로 받기</button><button type="button" class="btn sm" data-xa="print-all">전체 기획서 인쇄</button>' : ''}</div>
+    <span class="msg ok" id="ex-link-msg" role="status"></span>
+    <div class="exh-list">${list.length ? list.map((r, i) => exhItemHTML(r, i + 1)).join('') : `<div class="empty">${s.id ? '아직 들어온 출품 신청이 없어요. [출품 신청 링크 복사]로 부원들에게 링크를 보내 주세요.' : '전시회를 시작하면 여기에 출품 신청이 모여요.'}</div>`}</div>`;
+}
+function exhItemHTML(r, no){
+  const open = !!EXA.open[r.id]; const armed = EXA.armed === r.id;
+  return `<article class="exh-item${open ? ' open' : ''}">
+    <button type="button" class="exh-ih" data-xa="toggle" data-id="${esc(r.id)}" aria-expanded="${open}">
+      <span class="exh-no num">${no}</span>
+      <span class="grow"><b>${esc(r.work)}</b><span class="c-meta"><span>${esc(r.name)}</span><span class="num">${esc(r.sn)}</span><span>${esc(r.gen)}기</span><span>오브제 ${(r.objs || []).length}개</span><span class="hint">${esc(r.upd && r.upd !== r.at ? r.upd + ' 수정' : r.at + ' 신청')}</span></span></span>
+      <span class="exh-caret" aria-hidden="true">${open ? '▴' : '▾'}</span></button>
+    ${open ? `<div class="exh-ib">${exhDocHTML(r)}
+      <div class="actions"><button type="button" class="btn sm" data-xa="print" data-id="${esc(r.id)}">기획서 인쇄</button>
+        <button type="button" class="btn sm ghost" data-xa="word" data-id="${esc(r.id)}">Word로 받기</button>
+        <span class="spacer"></span><button type="button" class="btn sm ghost ${armed ? 'danger armed' : 'danger-t'}" data-xa="del" data-id="${esc(r.id)}">${armed ? '한 번 더 누르면 삭제돼요' : '출품 삭제'}</button></div>
+      ${EXA.pinMsg[r.id] ? `<p class="msg ok">${esc(EXA.pinMsg[r.id])}</p>` : ''}</div>` : ''}
+  </article>`;
+}
+const exA = $('#v-exh');
+exA.addEventListener('change', e => { if (e.target.id === 'ex-sel'){ EXA.sel = e.target.value; EXA.armed = null; renderExhAdmin(); } });
+exA.addEventListener('click', async e => {
+  const ob = e.target.closest('#ex-open [data-open]'); if (ob){ document.querySelectorAll('#ex-open [data-open]').forEach(x => x.setAttribute('aria-checked', String(x === ob))); return; }
+  const b = e.target.closest('[data-xa]'); if (!b) return; const a = b.dataset.xa, id = b.dataset.id;
+  if (a === 'clear-close'){ const i = $('#ex-close'); if (i) i.value = ''; return; }
+  if (a === 'toggle'){ EXA.open[id] = !EXA.open[id]; EXA.armed = null; renderExhAdmin(); return; }
+  if (a === 'refresh'){ try { EXA.d = await withLoader(api('exhAdmin', S.pw)); EXA.msg = ''; } catch(err){ EXA.msg = err.message; EXA.msgCls = 'err'; } renderExhAdmin(); return; }
+  if (a === 'copy-link'){ const u = SITE + '?v=x'; const m = $('#ex-link-msg'); try { await navigator.clipboard.writeText(u); m.textContent = '출품 신청 링크를 복사했어요. 단톡방에 붙여 넣어 주세요.'; } catch(err){ m.textContent = u; } return; }
+  if (a === 'preview'){ openExhibit(); return; }
+  if (a === 'print-all'){ const sel = EXA.sel; exhPrint(EXA.d.list.filter(r => r.exh === sel).sort((x, y) => String(x.at).localeCompare(String(y.at))).map(r => exhDocHTML(r)).join('')); return; }
+  if (a === 'print'){ const r = EXA.d.list.find(x => x.id === id); if (r) exhPrint(exhDocHTML(r)); return; }
+  if (a === 'new'){ if (!EXA.newArmed){ EXA.newArmed = true; renderExhAdmin(); return; }
+    b.disabled = true; try { EXA.d = await withLoader(api('exhNew', S.pw, '')); EXA.sel = EXA.d.settings.id; EXA.newArmed = false; EXA.msg = '새 전시회를 시작했어요. 이름을 정하고 출품 신청을 [받기]로 바꿔 저장해 주세요.'; EXA.msgCls = 'ok'; }
+    catch(err){ EXA.msg = err.message; EXA.msgCls = 'err'; } renderExhAdmin(); return; }
+  if (a === 'del'){ if (EXA.armed !== id){ EXA.armed = id; renderExhAdmin(); return; }
+    b.disabled = true; try { EXA.d = await api('exhDelete', S.pw, id); EXA.armed = null; delete EXA.open[id]; } catch(err){ alertMsg(err.message); } renderExhAdmin(); return; }
+  if (a === 'word'){ const r = EXA.d.list.find(x => x.id === id); if (r) exhWordDownload([r], r.exhTitle, `${r.exhTitle} 전시기획서_${r.name}`); return; }
+  if (a === 'word-all'){ const sel = EXA.sel; const L = EXA.d.list.filter(r => r.exh === sel).sort((x, y) => String(x.at).localeCompare(String(y.at)));
+    if (L.length) exhWordDownload(L, L[0].exhTitle, `${L[0].exhTitle} 전시기획서 전체 (${L.length}명)`); return; }
+});
+function alertMsg(t){ EXA.msg = t; EXA.msgCls = 'err'; }
+exA.addEventListener('submit', async e => {
+  if (e.target.id !== 'exh-set') return; e.preventDefault();
+  const body = { title: $('#ex-title').value.trim(), open: !!document.querySelector('#ex-open [data-open="1"][aria-checked="true"]'), closeAt: dtRead($('#ex-close')) || '', note: $('#ex-note').value.trim() };
+  const m = $('#ex-msg'); if (!body.title){ m.className = 'msg err'; m.textContent = '전시회 이름을 적어 주세요.'; return; }
+  $('#ex-save').disabled = true; m.className = 'msg'; m.textContent = '저장하는 중…';
+  try { EXA.d = await api('exhSaveSettings', S.pw, body); EXA.sel = EXA.d.settings.id; EXA.newArmed = false; EXA.msg = '저장했어요.'; EXA.msgCls = 'ok'; }
+  catch(err){ EXA.msg = err.message; EXA.msgCls = 'err'; }
+  renderExhAdmin();
 });
 async function reload(){ LIB.list = null; try { S.data = await withLoader(api('getAll', S.pw)); banner(''); } catch(e){ banner(e.message); } }
 
@@ -2293,7 +2802,7 @@ function cardInner(s, rank){
     </div>
   </button>`;
 }
-function openList(){ show('list'); renderList(); }
+function openList(){ show('list'); renderList(); if (LIVE && !LIB.list && !cacheGet('l', 'lib')) setTimeout(() => { if (!LIB.list) libRefresh(); }, 2500); }
 function renderList(){
   const ss = D().sessions; const nowTerm = termOf(today());
   const terms = [...new Set([nowTerm, ...ss.map(termFor)])].filter(Boolean).sort(termCmp);
@@ -2304,7 +2813,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 34판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 37판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -2342,7 +2851,7 @@ $('#v-list').addEventListener('click', async e => {
     catch(err){ m.className = 'msg'; m.textContent = SITE + '?v=g'; }
     return; }
   if (e.target.closest('[data-act="refresh"]')){ await reload(); renderList(); return; }
-  if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
+  if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); cacheClearHost(); EXA.d = null; store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
   if (e.target.closest('[data-act="pw-open"]')){
     const f = $('#pwform'); if (!f.hidden){ f.hidden = true; return; }
     f.innerHTML = `<h2>동아리 비밀번호 바꾸기</h2>
@@ -2531,20 +3040,30 @@ function readNewPin(msgEl){
   return p1;
 }
 
-/* --- 목공 설명서 (PIN 없이 진행자라면 누구나) --- */
+/* --- 작업 설명서 (PIN 없이 진행자라면 누구나) --- */
 const guideRow = s => D().guides ? D().guides.find(g => g.sid === s.id) : null;
 function guideOf(s){ const r = guideRow(s); if (r && r.guide) return {g:r.guide, at:r.updatedAt}; const L = leadLog(s); return L && L.guide ? {g:L.guide, at:L.updatedAt} : null; }
 function guideDraft(g){ g = g || {}; return { intro:g.intro||'', duration:g.duration||'', makeTime:g.makeTime||'', prep:(g.prep||[]).join('\n'), cutting:(g.cutting||[]).join('\n'),
   flow: (g.flow||[]).length ? clone(g.flow).map(f => ({...f, photos: f.photos || []})) : [{title:'',min:'',body:'',photos:[]}], safety:g.safety||'', tips:g.tips||'', finalPhotos:(g.finalPhotos||[]).slice() }; }
 
-/* 사진: 서버에서 한 장씩 받아 오고 한 번 받은 건 기억해 둬요 */
+/* 사진: 서버에서 한 장씩 받아 오고, 한 번 받은 사진은 기기(IndexedDB)에 저장해서 다음부터는 바로 보여 줘요.
+   사진 번호는 올릴 때마다 새로 생겨서, 같은 번호의 사진이 바뀌는 일은 없어요. */
+const PDB = (() => {
+  let op = null;
+  const open = () => op || (op = new Promise((res, rej) => { try { const r = indexedDB.open('dogakdogak', 1); r.onupgradeneeded = () => r.result.createObjectStore('ph'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch(e){ rej(e); } }));
+  return {
+    get: id => !LIVE ? Promise.resolve(null) : open().then(db => new Promise(res => { try { const q = db.transaction('ph').objectStore('ph').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); } catch(e){ res(null); } })).catch(() => null),
+    put: (id, v) => { if (!LIVE || !v) return; open().then(db => { try { db.transaction('ph', 'readwrite').objectStore('ph').put(v, id); } catch(e){} }).catch(() => {}); },
+  };
+})();
 const PH = {}; let phQueue = [], phBusy = 0;
 const phImg = (id, alt) => `<img class="ph" data-ph="${esc(id)}" alt="${esc(alt)}" ${PH[id] && PH[id] !== 'x' ? `src="${PH[id]}"` : ''}>`;
 function loadPhotos(){
   document.querySelectorAll('img[data-ph]:not([src])').forEach(img => { const id = img.dataset.ph; if (!PH[id] && !phQueue.includes(id)) phQueue.push(id); });
-  while (phBusy < 3 && phQueue.length){
+  while (phBusy < 4 && phQueue.length){
     const id = phQueue.shift(); PH[id] = 'x'; phBusy++;
-    (S.view === 'guides' ? api('getGuidePhoto', id) : api('getPhoto', S.pw, id)).then(src => { PH[id] = src; }).catch(() => { PH[id] = ''; }).finally(() => {
+    const fromServer = () => (S.view === 'guides' ? api('getGuidePhoto', id) : api('getPhoto', S.pw, id)).then(src => { PDB.put(id, src); return src; });
+    PDB.get(id).then(hit => hit || fromServer()).then(src => { PH[id] = src; }).catch(() => { PH[id] = ''; }).finally(() => {
       phBusy--; document.querySelectorAll(`img[data-ph="${id}"]`).forEach(im => { if (PH[id]) im.src = PH[id]; else im.classList.add('broken'); }); loadPhotos(); });
   }
 }
@@ -2560,19 +3079,24 @@ function shrinkImage(file, max){
 }
 const photoGrid = (ids, alt) => ids && ids.length ? `<div class="ph-grid">${ids.map((id,i) => `<figure>${phImg(id, `${alt} ${i+1}`)}</figure>`).join('')}</div>` : '';
 
-function manualHTML(s, G){
+/* 작업 설명서 보기
+   - 임원진(진행자 화면): 소개 · 준비물 · 학습회 준비 단계 · 만드는 방법 · 안전 주의사항 · 진행 팁 · 완성 사진 모두
+   - 부원(설명서 열람, member=true): 준비물 · 만드는 방법 · 안전 주의사항만 */
+function manualHTML(s, G, member){
   const g = G.g; const total = (g.flow||[]).reduce((n,f)=>n+(Number(f.min)||0),0); const when = G.at ? new Date(Number(G.at)) : null;
+  const meta = member ? [g.makeTime ? `완성까지 ${esc(g.makeTime)}` : '']
+    : [s.lead && s.lead.name ? `대표 진행자 ${esc(s.lead.name)}` : '', g.makeTime ? `완성까지 ${esc(g.makeTime)}` : '', g.duration ? esc(g.duration) : ''];
   return `<article class="manual">
-    <header><div class="tag">목공 설명서</div><h2>${esc(s.title)}</h2>
-      <p class="hint">${[s.lead && s.lead.name ? `대표 진행자 ${esc(s.lead.name)}` : '', g.makeTime ? `완성까지 ${esc(g.makeTime)}` : '', g.duration ? esc(g.duration) : ''].filter(Boolean).join(' · ')}${when?` · ${when.getFullYear()}. ${when.getMonth()+1}. ${when.getDate()} 고침`:''}</p></header>
-    ${g.intro ? `<p>${esc(g.intro)}</p>` : ''}
+    <header><div class="tag">작업 설명서</div><h2>${esc(s.title)}</h2>
+      <p class="hint">${meta.filter(Boolean).join(' · ')}${when && !member ? ` · ${when.getFullYear()}. ${when.getMonth()+1}. ${when.getDate()} 고침` : ''}</p></header>
+    ${g.intro && !member ? `<p>${esc(g.intro)}</p>` : ''}
     ${(g.prep||[]).length ? `<section><h3>준비물 · 재료</h3><ul class="checklist">${g.prep.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>` : ''}
-    ${(g.cutting||[]).length ? `<section><h3>준비 방법</h3><ol class="steps">${g.cutting.map(x=>`<li><span>${esc(x)}</span></li>`).join('')}</ol></section>` : ''}
-    ${(g.flow||[]).length ? `<section><h3>진행 순서 ${total?`<span class="hint">총 ${total}분</span>`:''}</h3><ol class="flow">${g.flow.map((f,i)=>`<li><div class="fl-h"><b>${esc(f.title || `${i+1}단계`)}</b>${f.min?`<span>${f.min}분</span>`:''}</div>${f.body?`<p>${esc(f.body)}</p>`:''}${photoGrid(f.photos, `${f.title || (i+1)+'단계'} 과정 사진`)}</li>`).join('')}</ol></section>` : ''}
+    ${(g.cutting||[]).length && !member ? `<section><h3>학습회 준비 단계 <span class="hint">임원진만 보여요</span></h3><ol class="steps">${g.cutting.map(x=>`<li><span>${esc(x)}</span></li>`).join('')}</ol></section>` : ''}
+    ${(g.flow||[]).length ? `<section><h3>만드는 방법 ${total?`<span class="hint">총 ${total}분</span>`:''}</h3><ol class="flow">${g.flow.map((f,i)=>`<li><div class="fl-h"><b>${esc(f.title || `${i+1}단계`)}</b>${f.min?`<span>${f.min}분</span>`:''}</div>${f.body?`<p>${esc(f.body)}</p>`:''}${photoGrid(f.photos, `${f.title || (i+1)+'단계'} 과정 사진`)}</li>`).join('')}</ol></section>` : ''}
     ${g.safety ? `<section class="warnbox"><h3>안전 주의사항</h3><p>${esc(g.safety)}</p></section>` : ''}
-    ${g.tips ? `<section><h3>진행 팁</h3><p>${esc(g.tips)}</p></section>` : ''}
-    ${(g.finalPhotos||[]).length ? `<section class="final"><h3>완성 사진</h3>${photoGrid(g.finalPhotos, '완성 사진')}</section>` : ''}
-    <p class="print-only hint">도각도각 · 목방 목공 학습회 목공 설명서 · ${esc(termLabel(termFor(s)))}</p>
+    ${g.tips && !member ? `<section><h3>진행 팁 <span class="hint">임원진만 보여요</span></h3><p>${esc(g.tips)}</p></section>` : ''}
+    ${(g.finalPhotos||[]).length && !member ? `<section class="final"><h3>완성 사진</h3>${photoGrid(g.finalPhotos, '완성 사진')}</section>` : ''}
+    <p class="print-only hint">도각도각 · 목방 목공 동아리 작업 설명서${member ? '' : ` · ${esc(termLabel(termFor(s)))}`}</p>
   </article>`;
 }
 function renderGuide(){
@@ -2581,11 +3105,11 @@ function renderGuide(){
   if (S.hdOpen && S.hdKind === 'guide'){ p.innerHTML = guideForm(s, G, others); loadPhotos(); return; }
   const has = G && hasGuide(G.g);
   p.innerHTML = `
-    <div class="actions"><h2>목공 설명서</h2><span class="spacer"></span>
+    <div class="actions"><h2>작업 설명서</h2><span class="spacer"></span>
       ${has ? `<button type="button" class="btn sm" data-act="print">인쇄하기</button>` : ''}
       <button type="button" class="btn sm ${has?'':'primary'}" data-act="guide-edit">${has ? '설명서 고치기' : '설명서 쓰기'}</button></div>
     <span class="msg ${S.hdMsgCls}" role="status">${esc(S.hdMsg)}</span>
-    ${has ? manualHTML(s, G) : `<div class="empty">아직 목공 설명서가 없어요. 준비물, 준비 방법, 진행 순서와 사진을 정리해 두면 다음 학기 임원진도 그대로 따라 할 수 있어요.</div>`}
+    ${has ? manualHTML(s, G) : `<div class="empty">아직 작업 설명서가 없어요. 준비물, 학습회 준비 단계, 만드는 방법과 사진을 정리해 두면 다음 학기 임원진도 그대로 따라 할 수 있어요. 부원에게는 준비물 · 만드는 방법 · 안전 주의사항만 보여요.</div>`}
 `;
   loadPhotos();
 }
@@ -2598,34 +3122,34 @@ function photoEdit(ids, key, label){
 function guideForm(s, G, others){
   const g = S.hd;
   return `<form id="gd-form" class="myform" novalidate>
-    <h3>목공 설명서 ${G && hasGuide(G.g) ? '고치기' : '쓰기'}</h3>
+    <h3>작업 설명서 ${G && hasGuide(G.g) ? '고치기' : '쓰기'}</h3>
     ${others.length ? `<div class="field" style="max-width:420px"><label for="gd-import">다른 학습회 설명서 가져오기</label><select id="gd-import"><option value="">가져오지 않음</option>${others.map(o=>`<option value="${esc(o.s.id)}">${esc(o.s.title)} · ${esc(termLabel(termFor(o.s)))}</option>`).join('')}</select><p class="hint">같은 주제를 다시 열 때 지난 설명서를 불러와서 고쳐 쓰세요. 사진도 같이 가져와요.</p></div>` : ''}
     <div class="row">
-      <div class="field"><label for="gd-intro">한 줄 소개</label><textarea id="gd-intro" data-g="intro" maxlength="400" placeholder="무엇을 어떤 크기로 만드는지, 회차 구성은 어떤지">${esc(g.intro)}</textarea></div>
+      <div class="field"><label for="gd-intro">한 줄 소개 <span class="hint">부원 설명서 목록 카드에 보여요</span></label><textarea id="gd-intro" data-g="intro" maxlength="400" placeholder="무엇을 어떤 크기로 만드는지, 회차 구성은 어떤지">${esc(g.intro)}</textarea></div>
       <div class="field"><label for="gd-make">완성까지 걸리는 시간 <span class="hint">처음부터 완성까지 실제로 드는 시간</span></label><input type="text" id="gd-make" data-g="makeTime" maxlength="30" value="${esc(g.makeTime)}" placeholder="예: 약 4시간 30분"></div>
     </div>
     <div class="field" style="max-width:420px"><label for="gd-dur">회차 구성</label><input type="text" id="gd-dur" data-g="duration" maxlength="30" value="${esc(g.duration)}" placeholder="예: 회차당 2시간 / 두 번, 하루 2시간 30분"></div>
     <div class="row">
-      <div class="field"><label for="gd-prep">준비물 · 재료 <span class="hint">한 줄에 하나</span></label><textarea id="gd-prep" data-g="prep" rows="7" placeholder="피나무 블록 50×50×80mm&#10;카빙나이프 (1인 1자루)&#10;방검 장갑 M·L">${esc(g.prep)}</textarea></div>
-      <div class="field"><label for="gd-cut">준비 방법 <span class="hint">한 줄에 한 단계 (재단, 초벌 가공, 자리 배치 등)</span></label><textarea id="gd-cut" data-g="cutting" rows="7" placeholder="블록에 옆모습 도안을 그려요.&#10;밴드 쏘로 도안 바깥 2mm를 남기고 잘라요.">${esc(g.cutting)}</textarea></div>
+      <div class="field"><label for="gd-prep">준비물 · 재료 <span class="hint">부원에게도 보여요 · 한 줄에 하나</span></label><textarea id="gd-prep" data-g="prep" rows="7" placeholder="피나무 블록 50×50×80mm&#10;카빙나이프 (1인 1자루)&#10;방검 장갑 M·L">${esc(g.prep)}</textarea></div>
+      <div class="field"><label for="gd-cut">학습회 준비 단계 <span class="hint">임원진만 보여요 · 학습회 전에 미리 해 둘 일, 한 줄에 하나 (재단, 초벌 가공, 자리 배치 등)</span></label><textarea id="gd-cut" data-g="cutting" rows="7" placeholder="블록에 옆모습 도안을 그려요.&#10;밴드 쏘로 도안 바깥 2mm를 남기고 잘라요.">${esc(g.cutting)}</textarea></div>
     </div>
-    <div class="field"><div class="lbl">진행 순서 <span class="hint">단계마다 과정 사진을 4장까지 넣을 수 있어요</span></div>
+    <div class="field"><div class="lbl">만드는 방법 <span class="hint">부원에게도 보여요 · 단계마다 과정 사진을 4장까지 넣을 수 있어요</span></div>
       <div class="flow-edit" id="flow-edit">${flowRows(g.flow)}</div>
       <div><button type="button" class="btn ghost sm" data-act="add-flow">+ 단계 추가</button></div></div>
     <div class="row">
-      <div class="field"><label for="gd-safe">안전 주의사항</label><textarea id="gd-safe" data-g="safety" maxlength="1000" placeholder="예: 테이블 쏘는 진행자가 옆에 있을 때만, 푸시 스틱 필수">${esc(g.safety)}</textarea></div>
-      <div class="field"><label for="gd-tips">진행 팁</label><textarea id="gd-tips" data-g="tips" maxlength="1000" placeholder="다음 진행자에게 알려 주고 싶은 것">${esc(g.tips)}</textarea></div>
+      <div class="field"><label for="gd-safe">안전 주의사항 <span class="hint">부원에게도 보여요</span></label><textarea id="gd-safe" data-g="safety" maxlength="1000" placeholder="예: 테이블 쏘는 진행자가 옆에 있을 때만, 푸시 스틱 필수">${esc(g.safety)}</textarea></div>
+      <div class="field"><label for="gd-tips">진행 팁 <span class="hint">임원진만 보여요</span></label><textarea id="gd-tips" data-g="tips" maxlength="1000" placeholder="다음 진행자에게 알려 주고 싶은 것">${esc(g.tips)}</textarea></div>
     </div>
-    <div class="field"><div class="lbl">완성 사진 <span class="hint">8장까지</span></div>${photoEdit(g.finalPhotos, 'final', '완성 사진')}</div>
+    <div class="field"><div class="lbl">완성 사진 <span class="hint">8장까지 · 첫 장은 부원 설명서 목록 카드 사진이 돼요</span></div>${photoEdit(g.finalPhotos, 'final', '완성 사진')}</div>
     <div class="actions"><button class="btn primary" type="submit" id="gd-submit">설명서 저장하기</button><button class="btn ghost" type="button" data-act="close-form">닫기</button><span class="msg err" id="gd-msg" role="status"></span></div>
   </form>`;
 }
 function flowRows(flow){
   return flow.map((f,i) => `<div class="flow-row" data-fi="${i}">
-    <input type="text" data-fl="title" aria-label="단계 ${i+1} 이름" maxlength="60" value="${esc(f.title)}" placeholder="${i+1}단계 이름 (예: 안전 교육)">
+    <input type="text" data-fl="title" aria-label="단계 ${i+1} 이름" maxlength="60" value="${esc(f.title)}" placeholder="${i+1}단계 이름 (예: 도안 그리기)">
     <input type="number" data-fl="min" aria-label="단계 ${i+1} 시간(분)" min="0" max="600" value="${esc(f.min)}" placeholder="분">
     <button type="button" class="icon-x" data-act="rm-flow" aria-label="단계 ${i+1} 빼기">✕</button>
-    <textarea data-fl="body" aria-label="단계 ${i+1} 설명" maxlength="600" placeholder="어떻게 진행하는지">${esc(f.body)}</textarea>
+    <textarea data-fl="body" aria-label="단계 ${i+1} 설명" maxlength="600" placeholder="어떻게 만드는지">${esc(f.body)}</textarea>
     ${photoEdit(f.photos || [], 'flow-' + i, `${i+1}단계 과정 사진`)}</div>`).join('');
 }
 const phSet = key => key === 'final' ? S.hd.finalPhotos : S.hd.flow[Number(key.slice(5))].photos;
@@ -2681,7 +3205,7 @@ gdPanel.addEventListener('submit', async e => {
   btn.disabled = true; msg.className = 'msg'; msg.textContent = '저장하는 중…';
   try { S.data = await api('saveGuide', S.pw, S.sid, body); }
   catch(err){ btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
-  S.hdOpen = false; S.hd = null; S.hdMsg = '목공 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide(); if (TUT) tutEvent('guideSaved');
+  S.hdOpen = false; S.hd = null; S.hdMsg = '작업 설명서를 저장했어요.'; S.hdMsgCls = 'ok'; renderGuide(); if (TUT) tutEvent('guideSaved');
 });
 
 /* --- 진행자 기록 (대표: 길게, 보조: 간단히) --- */
@@ -3092,6 +3616,7 @@ function setDemo(which, sid){
   if (which === 'apply') openApply(sid || '');
   else if (which === 'review') openReview(sid || 'sexjewel');
   else if (which === 'guides') openGuides();
+  else if (which === 'exhibit') openExhibit();
   else { if (S.pw) { reload().then(openList); } else openLogin(); }
 }
 /* =========================================================
@@ -3182,7 +3707,7 @@ function exGuide(){
   setVal('#gd-dur', '한 번, 2시간');
   setVal('#gd-prep', '편백 판재 100×100×10mm 2장\n사포 120·240방\n도마용 오일, 천');
   setVal('#gd-cut', '판재를 100mm로 미리 재단해 두기\n자리마다 사포와 오일 놓기');
-  const r1 = document.querySelector('#flow-edit .flow-row'); if (r1){ setVal(r1.querySelector('[data-fl="title"]'), '안전 교육'); setVal(r1.querySelector('[data-fl="min"]'), '10'); setVal(r1.querySelector('[data-fl="body"]'), '밴드 쏘 쓰는 법과 손 위치를 보여 줘요.'); }
+  const r1 = document.querySelector('#flow-edit .flow-row'); if (r1){ setVal(r1.querySelector('[data-fl="title"]'), '사포질하기'); setVal(r1.querySelector('[data-fl="min"]'), '40'); setVal(r1.querySelector('[data-fl="body"]'), '120방으로 모서리를 둥글게 다듬고 240방으로 표면을 매끄럽게 해요.'); }
   setVal('#gd-safe', '밴드 쏘는 진행자가 옆에 있을 때만 써요.');
   setVal('#gd-tips', '오일은 얇게 두 번 바르면 얼룩이 덜 생겨요.');
 }
@@ -3315,13 +3840,13 @@ const TUT_STEPS = [
     body: () => `<p>보조 진행자 카드에 <b>기록 완료</b>가 붙었어요. 고칠 때는 카드의 <b>[고치기 (PIN)]</b>를 누르고 PIN을 넣어요.</p>`,
     enter: () => { if (S.view !== 'session' || S.tab !== 'host') openSession(TUT.sid, 'host'); }, hl: () => [...document.querySelectorAll('#tab-host .hcard')].pop() },
 
-  // 7. 목공 설명서
-  { part: 'host', title: '7. 목공 설명서 쓰기', wait: 'guideOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
+  // 7. 작업 설명서
+  { part: 'host', title: '7. 작업 설명서 쓰기', wait: 'guideOpen', auto: true, waitLabel: '눌러 보면 넘어가요',
     body: () => `<p>다음에 같은 학습회를 열 후배를 위한 설명서예요. <b>[설명서 쓰기]</b>를 눌러 보세요.</p>`,
     enter: () => openSession(TUT.sid, 'guide'), hl: () => document.querySelector('#tab-guide [data-act="guide-edit"]'),
     done: () => !!document.querySelector('#gd-form') },
-  { part: 'host', title: '7. 목공 설명서 채우고 저장하기', ex: ['예시로 채우기', exGuide], wait: 'guideSaved', auto: true, waitLabel: '저장하면 넘어가요',
-    body: () => `<p>한 줄 소개, 소요 시간, 준비물, 준비 방법, <b>진행 순서</b>(단계마다 사진도 넣을 수 있어요), 안전 주의사항, 진행 팁을 적어요.</p><p>다 적었으면 맨 아래 <b>[설명서 저장하기]</b>를 눌러요.</p>`,
+  { part: 'host', title: '7. 작업 설명서 채우고 저장하기', ex: ['예시로 채우기', exGuide], wait: 'guideSaved', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>한 줄 소개, 완성까지 걸리는 시간, 준비물, 학습회 준비 단계, <b>만드는 방법</b>(단계마다 사진도 넣을 수 있어요), 안전 주의사항, 진행 팁을 적어요.</p><p>다 적었으면 맨 아래 <b>[설명서 저장하기]</b>를 눌러요.</p>`,
     hl: '#gd-form' },
   { part: 'host', title: '7. 설명서가 저장됐어요',
     body: () => `<p>이렇게 정리돼서 보여요. <b>[인쇄]</b>를 누르면 설명서만 종이로 뽑을 수 있어요.</p><p>진행자 화면에 들어온 사람이면 누구나 고칠 수 있어요.</p>`,
@@ -3370,8 +3895,8 @@ const TUT_MODS = {
   apply: { name: '신청받기·만족도 조사', desc: '신청 링크·QR을 나누고 출석을 관리한 뒤, 만족도 조사 QR을 띄우고 결과를 봐요.',
     intro: '신청 링크를 나누고 신청·출석을 관리하고, 수업이 끝난 뒤 만족도 조사를 받는 방법까지 볼게요.',
     pick: st => st.part === 'host' && /^2\. 링크와 QR|^[3458]\. /.test(st.title) },
-  guide: { name: '기록·설명서 쓰기', desc: '수업을 마친 뒤 진행자 기록(보조 진행자 포함)을 남기고, 후배를 위한 목공 설명서를 써요.',
-    intro: '수업을 마친 뒤 진행자 기록을 남기고, 다음에 같은 학습회를 열 후배를 위한 목공 설명서를 써 볼게요.',
+  guide: { name: '기록·설명서 쓰기', desc: '수업을 마친 뒤 진행자 기록(보조 진행자 포함)을 남기고, 후배를 위한 작업 설명서를 써요.',
+    intro: '수업을 마친 뒤 진행자 기록을 남기고, 다음에 같은 학습회를 열 후배를 위한 작업 설명서를 써 볼게요.',
     pick: st => st.part === 'host' && /^[67]\. /.test(st.title) },
   guest: { name: '신청자 화면 연습', desc: '참가자가 보는 신청 · 내 신청 확인 · 만족도 조사 화면을 직접 해 봐요.',
     intro: '참가자 입장에서 신청하고, 신청을 확인하고, 평가해 볼게요.',
@@ -3580,7 +4105,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 }
 
 /* 시작 화면: 첫 데이터를 다 불러오면 닫아요. 애니메이션이 보이게 최소 1.8초는 두고, 12초가 지나면 무조건 닫아요. */
-const SPLASH_MIN = 1800;
+const SPLASH_MIN = 900;   // 37판: 1.8초 → 0.9초 (데이터가 오면 그만큼만 보여 주고 넘어가요)
 function hideSplash(){
   const sp = document.getElementById('splash'); if (!sp || sp.dataset.closing) return;
   sp.dataset.closing = '1';
@@ -3607,8 +4132,13 @@ async function init(){
     if (BOOT.view === 'apply'){ await openApply(BOOT.sid); hideSplash(); return; }
     if (BOOT.view === 'review'){ await openReview(BOOT.sid); hideSplash(); return; }
     if (BOOT.view === 'guides'){ await openGuides(BOOT.sid); hideSplash(); return; }
+    if (BOOT.view === 'exhibit'){ await openExhibit(); hideSplash(); return; }
     const saved = store(PWK, 'dg_pw');
-    if (saved){ try { S.data = await api('hostLogin', saved); S.pw = saved; openList(); hideSplash(); return; } catch(e){ store(PWK,'dg_pw', null); } }
+    if (saved){
+      const cached = cacheGet(PWK, 'all');
+      if (cached){ S.data = cached; S.pw = saved; openList(); hideSplash(); bgRefreshAll(); return; }
+      try { S.data = await api('hostLogin', saved); S.pw = saved; rememberAll(S.data); openList(); hideSplash(); return; } catch(e){ store(PWK,'dg_pw', null); }
+    }
     openLogin(); hideSplash(); return;
   }
   $('#demobar').hidden = false;
