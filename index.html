@@ -507,6 +507,12 @@ body.mobile-sim .qr-btn .l-short{display:none} body.mobile-sim .qr-btn .l-long{d
 #splash{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);transition:opacity .38s ease;overflow:hidden}
 #splash.out{opacity:0;pointer-events:none}
+.ap-cd{margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ap-cd[hidden]{display:none}
+.ap-cd .n{font-size:38px;font-weight:700;line-height:1.15;color:var(--wood);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ap-cd .t{font-size:13px}
+.ap-cd .h{max-width:30em}
+.ap-cd [hidden]{display:none}
 #splash:not(.go) .sp-stage{visibility:hidden}
 .sp-stage{width:min(50vw,212px);aspect-ratio:1;overflow:visible}
 .sp-logo{width:100%;height:100%;overflow:visible;display:block}
@@ -1534,6 +1540,7 @@ const miniBrand = t => `<div class="mini-brand">${BRAND_SVG(22)}도각도각 · 
    ========================================================= */
 async function openApply(sid){
   show('apply');
+  apOpening = false; apTries = 0;
   S.ap = { sid: sid || '', info:null, pickS:null, pickC:null, f:{}, agree:false, result:null, msg:'', sn:'', p4:'', mine:null, mineMsg:'', armed:null };
   $('#v-apply').innerHTML = `<div class="empty">신청 화면을 여는 중이에요…</div>`;
   try { S.ap.info = await withLoader(api('getApplyInfo', S.ap.sid)); }
@@ -1570,7 +1577,7 @@ function renderApply(){
         ${s.desc ? `<p class="s-desc" style="margin:0">${esc(s.desc)}</p>` : ''}
         ${(s.tools||[]).length ? `<div class="ap-info"><span class="lbl">사용 장비</span><span>${esc(s.tools.join(', '))}</span></div>` : ''}
         ${noteLines(s.notes).length ? `<div class="ap-notes"><span class="lbl">유의사항</span><ol>${noteLines(s.notes).map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}
-        ${s.state === 'soon' ? `<div class="empty"><b>${esc(fmtDT(s.openAt))}</b>부터 신청할 수 있어요.${s.closeAt ? `<br>마감은 ${esc(fmtDT(s.closeAt))}이에요.` : ''}</div>
+        ${s.state === 'soon' ? `<div class="empty"><b>${esc(fmtDT(s.openAt))}</b>부터 신청할 수 있어요.${s.closeAt ? `<br>마감은 ${esc(fmtDT(s.closeAt))}이에요.` : ''}${cdBox(s.openAt)}</div>
           <div class="cls-opts">${s.classes.map(c2 => `<div class="cls-opt" aria-disabled="true"><b>${esc(c2.label)}</b><span class="d">${esc(datesText(c2.dates))}</span>${c2.time?`<span class="t">${esc(c2.time)}</span>`:''}<span class="seat">정원 ${c2.capacity||'제한 없음'}${c2.capacity?'명':''}</span></div>`).join('')}</div>`
         : !s.open ? `<div class="empty">이 학습회는 신청이 마감됐어요.</div>` : `
         ${s.closeAt ? `<p class="hint" style="margin:0">신청 마감: <b>${esc(fmtDT(s.closeAt))}</b></p>` : ''}
@@ -1597,6 +1604,56 @@ function renderApply(){
       </div>`).join('')}</div>` : '<div class="empty">확인된 신청이 없어요. 학번과 전화번호 뒤 4자리를 다시 확인해 주세요.</div>') : ''}
   </section>`;
   $('#v-apply').innerHTML = h;
+  apWatch();
+}
+/* 43판: 신청 열기 예약 — 3분 전부터 카운트다운, 시간이 되면 새로고침하지 않아도 신청 화면으로 바뀌어요.
+   휴대폰 시계가 서버보다 조금 빠르면 서버가 아직 안 열렸다고 하니, 열릴 때까지 2초마다 다시 확인해요 (최대 3분). */
+const CD_FROM = 3 * 60 * 1000;
+let apTimer = null, apOpening = false, apTries = 0;
+function cdBox(openAt){
+  return `<div class="ap-cd" data-cd="${esc(openAt)}" role="timer" hidden>
+    <span class="t a">신청 열리기까지</span><b class="n num">-:--</b>
+    <span class="t h">시간이 되면 이 화면이 저절로 신청 화면으로 바뀌어요. 새로고침하지 않아도 돼요.</span></div>`;
+}
+const cdText = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+function apTick(){
+  if (S.view !== 'apply' || !S.ap || !S.ap.info){ clearInterval(apTimer); apTimer = null; return; }
+  const now = Date.now(); let due = false;
+  document.querySelectorAll('#v-apply [data-cd]').forEach(el => {
+    const left = Number(el.dataset.cd) - now;
+    if (left <= 0){
+      el.hidden = false;
+      el.querySelector('.h').hidden = true;
+      if (S.ap.cdStop){ el.querySelector('.n').hidden = true; el.querySelector('.a').textContent = '아직 신청이 열리지 않았어요. 잠시 후 새로고침해 주세요.'; return; }
+      due = true; el.querySelector('.n').textContent = '0:00'; el.querySelector('.a').textContent = '신청 화면을 여는 중이에요…'; return;
+    }
+    el.hidden = left > CD_FROM;
+    if (!el.hidden) el.querySelector('.n').textContent = cdText(left);
+  });
+  if (due) apAutoOpen();
+}
+function apWatch(){
+  const soon = S.ap && S.ap.info && !S.ap.result && S.ap.info.sessions.some(s => s.state === 'soon' && s.openAt);
+  if (!soon){ clearInterval(apTimer); apTimer = null; return; }
+  if (!apTimer) apTimer = setInterval(apTick, 1000);   // 화면이 꺼졌다 켜져도 다음 틱에 남은 시간을 다시 계산해요
+  apTick();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && apTimer) apTick(); });
+async function apAutoOpen(){
+  if (apOpening) return; apOpening = true;
+  const A = S.ap, sid = A.sid;
+  try {
+    const info = await api('getApplyInfo', sid);
+    if (S.ap !== A || S.view !== 'apply'){ apOpening = false; return; }
+    A.info = info;
+    const still = info.sessions.some(s => s.state === 'soon' && s.openAt && Number(s.openAt) <= Date.now());
+    if (still && ++apTries <= 90){ setTimeout(() => { apOpening = false; apTick(); }, 2000); return; }   // 서버 시계로는 아직이에요
+    if (still) A.cdStop = true;   // 3분을 기다려도 안 열리면 그만 물어보고 안내만 해요
+    apTries = 0; apOpening = false; renderApply(); return;
+  } catch(e){
+    if (S.ap === A) { setTimeout(() => { apOpening = false; apTick(); }, 3000); return; }   // 잠깐 연결이 끊겨도 다시 시도해요
+  }
+  apOpening = false;
 }
 function applyForm(c){
   const f = S.ap.f; const full = isFull(c);
@@ -1604,7 +1661,7 @@ function applyForm(c){
     <div class="two">
       <div class="field"><label for="ap-name">이름</label><input type="text" id="ap-name" data-f="name" maxlength="20" value="${esc(f.name)}" autocomplete="name"></div>
       <div class="field"><label for="ap-dept">학과</label><input type="text" id="ap-dept" data-f="dept" maxlength="30" value="${esc(f.dept)}" placeholder="예: 산업디자인과"></div>
-      <div class="field"><label for="ap-sn">학번</label><input type="text" id="ap-sn" data-f="studentNo" inputmode="numeric" maxlength="12" value="${esc(f.studentNo)}" placeholder="예: 20231234"></div>
+      <div class="field"><label for="ap-sn">학번</label><input type="text" id="ap-sn" data-f="studentNo" inputmode="numeric" maxlength="9" value="${esc(f.studentNo)}" placeholder="9자리 (예: 202312345)"></div>
       <div class="field"><label for="ap-ph">전화번호</label><input type="tel" id="ap-ph" data-f="phone" inputmode="tel" maxlength="13" value="${esc(f.phone)}" placeholder="010-0000-0000" autocomplete="tel"></div>
     </div>
     <label class="agree" for="ap-agree"><input type="checkbox" id="ap-agree" ${S.ap.agree?'checked':''}><span><b>개인정보 수집·이용 동의 (필수)</b><br>신청 확인, 출석, 연락을 위해 이름·학과·학번·전화번호를 받아요.<br>동아리 임원진만 보고 학습회 운영에만 써요.</span></label>
@@ -1641,6 +1698,7 @@ apBox.addEventListener('submit', async e => {
   }
   if (e.target.id !== 'ap-form') return;
   const btn = $('#ap-submit'); const msg = $('#ap-msg');
+  if (String(A.f.studentNo || '').replace(/\D/g, '').length !== 9){ msg.className = 'msg err'; msg.textContent = A.msg = '학번은 9자리 숫자로 적어 주세요. (예: 202312345)'; $('#ap-sn').focus(); return; }   // 44판
   btn.disabled = true; msg.className = 'msg'; msg.textContent = '신청하는 중…';
   try {
     A.result = await api('apply', A.pickS, A.pickC, Object.assign({}, A.f, {agree: A.agree}));
@@ -1926,6 +1984,25 @@ function exhPrint(docsHTML){
 }
 
 /* ---------------- 부원: 출품 신청 · 수정 ---------------- */
+/* 44판: 학번 · 이름으로 찾을 때, 지금 보고 있는 전시회에 없으면 다른 전시회에서도 찾아봐요
+   (전시회가 여러 개이거나, 받던 전시회가 마감돼 다른 전시회가 먼저 보일 때 "없어요"가 나오지 않게) */
+async function exhFindAny(sn, name){
+  const cur = EXM.info && EXM.info.id;
+  const all = ((EXM.all && EXM.all.list) || []).filter(e => e.id && e.id !== cur);
+  let first = null;
+  for (const id of [cur, ...all.filter(e => e.open).map(e => e.id), ...all.filter(e => !e.open).map(e => e.id)]){
+    if (!id) continue;
+    try {
+      const r = await api('exhFind', id, sn, name);
+      if (id !== cur){ const e = all.find(x => x.id === id); EXM.info = Object.assign({ ready: true }, e); r.moved = e.title || '다른 전시회'; }
+      return r;
+    } catch(err){
+      if (!/맞는 출품 신청이 없어요/.test(err.message)) throw err;   // 잠김 · 연결 오류는 바로 알려 줘요
+      first = first || err;
+    }
+  }
+  throw first || new Error('학번과 이름이 맞는 출품 신청이 없어요. 신청할 때 적은 학번과 이름을 확인해 주세요.');
+}
 /* 열린 전시회가 하나면 바로, 여러 개면 고르는 화면, 없으면 가장 최근 전시회(마감 안내)를 보여 줘요. ?v=x&s=전시회ID로 바로 열 수도 있어요 */
 function exhPick(want){
   const L = (EXM.all && EXM.all.list) || [];
@@ -2024,7 +2101,7 @@ function exhSheetHTML(f, i, n){
       <div class="xd-row xd-title">${esc(title)} 전시기획서</div>
       <div class="xd-row xd-3">
         <label>이름: <input type="text" ${pid('name')} data-xp="name" maxlength="20" value="${esc(P.name)}" autocomplete="name" ${first ? '' : 'disabled'}></label>
-        <label>학번: <input type="text" ${pid('sn')} data-xp="sn" inputmode="numeric" maxlength="12" value="${esc(P.sn)}" ${first && !edit ? '' : 'disabled'}></label>
+        <label>학번: <input type="text" ${pid('sn')} data-xp="sn" inputmode="numeric" maxlength="9" placeholder="9자리" value="${esc(P.sn)}" ${first && !edit ? '' : 'disabled'}></label>
         <label>기수: <input type="text" ${pid('gen')} data-xp="gen" inputmode="numeric" maxlength="3" value="${esc(P.gen)}" placeholder="38" class="xd-short" ${first ? '' : 'disabled'}>기</label>
       </div>
       <div class="xd-row xd-c"><label class="xd-wide">제목: <input type="text" ${pid('work')} data-xf="work" maxlength="60" value="${esc(f.work)}" placeholder="작품 제목"></label></div>
@@ -2121,13 +2198,14 @@ exV.addEventListener('submit', async e => {
     const sn = $('#xl-sn').value.trim(), name = $('#xl-name').value.trim(), m = $('#xl-msg'); EXM.lk.sn = sn; EXM.lk.name = name;
     if (!sn || !name){ m.textContent = '학번과 이름을 넣어 주세요.'; return; }
     $('#xl-go').disabled = true; m.className = 'msg'; m.textContent = '찾는 중…';
-    try { const r = await withLoader(api('exhFind', EXM.info.id, sn, name)); Object.assign(EXM, { sn, nm: name, recs: r.recs || [r.rec], canEdit: r.canEdit, mode: 'view', msg: '' }); renderExhibit(); window.scrollTo(0,0); }
+    try { const r = await withLoader(exhFindAny(sn, name)); Object.assign(EXM, { sn, nm: name, recs: r.recs || [r.rec], canEdit: r.canEdit, mode: 'view', msg: r.moved ? `‘${r.moved}’에 낸 출품이라 그 전시회로 열었어요.` : '', msgCls: 'ok' }); renderExhibit(); window.scrollTo(0,0); }
     catch(err){ $('#xl-go').disabled = false; m.className = 'msg err'; m.textContent = err.message; }
     return;
   }
   if (e.target.id !== 'exh-form') return;
   const m = $('#xf-msg'); const edit = EXM.mode === 'edit';
   const items = EXM.fs.map(f => Object.assign({}, EXM.p, f, edit ? { sn: EXM.recs[0].sn } : {}));
+  if (!edit && String(items[0].sn || '').replace(/\D/g, '').length !== 9){ m.className = 'msg err'; m.textContent = '학번은 9자리 숫자로 적어 주세요. (예: 202312345)'; return; }   // 44판
   try { exhCleanAll(items, edit ? EXM.recs[0].sn : null); } catch(err){ m.textContent = err.message; return; }
   $('#xf-go').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
   try {
@@ -2471,7 +2549,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 42판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 44판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
