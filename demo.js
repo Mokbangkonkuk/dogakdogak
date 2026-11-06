@@ -14,12 +14,12 @@ function makeCore(store, env) {
     sn = String(sn || '').replace(/\D/g, '');
     const key = 'exhfail_' + e.id + sn; const fails = Number(env.cacheGet(key) || 0);
     if (fails >= 5) fail('여러 번 틀려서 10분 동안 잠겼어요. 잠시 후 다시 시도해 주세요.');
-    const recs = exhRowsOf(e.id).filter(x => x.sn === sn);
-    if (!recs.length || !exhSameName(recs[0].name, name)){ env.cachePut(key, String(fails + 1), 600); fail('학번과 이름이 맞는 출품 신청이 없어요. 신청할 때 적은 학번과 이름을 확인해 주세요.'); }
-    env.cacheRemove(key); return recs;
+    const m = exhMatch(exhRowsOf(e.id), sn, name);   // 46판: 공동 작품자로 들어간 장도 함께
+    if (!m.me){ env.cachePut(key, String(fails + 1), 600); fail('학번과 이름이 맞는 출품 신청이 없어요. 신청할 때 적은 학번과 이름을 확인해 주세요.'); }
+    env.cacheRemove(key); return m;
   }
   const exhDetail_ = id => { const e = exhFind_(id); return { ex: Object.assign(exhPubEx(e), { openFlag: !!e.open, at: e.at, url: '' }), list: exhRowsOf(e.id).map(exhPub) }; };
-  const exhAdmin_ = () => ({ list: EXL.map(e => { const rs = exhRowsOf(e.id); return Object.assign(exhPubEx(e), { openFlag: !!e.open, at: e.at, url: '', n: rs.length, pn: new Set(rs.map(r => r.sn)).size, objN: rs.reduce((k, r) => k + (r.objs || []).length, 0) }); }) });
+  const exhAdmin_ = () => ({ list: EXL.map(e => { const rs = exhRowsOf(e.id); return Object.assign(exhPubEx(e), { openFlag: !!e.open, at: e.at, url: '', n: rs.length, pn: exhPeople(rs), objN: rs.reduce((k, r) => k + (r.objs || []).length, 0) }); }) });
   const RATED = env.ratings || {};   // 미리보기용 부원 난이도 평가
   const TOOK = env.times || {};      // 미리보기용 부원 걸린 시간
   const PLACES = ['1동방', '2동방'];
@@ -416,9 +416,9 @@ function makeCore(store, env) {
       const rec = Object.assign({ id: 'x' + env.uid(), exh: e.id, exhTitle: e.title, at: exhStamp(now()), upd: exhStamp(now()), pin: '' }, r);
       store.insert('exh', rec); return exhPub(rec);
     },
-    exhFind: (exhId, sn, name) => { const e = exhFind_(exhId); const recs = exhMine(e, sn, name).map(exhPub); return { recs, rec: recs[0], canEdit: exhOpenNow(e, now()) }; },
+    exhFind: (exhId, sn, name) => { const e = exhFind_(exhId); const m = exhMine(e, sn, name); const recs = exhMineOut(m); return { recs, rec: recs[0], me: m.me, canEdit: exhOpenNow(e, now()) }; },
     exhUpdate: (exhId, sn, name, f, recId) => {
-      const e = exhFind_(exhId); const mine = exhMine(e, sn, name); if (!exhOpenNow(e, now())) fail('출품 신청이 마감돼서 고칠 수 없어요. 임원진에게 연락해 주세요.');
+      const e = exhFind_(exhId); const mine = exhMine(e, sn, name).own; if (!exhOpenNow(e, now())) fail('출품 신청이 마감돼서 고칠 수 없어요. 임원진에게 연락해 주세요.');
       const rec = recId ? mine.find(x => x.id === String(recId)) : mine[0]; if (!rec) fail('고칠 기획서를 찾을 수 없어요. 처음부터 다시 불러와 주세요.');
       const r = exhClean(Object.assign({}, f, { sn: rec.sn })); const nx = Object.assign({}, rec, r, { upd: exhStamp(now()) });
       store.update('exh', nx);
@@ -436,16 +436,14 @@ function makeCore(store, env) {
       return { recs, had: had.length, canEdit: true };
     },
     exhUpdateAll: (exhId, sn, name, items, dels) => {
-      const e = exhFind_(exhId); const mine = exhMine(e, sn, name); if (!exhOpenNow(e, now())) fail('출품 신청이 마감돼서 고칠 수 없어요. 임원진에게 연락해 주세요.');
-      const rs = exhCleanAll(items, mine[0].sn); const ids = new Set(mine.map(x => x.id)); const t = exhStamp(now());
-      const gone = new Set((dels || []).map(String).filter(id => ids.has(id) && !items.some(f => f && f.id === id)));
-      if (mine.length - gone.size + rs.filter((r, i) => !ids.has(String(items[i].id || ''))).length > 10) fail('한 사람이 낼 수 있는 기획서는 10장까지예요.');
-      gone.forEach(id => store.remove('exh', id));
-      rs.forEach((r, i) => { const id = String(items[i].id || ''); const old = ids.has(id) && mine.find(x => x.id === id);
-        if (old) store.update('exh', Object.assign({}, old, r, { upd: exhStamp(now()) }));
-        else store.insert('exh', Object.assign({ id: 'x' + env.uid(), exh: e.id, exhTitle: e.title, at: t, upd: t, pin: '' }, r)); });
-      mine.forEach(x => { if (!gone.has(x.id) && !rs.some((r, i) => items[i].id === x.id)) store.update('exh', Object.assign({}, x, { name: rs[0].name, gen: rs[0].gen })); });
-      return { recs: exhRowsOf(e.id).filter(x => x.sn === mine[0].sn).map(exhPub), canEdit: true };
+      const e = exhFind_(exhId); const m = exhMine(e, sn, name); if (!exhOpenNow(e, now())) fail('출품 신청이 마감돼서 고칠 수 없어요. 임원진에게 연락해 주세요.');
+      const plan = exhPlanUpdate(m, items, dels); const t = exhStamp(now()); const done = new Set();
+      plan.ups.forEach(u => { const nx = Object.assign({}, u.old, { work: u.r.work, objs: u.r.objs, desc: u.r.desc, co: u.r.co, upd: t }, u.own && plan.who ? plan.who : {}); store.update('exh', nx); done.add(nx.id); });
+      if (plan.who) m.own.forEach(x => { if (!done.has(x.id) && !plan.gone.includes(x.id) && (x.name !== plan.who.name || x.gen !== plan.who.gen)) store.update('exh', Object.assign({}, x, plan.who)); });
+      plan.gone.forEach(id => store.remove('exh', id));
+      plan.adds.forEach(r => store.insert('exh', Object.assign({ id: 'x' + env.uid(), exh: e.id, exhTitle: e.title, at: t, upd: t, pin: '' }, r)));
+      const after = exhMatch(exhRowsOf(e.id), m.me.sn, null);
+      return { recs: exhMineOut(after), me: after.me || m.me, canEdit: true };
     },
     exhAdmin: pw => { auth(pw); return exhAdmin_(); },
     exhDetail: (pw, id) => { auth(pw); return exhDetail_(id); },

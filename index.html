@@ -767,6 +767,12 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .exh-doc.xd-edit input[type=text]:focus,.exh-doc.xd-edit textarea:focus{border-bottom-color:var(--wood);background:#fff8ee}
 .exh-doc.xd-edit input:disabled{background:transparent;border-bottom-color:transparent;color:#111;-webkit-text-fill-color:#111}
 .exh-doc.xd-edit .xd-short{max-width:4.5em;text-align:center}
+.exh-doc .xd-ownerhint{font-size:12.5px;background:#fafaf6}
+.exh-mine-no .chip{margin-left:8px}
+.exh-doc .xd-cohead{display:flex;align-items:center;justify-content:space-between;padding:3px 8px 3px 14px;background:#f3f1ea;border-bottom:1px solid #222;font-size:12.5px;font-weight:600;color:var(--wood)}
+.exh-doc .xd-cohead .btn{padding:3px 10px;min-height:0;font-size:12.5px}
+.exh-doc .xd-coadd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:#fafaf6}
+.exh-doc .xd-coadd .hint{font-size:12.5px}
 .exh-doc.xd-edit .xd-wide input{max-width:24em;text-align:center}
 .exh-doc.xd-edit textarea{border:1.5px dashed #c9cec9;border-radius:6px;min-height:120px;resize:vertical;margin-top:4px}
 .exh-doc .xd-lines{display:flex;flex-direction:column;gap:3px}
@@ -1233,6 +1239,10 @@ function exhClean(f) {
   }).filter(function (o) { return o.n || o.m || o.w || o.d || o.h; });
   var r = { name: cut(f.name, 20), sn: String(f.sn == null ? '' : f.sn).replace(/\D/g, '').slice(0, 12),
     gen: String(f.gen == null ? '' : f.gen).replace(/\D/g, '').slice(0, 3), work: cut(f.work, 60), objs: objs, desc: cut(f.desc, 1500) };
+  // 45판: 공동 작품자 (여럿이 함께 만든 작품). 이름 · 학번 · 기수, 9명까지
+  var co = (Array.isArray(f.co) ? f.co : []).slice(0, 9).map(function (p) {
+    p = p || {}; return { name: cut(p.name, 20), sn: String(p.sn == null ? '' : p.sn).replace(/\D/g, '').slice(0, 12), gen: String(p.gen == null ? '' : p.gen).replace(/\D/g, '').slice(0, 3) };
+  }).filter(function (p) { return p.name || p.sn || p.gen; });
   if (!r.name) throw new Error('이름을 적어 주세요.');
   if (r.sn.length < 6) throw new Error('학번을 숫자로 적어 주세요.');
   if (!r.gen) throw new Error('기수를 숫자로 적어 주세요. (예: 38)');
@@ -1240,6 +1250,16 @@ function exhClean(f) {
   if (!objs.length) throw new Error('작품(오브제)을 하나 이상 적어 주세요.');
   if (objs.some(function (o) { return !o.n; })) throw new Error('작품(오브제)마다 작품 설명을 적어 주세요. (예: 작은 접시)');
   if (objs.some(function (o) { return !o.w || !o.d || !o.h; })) throw new Error('작품(오브제)마다 크기(가로 · 세로 · 높이)를 mm 숫자로 적어 주세요.');
+  var seen = {}; seen[r.sn] = 1;
+  co.forEach(function (p, i) {
+    var L = '공동 작품자' + (co.length > 1 ? ' ' + (i + 1) : '') + ': ';
+    if (!p.name) throw new Error(L + '이름을 적어 주세요.');
+    if (p.sn.length !== 9) throw new Error(L + '학번은 9자리 숫자로 적어 주세요. (예: 202312345)');
+    if (!p.gen) throw new Error(L + '기수를 숫자로 적어 주세요. (예: 38)');
+    if (seen[p.sn]) throw new Error(L + (p.sn === r.sn ? '신청하는 사람과 학번이 같아요. 다른 사람만 적어 주세요.' : '같은 학번이 두 번 들어갔어요.'));
+    seen[p.sn] = 1;
+  });
+  r.co = co;
   return r;
 }
 /* 기획서 여러 장: 이름 · 학번 · 기수는 첫 장 것으로 모두 맞추고, 틀린 곳은 "기획서 2:"처럼 알려 줘요 */
@@ -1249,9 +1269,58 @@ function exhCleanAll(items, sn) {
   var p = items[0] || {};
   return items.map(function (f, i) {
     f = f || {};
-    var g = { name: p.name, sn: sn || p.sn, gen: p.gen, work: f.work, objs: f.objs, desc: f.desc };
+    var g = { name: p.name, sn: sn || p.sn, gen: p.gen, work: f.work, objs: f.objs, desc: f.desc, co: f.co };
     try { return exhClean(g); } catch (err) { throw new Error((items.length > 1 ? '기획서 ' + (i + 1) + ': ' : '') + err.message); }
   });
+}
+/* 공동 작품자 한 줄: "김하늘 202312345 38기, 박서윤 202411111 39기" */
+function exhCoText(co) { return (co || []).map(function (p) { return p.name + ' ' + p.sn + ' ' + p.gen + '기'; }).join(', '); }
+/* 출품 인원: 신청한 사람 + 공동 작품자 (학번으로 한 번씩만 세요) */
+function exhPeople(list) { var s = {}; (list || []).forEach(function (r) { if (r.sn) s[r.sn] = 1; (r.co || []).forEach(function (p) { if (p.sn) s[p.sn] = 1; }); }); return Object.keys(s).length; }
+/* 46판: 학번 · 이름으로 내 기획서 찾기 — 내가 신청한 것(own) + 공동 작품자로 들어간 것(co)
+   name을 null로 주면 이름은 보지 않아요 (저장한 뒤 다시 모을 때) */
+function exhMatch(list, sn, name) {
+  sn = String(sn || '').replace(/\D/g, '');
+  var chk = function (a) { return name === null || exhSameName(a, name); };
+  var own = (list || []).filter(function (r) { return r.sn === sn; });
+  if (own.length && !chk(own[0].name)) own = [];
+  var co = (list || []).filter(function (r) { return r.sn !== sn && (r.co || []).some(function (p) { return p.sn === sn && chk(p.name); }); });
+  var me = null;
+  if (own.length) me = { name: own[0].name, sn: sn, gen: own[0].gen };
+  else if (co.length) { var q = co[0].co.filter(function (p) { return p.sn === sn; })[0]; me = { name: q.name, sn: sn, gen: q.gen }; }
+  return { own: own, co: co, me: me };
+}
+/* 찾은 기획서를 화면에 보낼 때: 내가 대표(own)인지 공동 작품자(co)인지 표시해요 */
+function exhMineOut(m) {
+  return m.own.map(function (r) { return Object.assign(exhPub(r), { role: 'own' }); })
+    .concat(m.co.map(function (r) { return Object.assign(exhPub(r), { role: 'co' }); }));
+}
+/* 내 기획서 모두 고치기 (대표 · 공동 작품자 모두): 무엇을 바꿀지 정리해요
+   - 내가 대표인 장: 내용 · 공동 작품자를 고치고, 이름 · 기수는 내가 대표인 장 모두 같이 바꿔요
+   - 공동 작품자로 들어간 장: 내용 · 공동 작품자만 고쳐요 (대표의 이름 · 학번 · 기수는 그대로, 출품 취소는 대표만)
+   - id 없는 장: 내가 대표로 새로 내요 */
+function exhPlanUpdate(m, items, dels) {
+  items = Array.isArray(items) ? items.slice(0, 20) : [];
+  if (!items.length) throw new Error('기획서를 한 장 이상 적어 주세요.');
+  var byId = {};
+  m.own.forEach(function (r) { byId[r.id] = { r: r, own: true }; });
+  m.co.forEach(function (r) { if (!byId[r.id]) byId[r.id] = { r: r, own: false }; });
+  var isCo = function (f) { var h = byId[String((f && f.id) || '')]; return !!(h && !h.own); };
+  var p = items.filter(function (f) { return !isCo(f); })[0] || {};
+  var ups = [], adds = [], who = null;
+  items.forEach(function (f, i) {
+    f = f || {}; var hit = byId[String(f.id || '')], L = items.length > 1 ? '기획서 ' + (i + 1) + ': ' : '';
+    var g = hit && !hit.own ? { name: hit.r.name, sn: hit.r.sn, gen: hit.r.gen } : { name: p.name, sn: m.me.sn, gen: p.gen };
+    var r;
+    try { r = exhClean({ name: g.name, sn: g.sn, gen: g.gen, work: f.work, objs: f.objs, desc: f.desc, co: f.co }); } catch (e) { throw new Error(L + e.message); }
+    if (hit && !hit.own && !r.co.some(function (c) { return c.sn === m.me.sn; })) throw new Error(L + '공동 작품자에 내 학번(' + m.me.sn + ')이 있어야 해요. 이 작품에서 빠지려면 대표에게 말해 주세요.');
+    if (!(hit && !hit.own) && !who) who = { name: r.name, gen: r.gen };
+    if (hit) ups.push({ old: hit.r, own: hit.own, r: r }); else adds.push(r);
+  });
+  var keep = {}; ups.forEach(function (u) { keep[u.old.id] = 1; });
+  var gone = (Array.isArray(dels) ? dels : []).map(String).filter(function (id) { return byId[id] && byId[id].own && !keep[id]; });
+  if (m.own.length - gone.length + adds.length > 10) throw new Error('한 사람이 낼 수 있는 기획서는 10장까지예요.');
+  return { ups: ups, adds: adds, gone: gone, who: who };
 }
 /* 기획서 모양: "120*70*20, 70*50*150" / "작은 접시, 사과: 호두" */
 function exhSizes(objs) {
@@ -1386,7 +1455,7 @@ function groupSimilar(texts){
 
 /* ---------- 미리보기용 가짜 서버 · 튜토리얼 연습용 규칙은 demo.js에 따로 있어요 (42판) ----------
    실제 서버로 도는 사이트에서는 튜토리얼을 시작할 때만 불러와서, 앱을 처음 여는 게 가벼워요. */
-const DEMO_JS = 'demo.js?v=42';
+const DEMO_JS = 'demo.js?v=46';
 let Demo = null, demoJsP = null;
 function loadDemoJs(){
   if (window.dgBuildDemo) return Promise.resolve();
@@ -1958,7 +2027,10 @@ $('#v-guides').addEventListener('click', async e => {
    ========================================================= */
 const FRAME_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="13" rx="1.5"/><path d="M7 13l3.2-3.6 2.6 2.6 1.8-1.8L17 13"/><path d="M9 20.5l3-4 3 4"/></svg>';
 const EXM = { all: null, info: null, mode: 'home', fs: null, p: null, dels: [], sn: '', nm: '', recs: [], canEdit: false, msg: '', msgCls: '', lk: { sn: '', name: '' } };
-const exhBlank = () => ({ work: '', objs: [{ n: '', m: '', w: '', d: '', h: '' }], desc: '' });
+/* 46판: 지금 찾아 들어온 사람 (대표든 공동 작품자든) */
+const exhMe = () => EXM.me || (EXM.recs && EXM.recs[0] ? { name: EXM.recs[0].name, sn: EXM.recs[0].sn, gen: EXM.recs[0].gen } : { name: EXM.nm || '', sn: EXM.sn || '', gen: '' });
+const exhIsCo = r => r && r.role === 'co';
+const exhBlank = () => ({ work: '', objs: [{ n: '', m: '', w: '', d: '', h: '' }], desc: '', co: [] });
 function exhStateText(I){
   if (!I || !I.ready) return { cls: 'todo', t: '아직 준비 중이에요' };
   if (I.open) return { cls: 'done', t: I.closeAt ? `신청 받는 중 · ${fmtDT(I.closeAt)} 마감` : '신청 받는 중' };
@@ -1970,6 +2042,7 @@ function exhDocHTML(rec, title){
   return `<article class="exh-doc">
     <div class="xd-row xd-title">${esc(title || rec.exhTitle || '')} 전시기획서</div>
     <div class="xd-row xd-3"><div>이름: ${esc(rec.name)}</div><div>학번: ${esc(rec.sn)}</div><div>기수: ${esc(rec.gen)}기</div></div>
+    ${(rec.co || []).map(p => `<div class="xd-row xd-3"><div>이름: ${esc(p.name)}</div><div>학번: ${esc(p.sn)}</div><div>기수: ${esc(p.gen)}기</div></div>`).join('')}
     <div class="xd-row xd-c">제목: ${esc(rec.work)}</div>
     <div class="xd-row xd-2"><div>작품(오브제) 개수: ${(rec.objs || []).length}</div><div class="xd-c">각 작품(오브제)의 사이즈(w*d*h, mm):<small>${esc(exhSizes(rec.objs))}</small></div></div>
     <div class="xd-row xd-head">작품 설명</div>
@@ -2044,9 +2117,9 @@ function renderExhibit(){
   if (EXM.mode === 'new' || EXM.mode === 'edit'){ v.innerHTML = head + exhFormHTML(); return; }
   if (EXM.mode === 'view' && EXM.recs.length){
     const n = EXM.recs.length;
-    v.innerHTML = head + msg + `<div class="exh-mine-top"><span><b>${esc(EXM.recs[0].name)}</b> 님의 전시기획서 <b class="num">${n}</b>장</span>
+    v.innerHTML = head + msg + `<div class="exh-mine-top"><span><b>${esc(exhMe().name)}</b> 님의 전시기획서 <b class="num">${n}</b>장${EXM.recs.some(exhIsCo) ? ` <span class="hint">(공동 작품자로 들어간 ${EXM.recs.filter(exhIsCo).length}장 포함)</span>` : ''}</span>
       ${EXM.canEdit ? '<span class="right"><button type="button" class="btn sm" data-x="more">+ 신청서 추가</button><button type="button" class="btn primary sm" data-x="edit">모두 수정하기</button></span>' : ''}</div>
-      ${EXM.recs.map((r, i) => `<div class="panel exh-mine">${n > 1 ? `<div class="exh-mine-no">기획서 ${i + 1} / ${n}</div>` : ''}${exhDocHTML(r, I.title)}
+      ${EXM.recs.map((r, i) => `<div class="panel exh-mine">${n > 1 || exhIsCo(r) ? `<div class="exh-mine-no">${n > 1 ? `기획서 ${i + 1} / ${n}` : ''}${exhIsCo(r) ? `<span class="chip">공동 작품 · 대표 ${esc(r.name)}</span>` : ''}</div>` : ''}${exhDocHTML(r, I.title)}
       <div class="actions">${EXM.canEdit ? `<button type="button" class="btn" data-x="edit" data-rid="${esc(r.id)}">수정하기</button>` : ''}<button type="button" class="btn" data-x="print" data-rid="${esc(r.id)}">인쇄하기</button><button type="button" class="btn" data-x="word" data-rid="${esc(r.id)}">Word로 받기</button></div></div>`).join('')}
       <div class="actions">${n > 1 ? '<button type="button" class="btn ghost" data-x="word-all">전체 Word로 받기</button>' : ''}<span class="spacer"></span><button type="button" class="btn ghost" data-x="home">처음으로</button></div>
       <p class="hint">${EXM.canEdit ? '나중에 고치거나 더 낼 때는 [신청한 내용 보기 · 수정]에 학번과 이름을 넣으면 내 기획서가 한꺼번에 나와요.' : '출품 신청이 마감돼서 지금은 고칠 수 없어요. 고칠 게 있으면 임원진에게 연락해 주세요.'}</p>`;
@@ -2078,6 +2151,19 @@ function exhObjRows(objs, fi){
     <button type="button" class="icon-x" data-x="rm-obj" aria-label="${L} ${i+1} 빼기">✕</button>
   </div>`).join('');
 }
+/* 45판: 공동 작품자 칸 (기획서마다). 함께 만든 사람의 이름 · 학번 · 기수를 신청하는 사람 아래에 줄로 붙여요 */
+function exhCoRows(co, fi){
+  const L = `기획서 ${fi + 1} 공동 작품자`;
+  return `<div class="xd-colist">${co.map((p, ci) => `<div class="xd-coitem" data-ci="${ci}">
+      <div class="xd-cohead"><span>공동 작품자 ${ci + 1}</span><button type="button" class="btn ghost sm" data-x="rm-co" aria-label="${L} ${ci + 1} 빼기">빼기</button></div>
+      <div class="xd-row xd-3 xd-co">
+        <label>이름: <input type="text" data-xc="name" maxlength="20" value="${esc(p.name)}" aria-label="${L} ${ci + 1} 이름"></label>
+        <label>학번: <input type="text" data-xc="sn" inputmode="numeric" maxlength="9" placeholder="9자리" value="${esc(p.sn)}" aria-label="${L} ${ci + 1} 학번"></label>
+        <label>기수: <input type="text" data-xc="gen" inputmode="numeric" maxlength="3" placeholder="38" class="xd-short" value="${esc(p.gen)}" aria-label="${L} ${ci + 1} 기수">기</label>
+      </div></div>`).join('')}
+    <div class="xd-row xd-coadd">${co.length < 9 ? `<button type="button" class="btn ghost sm" data-x="add-co">+ 공동 작품자 추가</button>` : ''}<span class="hint">여럿이 함께 만든 작품이면 같이 만든 사람을 적어요${co.length ? ` · 지금 ${co.length + 1}명` : ''}</span></div>
+  </div>`;
+}
 const exhSheetEl = i => document.querySelector(`#exh-form [data-fi="${i}"]`);
 /* 작품(오브제)을 적으면 그 기획서의 개수 · 사이즈 · 재료 줄이 바로 채워져요 */
 function exhLive(fi){
@@ -2092,18 +2178,23 @@ function exhLive(fi){
 }
 /* 기획서 한 장: 이름 · 학번 · 기수는 첫 장에서만 적고, 다음 장들은 그대로 따라와요 */
 function exhSheetHTML(f, i, n){
-  const edit = EXM.mode === 'edit', first = i === 0, P = EXM.p, title = (EXM.info || {}).title || '';
+  const edit = EXM.mode === 'edit', title = (EXM.info || {}).title || '';
+  const isCo = f.role === 'co', first = i === EXM.fs.findIndex(x => x.role !== 'co'), P = isCo ? f.owner : EXM.p;   // 46판: 이름 · 학번 · 기수는 '내 장' 중 첫 장에서만 적어요
   const pid = k => first ? `id="xf-${k}"` : '';
   return `<section class="xd-sheet" data-fi="${i}">
     <div class="xd-sheet-h"><b>기획서 ${i + 1}${n > 1 ? ` <span class="hint">/ ${n}</span>` : ''}</b>${edit && !f.id ? '<span class="chip done">새로 추가</span>' : ''}
-      ${n > 1 ? `<button type="button" class="btn ghost sm danger-t" data-x="rm-sheet">${edit && f.id ? '이 기획서 출품 취소' : '이 기획서 빼기'}</button>` : ''}</div>
+      ${isCo ? `<span class="chip">공동 작품 · 대표 ${esc(P.name)}</span>` : n > 1 ? `<button type="button" class="btn ghost sm danger-t" data-x="rm-sheet">${edit && f.id ? '이 기획서 출품 취소' : '이 기획서 빼기'}</button>` : ''}</div>
     <div class="exh-doc xd-edit">
       <div class="xd-row xd-title">${esc(title)} 전시기획서</div>
-      <div class="xd-row xd-3">
+      ${isCo ? `<div class="xd-row xd-3 xd-owner">
+        <label>이름: <input type="text" value="${esc(P.name)}" disabled></label><label>학번: <input type="text" value="${esc(P.sn)}" disabled></label><label>기수: <input type="text" value="${esc(P.gen)}" class="xd-short" disabled>기</label>
+      </div>
+      <div class="xd-row xd-ownerhint hint">공동 작품이라 대표(${esc(P.name)})의 이름 · 학번 · 기수와 출품 취소는 대표만 할 수 있어요. 제목 · 작품 · 설명 · 공동 작품자는 함께 고쳐요.</div>` : `<div class="xd-row xd-3">
         <label>이름: <input type="text" ${pid('name')} data-xp="name" maxlength="20" value="${esc(P.name)}" autocomplete="name" ${first ? '' : 'disabled'}></label>
         <label>학번: <input type="text" ${pid('sn')} data-xp="sn" inputmode="numeric" maxlength="9" placeholder="9자리" value="${esc(P.sn)}" ${first && !edit ? '' : 'disabled'}></label>
         <label>기수: <input type="text" ${pid('gen')} data-xp="gen" inputmode="numeric" maxlength="3" value="${esc(P.gen)}" placeholder="38" class="xd-short" ${first ? '' : 'disabled'}>기</label>
-      </div>
+      </div>`}
+      ${exhCoRows(f.co || [], i)}
       <div class="xd-row xd-c"><label class="xd-wide">제목: <input type="text" ${pid('work')} data-xf="work" maxlength="60" value="${esc(f.work)}" placeholder="작품 제목"></label></div>
       <div class="xd-row xd-2"><div><span>작품(오브제) 개수: <b class="xf-count"></b></span></div><div class="xd-c">각 작품(오브제)의 사이즈(w*d*h, mm):<small class="xf-sizes"></small></div></div>
       <div class="xd-row xd-objs">
@@ -2129,7 +2220,7 @@ function exhFormHTML(){
     <div class="xd-addsheet">${n < 10 ? '<button type="button" class="btn" data-x="add-sheet">+ 신청서 추가</button>' : ''}<span class="hint">${n < 10 ? '다른 작품도 내고 싶으면 기획서를 한 장 더 붙여요. 아래 버튼 하나로 모두 함께 내요.' : '기획서는 한 사람에 10장까지예요.'}</span></div>
     ${k ? `<p class="msg err" role="status">저장하면 뺀 기획서 ${k}장은 출품이 취소돼요.</p>` : ''}
     <div class="actions"><button class="btn primary" type="submit" form="exh-form" id="xf-go">${edit ? '모두 저장하기' : '출품 신청하기'}${n > 1 ? ` (${n}장)` : ''}</button><button class="btn ghost" type="button" data-x="${edit ? 'view' : 'home'}">취소</button><span class="msg err" id="xf-msg" role="status"></span></div>
-    <p class="hint">${edit ? '이름 · 기수를 고치면 기획서 모두 같이 바뀌어요.' : '고칠 때는 [신청한 내용 보기 · 수정]에 지금 적은 학번과 이름을 넣으면 내 기획서가 한꺼번에 나와요.'}</p>
+    <p class="hint">${edit ? '이름 · 기수를 고치면 내가 대표인 기획서 모두 같이 바뀌어요.' : '고칠 때는 [신청한 내용 보기 · 수정]에 지금 적은 학번과 이름을 넣으면 내 기획서가 한꺼번에 나와요.'}</p>
   </div>`;
 }
 /* Word 파일(.doc)로 받기: 전시기획서 표 그대로, 여러 명이면 한 장에 한 명씩 */
@@ -2138,7 +2229,7 @@ function exhWordHTML(recs, title){
   const one = r => `<table style="width:100%;border-collapse:collapse;table-layout:fixed;font-family:'맑은 고딕','Malgun Gothic',sans-serif">
     <colgroup><col style="width:30%"><col style="width:10%"><col style="width:30%"><col style="width:30%"></colgroup>
     <tr><td colspan="4" style="${B}text-align:center;font-size:22pt;padding:16pt 10pt">${esc(title || r.exhTitle || '')} 전시기획서</td></tr>
-    <tr><td style="${B}">이름: ${esc(r.name)}</td><td colspan="2" style="${B}">학번: ${esc(r.sn)}</td><td style="${B}">기수: ${esc(r.gen)}기</td></tr>
+    ${[r].concat(r.co || []).map(p => `<tr><td style="${B}">이름: ${esc(p.name)}</td><td colspan="2" style="${B}">학번: ${esc(p.sn)}</td><td style="${B}">기수: ${esc(p.gen)}기</td></tr>`).join('')}
     <tr><td colspan="4" style="${B}text-align:center">제목: ${esc(r.work)}</td></tr>
     <tr><td colspan="2" style="${B}">작품(오브제) 개수: ${(r.objs || []).length}</td><td colspan="2" style="${B}text-align:center">각 작품(오브제)의 사이즈(w*d*h, mm):<br><span style="font-size:10pt">${esc(exhSizes(r.objs))}</span></td></tr>
     <tr><td colspan="4" style="${B}text-align:center;font-size:17pt">작품 설명</td></tr>
@@ -2158,13 +2249,16 @@ exV.addEventListener('input', e => {
   const t = e.target; if (!EXM.fs) return; const i = exhFi(t); if (i < 0) return;
   if (t.dataset.xp){ EXM.p[t.dataset.xp] = t.value; document.querySelectorAll(`#exh-form [data-xp="${t.dataset.xp}"]`).forEach(x => { if (x !== t) x.value = t.value; }); return; }
   if (t.dataset.xf){ EXM.fs[i][t.dataset.xf] = t.value; return; }
+  if (t.dataset.xc){ const r = t.closest('[data-ci]'); if (r) EXM.fs[i].co[Number(r.dataset.ci)][t.dataset.xc] = t.value; return; }
   const row = t.closest('.xo-row'); if (row && t.dataset.xo){ EXM.fs[i].objs[Number(row.dataset.xi)][t.dataset.xo] = t.value; exhLive(i); }
 });
 /* 쓰는 화면 열기: 새로 쓰기 / 내 기획서 모두 고치기 (+ 한 장 더 붙여서) */
 function exhOpenForm(mode, opt){
   opt = opt || {};
   if (mode === 'new') Object.assign(EXM, { mode, p: { name: '', sn: '', gen: '' }, fs: [exhBlank()], dels: [], recs: [], msg: '' });
-  else { const r0 = EXM.recs[0]; Object.assign(EXM, { mode, p: { name: r0.name, sn: r0.sn, gen: r0.gen }, fs: EXM.recs.map(r => ({ id: r.id, work: r.work, objs: clone(r.objs && r.objs.length ? r.objs : exhBlank().objs), desc: r.desc || '' })), dels: [], msg: '' });
+  else { const r0 = EXM.recs.find(r => !exhIsCo(r)), me = exhMe();   // 내가 대표인 장이 없으면(공동 작품자로만 들어감) 새로 붙이는 장은 내 이름으로
+    Object.assign(EXM, { mode, p: r0 ? { name: r0.name, sn: r0.sn, gen: r0.gen } : { name: me.name, sn: me.sn, gen: me.gen },
+      fs: EXM.recs.map(r => ({ id: r.id, role: r.role || 'own', owner: exhIsCo(r) ? { name: r.name, sn: r.sn, gen: r.gen } : null, work: r.work, objs: clone(r.objs && r.objs.length ? r.objs : exhBlank().objs), desc: r.desc || '', co: clone(r.co || []) })), dels: [], msg: '' });
     if (opt.add) EXM.fs.push(exhBlank()); }
   renderExhibit(); exhLive();
   const at = opt.add ? EXM.fs.length - 1 : opt.rid ? Math.max(0, EXM.fs.findIndex(f => f.id === opt.rid)) : 0;
@@ -2190,6 +2284,15 @@ exV.addEventListener('click', e => {
   if (a === 'add-sheet'){ if (EXM.fs.length >= 10) return; EXM.fs.push(exhBlank()); exhRerenderForm(); const s = exhSheetEl(EXM.fs.length - 1); s.scrollIntoView({ block: 'start', behavior: 'smooth' }); s.querySelector('[data-xf="work"]').focus({ preventScroll: true }); return; }
   if (a === 'rm-sheet'){ const f = EXM.fs[i]; if (!f || EXM.fs.length < 2) return; if (f.id) EXM.dels.push(f.id); EXM.fs.splice(i, 1); exhRerenderForm(); return; }
   if (a === 'add-obj'){ const f = EXM.fs[i]; if (f.objs.length >= 30) return; f.objs.push({ n: '', m: '', w: '', d: '', h: '' }); const L = exhSheetEl(i).querySelector('.xo-list'); L.innerHTML = exhObjRows(f.objs, i); exhLive(i); const ins = L.querySelectorAll('[data-xo="n"]'); ins[ins.length-1].focus(); return; }
+  if (a === 'add-co' || a === 'rm-co'){
+    const f = EXM.fs[i]; if (!f) return; f.co = f.co || [];
+    if (a === 'add-co'){ if (f.co.length >= 9) return; f.co.push({ name: '', sn: '', gen: '' }); }
+    else f.co.splice(Number(b.closest('[data-ci]').dataset.ci), 1);
+    const box = exhSheetEl(i).querySelector('.xd-colist'); box.outerHTML = exhCoRows(f.co, i);
+    if (a === 'add-co'){ const ins = exhSheetEl(i).querySelectorAll('[data-xc="name"]'); ins[ins.length - 1].focus(); }
+    else { const nb = exhSheetEl(i).querySelector('[data-x="add-co"]'); if (nb) nb.focus(); }
+    return;
+  }
   if (a === 'rm-obj'){ const f = EXM.fs[i]; f.objs.splice(Number(b.closest('.xo-row').dataset.xi), 1); if (!f.objs.length) f.objs.push({ n: '', m: '', w: '', d: '', h: '' }); exhSheetEl(i).querySelector('.xo-list').innerHTML = exhObjRows(f.objs, i); exhLive(i); return; }
 });
 exV.addEventListener('submit', async e => {
@@ -2198,19 +2301,23 @@ exV.addEventListener('submit', async e => {
     const sn = $('#xl-sn').value.trim(), name = $('#xl-name').value.trim(), m = $('#xl-msg'); EXM.lk.sn = sn; EXM.lk.name = name;
     if (!sn || !name){ m.textContent = '학번과 이름을 넣어 주세요.'; return; }
     $('#xl-go').disabled = true; m.className = 'msg'; m.textContent = '찾는 중…';
-    try { const r = await withLoader(exhFindAny(sn, name)); Object.assign(EXM, { sn, nm: name, recs: r.recs || [r.rec], canEdit: r.canEdit, mode: 'view', msg: r.moved ? `‘${r.moved}’에 낸 출품이라 그 전시회로 열었어요.` : '', msgCls: 'ok' }); renderExhibit(); window.scrollTo(0,0); }
+    try { const r = await withLoader(exhFindAny(sn, name)); Object.assign(EXM, { sn, nm: name, recs: r.recs || [r.rec], me: r.me || null, canEdit: r.canEdit, mode: 'view', msg: r.moved ? `‘${r.moved}’에 낸 출품이라 그 전시회로 열었어요.` : '', msgCls: 'ok' }); renderExhibit(); window.scrollTo(0,0); }
     catch(err){ $('#xl-go').disabled = false; m.className = 'msg err'; m.textContent = err.message; }
     return;
   }
   if (e.target.id !== 'exh-form') return;
   const m = $('#xf-msg'); const edit = EXM.mode === 'edit';
-  const items = EXM.fs.map(f => Object.assign({}, EXM.p, f, edit ? { sn: EXM.recs[0].sn } : {}));
+  const me = exhMe();
+  const items = EXM.fs.map(f => f.role === 'co' ? Object.assign({}, f, f.owner) : Object.assign({}, EXM.p, f, edit ? { sn: me.sn } : {}));
   if (!edit && String(items[0].sn || '').replace(/\D/g, '').length !== 9){ m.className = 'msg err'; m.textContent = '학번은 9자리 숫자로 적어 주세요. (예: 202312345)'; return; }   // 44판
-  try { exhCleanAll(items, edit ? EXM.recs[0].sn : null); } catch(err){ m.textContent = err.message; return; }
+  try {
+    if (edit) exhPlanUpdate({ own: EXM.recs.filter(r => !exhIsCo(r)), co: EXM.recs.filter(exhIsCo), me }, items, EXM.dels);   // 46판: 서버와 같은 규칙으로 먼저 확인
+    else exhCleanAll(items, null);
+  } catch(err){ m.className = 'msg err'; m.textContent = err.message; return; }
   $('#xf-go').disabled = true; m.className = 'msg'; m.textContent = '보내는 중…';
   try {
     const d = edit ? await api('exhUpdateAll', EXM.info.id, EXM.sn, EXM.nm, items, EXM.dels) : await api('exhSubmitAll', EXM.info.id, items);
-    const n = d.recs.length; EXM.sn = d.recs[0].sn; EXM.nm = d.recs[0].name;   // 이름을 고쳤으면 다음부터는 고친 이름으로 들어와요
+    const n = d.recs.length; const nme = d.me || { name: d.recs[0].name, sn: d.recs[0].sn, gen: d.recs[0].gen }; EXM.sn = nme.sn; EXM.nm = nme.name; EXM.me = nme;   // 이름을 고쳤으면 다음부터는 고친 이름으로 들어와요
     Object.assign(EXM, { recs: d.recs, canEdit: true, mode: 'view', fs: null, dels: [], msgCls: 'ok',
       msg: edit ? `고친 내용을 저장했어요. 내 기획서는 ${n}장이에요.` : (n > 1 ? `출품 신청을 받았어요. 기획서 ${n}장이에요.` : '출품 신청을 받았어요. 아래 기획서를 확인해 주세요.') + (d.had ? ` 이 학번으로 먼저 낸 기획서 ${d.had}장도 있어요. [신청한 내용 보기 · 수정]으로 함께 볼 수 있어요.` : '') });
     renderExhibit(); window.scrollTo(0,0);
@@ -2290,7 +2397,7 @@ function renderExhList(){
 }
 function renderExhDetail(){
   const D2 = EXA.D; const ex = D2.ex; const list = (D2.list || []).slice().sort((a, b) => String(a.at).localeCompare(String(b.at)));
-  const objN = list.reduce((n, r) => n + (r.objs || []).length, 0); const pn = new Set(list.map(r => r.sn)).size;
+  const objN = list.reduce((n, r) => n + (r.objs || []).length, 0); const pn = exhPeople(list);
   $('#v-exh').innerHTML = `${exhAdminTop()}
     <div class="actions"><button type="button" class="back btn ghost sm" data-xa="back">← 전시회 목록</button><span class="spacer"></span><button type="button" class="btn sm ghost" data-xa="refresh">새로고침</button></div>
     <h2 class="exh-title-h">${esc(ex.title)}</h2>
@@ -2334,7 +2441,7 @@ function exhItemHTML(r, no){
   return `<article class="exh-item${open ? ' open' : ''}">
     <button type="button" class="exh-ih" data-xa="toggle" data-id="${esc(r.id)}" aria-expanded="${open}">
       <span class="exh-no num">${no}</span>
-      <span class="grow"><b>${esc(r.work)}</b><span class="c-meta"><span>${esc(r.name)}</span><span class="num">${esc(r.sn)}</span><span>${esc(r.gen)}기</span><span>작품(오브제) ${(r.objs || []).length}개</span><span class="hint">${esc(r.upd && r.upd !== r.at ? r.upd + ' 수정' : r.at + ' 신청')}</span></span></span>
+      <span class="grow"><b>${esc(r.work)}</b><span class="c-meta"><span>${esc(r.name)}${(r.co || []).length ? ` 외 ${r.co.length}명` : ''}</span><span class="num">${esc(r.sn)}</span><span>${esc(r.gen)}기</span><span>작품(오브제) ${(r.objs || []).length}개</span><span class="hint">${esc(r.upd && r.upd !== r.at ? r.upd + ' 수정' : r.at + ' 신청')}</span></span></span>
       <span class="exh-caret" aria-hidden="true">${open ? '▴' : '▾'}</span></button>
     ${open ? `<div class="exh-ib">${exhDocHTML(r)}
       <div class="actions"><button type="button" class="btn sm" data-xa="print" data-id="${esc(r.id)}">기획서 인쇄</button>
@@ -2549,7 +2656,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 44판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 46판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
