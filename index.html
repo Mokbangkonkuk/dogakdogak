@@ -1038,6 +1038,7 @@ window.dgWrite = function(root){
   <button type="button" data-demo="host" aria-pressed="false">진행자 화면</button>
   <button type="button" data-demo="guides" aria-pressed="false">부원 · 설명서 열람</button>
   <button type="button" data-demo="exhibit" aria-pressed="false">부원 · 전시회 출품</button>
+  <button type="button" data-demo="sangju" aria-pressed="false">부원 · 전시 상주</button>
   <span class="sep" aria-hidden="true"></span>
   <button type="button" data-mobile aria-pressed="false">모바일 화면으로</button>
   <button type="button" data-splash>시작 화면 보기</button>
@@ -1050,6 +1051,7 @@ window.dgWrite = function(root){
   <section id="v-guides" class="stackcol" hidden></section>
   <section id="v-exhibit" class="stackcol narrow" hidden></section>
   <section id="v-exh" class="stackcol" hidden></section>
+  <section id="v-sangju" hidden></section>
 
   <section id="v-list" class="stackcol" hidden>
     <div class="top">
@@ -1379,7 +1381,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const API = String(window.DOGAK_API || '').trim();
 const LIVE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
 const QS = new URLSearchParams(location.search);
-const BOOT = LIVE ? { view: ({a:'apply', r:'review', g:'guides', x:'exhibit'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
+const BOOT = LIVE ? { view: ({a:'apply', r:'review', g:'guides', x:'exhibit', s:'sangju'})[QS.get('v')] || 'host', sid: QS.get('s') || '' } : null;
 const STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 const SITE = location.origin + location.pathname.replace(/index\.html$/, '');   // 신청·만족도 링크는 이 사이트 주소로 만들어요
 const PWK = STANDALONE ? 'l' : 's';   // 홈 화면 앱에서는 로그인을 기억하고, 브라우저에서는 창을 닫으면 잊어요
@@ -1484,6 +1486,31 @@ function loadDemoJs(){
     document.head.appendChild(s);
   });
 }
+/* 48판: 전시 상주 시간표는 sangju.js에 따로 있어요. 상주 화면을 처음 열 때만 불러와요 */
+const SANGJU_JS = 'sangju.js?v=48';
+let sjJsP = null;
+function loadSangju(){
+  if (window.dgSangju) return Promise.resolve();
+  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, get S(){ return S; },
+    openExhDetail: id => { show('exh'); openExhDetail(id); } };
+  return sjJsP = sjJsP || new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = SANGJU_JS; s.async = true;
+    s.onload = () => window.dgSangju ? res() : rej(new Error('sangju.js를 읽지 못했어요.'));
+    s.onerror = () => { sjJsP = null; s.remove(); rej(new Error(navigator.onLine === false ? '인터넷에 연결되어 있지 않아요. 연결을 확인한 뒤 다시 시도해 주세요.' : '상주 시간표 파일(sangju.js)을 불러오지 못했어요. GitHub에 sangju.js를 올렸는지 확인해 주세요.')); };
+    document.head.appendChild(s);
+  });
+}
+async function openSangju(exhId){
+  show('sangju'); banner('');
+  try { await loadSangju(); await window.dgSangju.member(exhId || ''); }
+  catch(e){ $('#v-sangju').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+async function openSangjuAdmin(){
+  if (!EXA.id || !EXA.D) return;
+  show('sangju'); banner('');
+  try { await loadSangju(); await window.dgSangju.admin(EXA.id, EXA.D.ex); }
+  catch(e){ show('exh'); EXA.msg = e.message; EXA.msgCls = 'err'; renderExhAdmin(); }
+}
 async function getDemo(){
   if (!Demo){ await loadDemoJs(); Demo = window.dgBuildDemo(clone); if (!LIVE) window.__DG_DEMO = Demo; }   // 미리보기에서만: 속도 시험용
   return Demo;
@@ -1569,7 +1596,7 @@ const S = {
   notice:{}, regMsg:'', regMsgCls:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null, rawComments:false,
   ap:null, rv:null,
 };
-const VIEWS = ['apply','review','login','list','session','guides','exhibit','exh'];
+const VIEWS = ['apply','review','login','list','session','guides','exhibit','exh','sangju'];
 ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
 function show(v){ S.view = v; document.body.dataset.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
@@ -2440,6 +2467,9 @@ function renderExhDetail(){
     <h2 class="exh-title-h">${esc(ex.title)}</h2>
     ${exhSetFormHTML(ex)}
     ${EXA.notice ? exhNoticeHTML(ex) : ''}
+    <div class="panel exh-sj"><div class="qs-head"><h2>전시 상주 시간표</h2></div>
+      <p class="hint" style="margin:0">부원들에게 상주할 수 있는 시간을 받아 한 타임에 몇 명씩 고르게 나누고, 시간표를 공개해요. 포스터에 맞춘 디자인도 여기서 정해요.</p>
+      <div class="actions"><button type="button" class="btn primary sm" data-xa="sangju">상주 시간표 열기</button><button type="button" class="btn sm ghost" data-xa="sj-link">상주 링크 복사</button><span class="msg ok" id="ex-sj-msg" role="status"></span></div></div>
     <div class="toolbar"><h2>출품 목록</h2></div>
     <div class="exh-sum"><span>출품 <b class="num">${pn}</b>명</span><span>기획서 <b class="num">${list.length}</b>장</span><span>작품(오브제) <b class="num">${objN}</b>개</span><span class="spacer"></span>
       ${ex.url ? `<a class="btn sm ghost" href="${esc(ex.url)}" target="_blank" rel="noopener">구글 시트에서 보기</a>` : ''}
@@ -2497,6 +2527,8 @@ exA.addEventListener('click', async e => {
   if (a === 'poster-rm'){ EXA.poster = ''; refreshExhPoster(); return; }
   if (a === 'open-ex'){ openExhDetail(id); return; }
   if (a === 'back'){ openExhAdmin(); return; }
+  if (a === 'sangju'){ openSangjuAdmin(); return; }
+  if (a === 'sj-link'){ const ok = await copyOut(SITE + '?v=s&s=' + encodeURIComponent(EXA.id)); const m = $('#ex-sj-msg'); if (m) m.textContent = ok ? '상주 링크를 복사했어요. 단톡방에 붙여 넣어 주세요.' : SITE + '?v=s&s=' + EXA.id; return; }
   if (a === 'refresh-list'){ try { EXA.L = await withLoader(api('exhAdmin', S.pw)); cacheSet(PWK, 'exha2', EXA.L); EXA.msg = ''; } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); return; }
   if (a === 'refresh'){ try { EXA.D = await withLoader(api('exhDetail', S.pw, EXA.id)); cacheSet(PWK, 'exhd_' + EXA.id, EXA.D); EXA.msg = ''; } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); return; }
   if (a === 'toggle'){ EXA.open[id] = !EXA.open[id]; EXA.armed = null; renderExhAdmin(); return; }
@@ -2706,7 +2738,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 47판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 48판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -3510,6 +3542,7 @@ function setDemo(which, sid){
   else if (which === 'review') openReview(sid || 'sexjewel');
   else if (which === 'guides') openGuides();
   else if (which === 'exhibit') openExhibit();
+  else if (which === 'sangju') openSangju('');
   else { if (S.pw) { reload().then(openList); } else openLogin(); }
 }
 /* =========================================================
@@ -4032,6 +4065,7 @@ async function init(){
     if (BOOT.view === 'review'){ await openReview(BOOT.sid); hideSplash(); return; }
     if (BOOT.view === 'guides'){ await openGuides(BOOT.sid); hideSplash(); return; }
     if (BOOT.view === 'exhibit'){ await openExhibit(BOOT.sid); hideSplash(); return; }
+    if (BOOT.view === 'sangju'){ await openSangju(BOOT.sid); hideSplash(); return; }
     const saved = store(PWK, 'dg_pw');
     if (saved){
       const cached = cacheGet(PWK, 'all');
