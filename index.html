@@ -1487,11 +1487,11 @@ function loadDemoJs(){
   });
 }
 /* 48판: 전시 상주 시간표는 sangju.js에 따로 있어요. 상주 화면을 처음 열 때만 불러와요 */
-const SANGJU_JS = 'sangju.js?v=48';
+const SANGJU_JS = 'sangju.js?v=48b';
 let sjJsP = null;
 function loadSangju(){
   if (window.dgSangju) return Promise.resolve();
-  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, get S(){ return S; },
+  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, route, get S(){ return S; },
     openExhDetail: id => { show('exh'); openExhDetail(id); } };
   return sjJsP = sjJsP || new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = SANGJU_JS; s.async = true;
@@ -1505,10 +1505,10 @@ async function openSangju(exhId){
   try { await loadSangju(); await window.dgSangju.member(exhId || ''); }
   catch(e){ $('#v-sangju').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
 }
-async function openSangjuAdmin(){
+async function openSangjuAdmin(tab){
   if (!EXA.id || !EXA.D) return;
-  show('sangju'); banner('');
-  try { await loadSangju(); await window.dgSangju.admin(EXA.id, EXA.D.ex); }
+  show('sangju'); banner(''); route({ v: 'sj', id: EXA.id, tab: tab || '' });
+  try { await loadSangju(); await window.dgSangju.admin(EXA.id, EXA.D.ex, tab); }
   catch(e){ show('exh'); EXA.msg = e.message; EXA.msgCls = 'err'; renderExhAdmin(); }
 }
 async function getDemo(){
@@ -2401,7 +2401,7 @@ const exhAdminTop = () => `<div class="top"><div><div class="brand"><img class="
 const exhApiMsg = e => /알 수 없는 요청/.test(e.message) ? '전시회 관리는 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : e.message;
 async function openExhAdmin(){
   if (TUT) tutClose();
-  show('exh'); Object.assign(EXA, { id: null, D: null, creating: false, msg: '', armed: null, dropArmed: false, poster: undefined });
+  show('exh'); route({ v: 'exh' }); Object.assign(EXA, { id: null, D: null, creating: false, msg: '', armed: null, dropArmed: false, poster: undefined });
   const c = EXA.L || cacheGet(PWK, 'exha2');
   if (c){ EXA.L = c; renderExhAdmin();
     api('exhAdmin', S.pw).then(d => { EXA.L = d; cacheSet(PWK, 'exha2', d); if (S.view === 'exh' && !EXA.id && !EXA.creating && !typingIn('#v-exh')) renderExhAdmin(); }).catch(() => {});
@@ -2412,6 +2412,7 @@ async function openExhAdmin(){
   renderExhAdmin();
 }
 async function openExhDetail(id){
+  route({ v: 'exhd', id });
   Object.assign(EXA, { id, creating: false, msg: '', armed: null, dropArmed: false, open: {}, notice: false, poster: undefined });
   const c = cacheGet(PWK, 'exhd_' + id);
   if (c){ EXA.D = c; renderExhAdmin(); window.scrollTo(0, 0);
@@ -2727,7 +2728,18 @@ function cardInner(s, rank){
     </div>
   </button>`;
 }
-function openList(){ show('list'); renderList(); if (LIVE && !LIB.list && !cacheGet('l', 'lib')) setTimeout(() => { if (!LIB.list) libRefresh(); }, 2500); }
+/* 48판: 새로고침해도 보던 화면(학습회 · 전시회 · 상주 시간표)으로 돌아와요. 이 창(탭)에서만 기억해요 */
+function route(o){ try { o ? sessionStorage.setItem('dg_route', JSON.stringify(o)) : sessionStorage.removeItem('dg_route'); } catch(e){} }
+function restoreRoute(){
+  let r = null; try { r = JSON.parse(sessionStorage.getItem('dg_route') || 'null'); } catch(e){}
+  try {
+    if (r && r.v === 'session' && D().sessions.some(x => x.id === r.sid)) return openSession(r.sid, r.tab);
+    if (r && r.v === 'exh') return openExhAdmin();
+    if (r && (r.v === 'exhd' || r.v === 'sj') && r.id){ show('exh'); return openExhDetail(r.id).then(() => { if (r.v === 'sj' && EXA.id === r.id && EXA.D) return openSangjuAdmin(r.tab); }); }
+  } catch(e){}
+  openList();
+}
+function openList(){ show('list'); route({ v: 'list' }); renderList(); if (LIVE && !LIB.list && !cacheGet('l', 'lib')) setTimeout(() => { if (!LIB.list) libRefresh(); }, 2500); }
 function renderList(){
   const ss = D().sessions; const nowTerm = termOf(today());
   const terms = [...new Set([nowTerm, ...ss.map(termFor)])].filter(Boolean).sort(termCmp);
@@ -2776,7 +2788,7 @@ $('#v-list').addEventListener('click', async e => {
     catch(err){ m.className = 'msg'; m.textContent = SITE + '?v=g'; }
     return; }
   if (e.target.closest('[data-act="refresh"]')){ await reload(); renderList(); return; }
-  if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); cacheClearHost(); EXA.L = null; EXA.D = null; EXA.id = null; store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
+  if (e.target.closest('[data-act="logout"]')){ if (TUT) tutClose(); cacheClearHost(); EXA.L = null; EXA.D = null; EXA.id = null; store('s','dg_pw', null); store('l','dg_pw', null); S.pw = ''; S.data = null; route(null); openLogin('로그아웃했어요.'); $('#pw-msg').className = 'msg ok'; return; }
   if (e.target.closest('[data-act="pw-open"]')){
     const f = $('#pwform'); if (!f.hidden){ f.hidden = true; return; }
     f.innerHTML = `<h2>동아리 비밀번호 바꾸기</h2>
@@ -2833,7 +2845,7 @@ $('#create').addEventListener('submit', async e => {
    ========================================================= */
 function resetDelTop(){ const b = $('#del-top'); if (!b) return; if (b.classList.contains('armed')) banner(''); b.classList.remove('armed'); b.disabled = false; b.textContent = '학습회 삭제'; }
 function resetSessionUI(){ resetDelTop(); Object.assign(S, {asAddName:'', asAddMsg:'', flipArmed:false, rvList:false, armedRv:null, rvListMsg:'', notice:{}, quick:null, quickMsg:'', shareEdit:null, justOpened:false, hdOpen:false, hd:null, hdKind:null, hdPin:'', hdMsg:'', pinFor:null, pinMsg:'', inf:null, infMsg:'', delArmed:false, regMsg:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null}); }
-function openSession(sid, tab){ S.sid = sid; S.tab = tab || 'regs'; resetSessionUI(); show('session'); renderSession(); }
+function openSession(sid, tab){ S.sid = sid; S.tab = tab || 'regs'; resetSessionUI(); show('session'); route({ v: 'session', sid, tab: S.tab }); renderSession(); }
 function renderSession(){
   const s = cur(); if (!s){ S.sid = null; openList(); return; }
   const ds = sDates(s);
@@ -2864,7 +2876,7 @@ $('#v-session').addEventListener('click', async e => {
     const n = $('#pw-done'); n.hidden = false; n.textContent = `'${s.title || '제목 없음'}' 학습회를 삭제했어요.`; return;
   }
   if (e.target.closest('.actions [data-act="refresh"]') && !e.target.closest('.panel')){ await reload(); resetSessionUI(); renderSession(); return; }
-  const t = e.target.closest('#tabs .tab'); if (t){ S.tab = t.dataset.tab; resetSessionUI(); renderSession(); }
+  const t = e.target.closest('#tabs .tab'); if (t){ S.tab = t.dataset.tab; route({ v: 'session', sid: S.sid, tab: S.tab }); resetSessionUI(); renderSession(); }
 });
 
 /* --- 신청 · 출석 --- */
@@ -4069,8 +4081,8 @@ async function init(){
     const saved = store(PWK, 'dg_pw');
     if (saved){
       const cached = cacheGet(PWK, 'all');
-      if (cached){ S.data = cached; S.pw = saved; openList(); hideSplash(); bgRefreshAll(); return; }
-      try { S.data = await api('hostLogin', saved); S.pw = saved; rememberAll(S.data); openList(); hideSplash(); return; } catch(e){ store(PWK,'dg_pw', null); }
+      if (cached){ S.data = cached; S.pw = saved; restoreRoute(); hideSplash(); bgRefreshAll(); return; }
+      try { S.data = await api('hostLogin', saved); S.pw = saved; rememberAll(S.data); restoreRoute(); hideSplash(); return; } catch(e){ store(PWK,'dg_pw', null); }
     }
     openLogin(); hideSplash(); return;
   }

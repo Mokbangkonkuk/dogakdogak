@@ -322,7 +322,7 @@ function heroHTML(t, title){
   if (t.mode === 'poster' && t.title) return imgTag(t.title, 'hero', title).replace('class="hero"', `class="hero" style="width:calc(${t.titleW || 72}% + 28px);margin-left:-28px"`);
   return `<div class="thero"><div class="k">목방 전시회</div><div class="t">${esc(title)}</div><span class="bar"></span></div>`;
 }
-function go(v){ S.view = v || 'home'; render(); }
+function go(v){ S.view = v || 'home'; if (X.mode === 'member' && !X.backToAdmin) try { sessionStorage.setItem('dg_sj_view_' + X.exhId, S.view); } catch(e){} render(); }
 function render(){
   setTop(); drawChrome(); window.scrollTo(0, 0);
   if (X.mode === 'admin') return adminMain();
@@ -354,6 +354,8 @@ function viewHome(){
 /* ---------- 부원 링크로 열기 ---------- */
 async function member(exhId){
   mount(); X.mode = 'member'; X.exhId = exhId || ''; S.view = 'home';
+  // 새로고침해도 보던 화면(시간 적기 · 시간표)으로 돌아와요
+  try { const v = sessionStorage.getItem('dg_sj_view_' + X.exhId); if (v === 'form' || v === 'table') S.view = v; } catch(e){}
   if (!LIVE){ try { const I = await DG.api('exhInfo'); X.demoTitles = {}; (I.list || []).forEach(e => X.demoTitles[e.id] = e.title); if (!X.exhId) X.exhId = ((I.list || [])[0] || {}).id || ''; } catch(e){} }
   const cached = X.exhId ? lsGet(pubKey(), null) : null;
   if (cached && cached.cfg){
@@ -371,8 +373,8 @@ async function member(exhId){
 /* ---------- 임원진 ---------- */
 async function adminReload(){ S.admin = await call('sjAdmin', DG.S.pw, X.exhId); }
 async function adminWrite(fn, ...args){ S.admin = await call(fn, DG.S.pw, X.exhId, ...args); }
-async function admin(exhId, ex){
-  mount(); X.mode = 'admin'; X.exhId = exhId; X.ex = ex || null; S.tab = S.tab || 'set'; S.draft = null; S.distOpt = null; S.td = null;
+async function admin(exhId, ex, tab){
+  mount(); X.mode = 'admin'; X.exhId = exhId; X.ex = ex || null; X.backToAdmin = false; S.tab = ['set', 'resp', 'dist', 'design'].includes(tab) ? tab : (S.tab || 'set'); S.draft = null; S.distOpt = null; S.td = null;
   const ck = 'dg_sj_adm_' + exhId;
   const cached = DG.cacheGet ? DG.cacheGet(DG.PWK, ck) : null;
   if (cached){ S.admin = cached; applyTheme(cached.theme); render(); }
@@ -401,7 +403,7 @@ function adminMain(){
     <button data-t="set">설정</button><button data-t="resp">응답 ${A.responses.length}명</button><button data-t="dist">배분 · 공개</button><button data-t="design">디자인</button>
   </div>
   <div id="tab"></div>`;
-  root.querySelectorAll('.tabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === S.tab); b.onclick = () => { S.tab = b.dataset.t; adminMain(); }; });
+  root.querySelectorAll('.tabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === S.tab); b.onclick = () => { S.tab = b.dataset.t; if (DG.route) DG.route({v: 'sj', id: X.exhId, tab: S.tab}); adminMain(); }; });
   ({set: tabSet, resp: tabResp, dist: tabDist, design: tabDesign})[S.tab]();
 }
 async function adminRefresh(){ try { await adminReload(); S.draft = null; S.td = null; applyTheme(S.admin.theme); render(); toast('새로 불러왔어요'); } catch(e){ toast(e.message); } }
