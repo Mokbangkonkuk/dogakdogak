@@ -1,4 +1,4 @@
-/* 도각도각 미리보기 · 튜토리얼 전용 파일 (42판)
+/* 도각도각 미리보기 · 튜토리얼 전용 파일 (47판)
    - 실제 서버 주소(config.js)가 들어간 사이트에서는 [앱 사용 튜토리얼]을 누를 때만 불러와요.
    - 서버 주소를 비워 둔 미리보기에서는 처음에 불러와 가짜 서버로 써요.
    - index.html과 같은 폴더에 두세요. 지우면 튜토리얼과 미리보기가 안 돼요. */
@@ -8,7 +8,7 @@ function makeCore(store, env) {
   /* 미리보기용 전시회 목록: 전시회마다 따로 저장해요 (실제 서버는 전시회마다 구글 시트 파일이 따로 생겨요) */
   let EXL = env.exhList || [];
   const exhFind_ = id => { const e = EXL.find(x => x.id === String(id)); if (!e) fail('전시회를 찾을 수 없어요. 처음 화면에서 다시 골라 주세요.'); return e; };
-  const exhPubEx = e => ({ id: e.id, title: e.title, open: exhOpenNow(e, now()), closeAt: e.closeAt || '', note: e.note || '' });
+  const exhPubEx = e => ({ id: e.id, title: e.title, open: exhOpenNow(e, now()), closeAt: e.closeAt || '', note: e.note || '', poster: e.poster || '' });
   const exhRowsOf = id => store.list('exh').filter(x => x.exh === id);
   function exhMine(e, sn, name) {
     sn = String(sn || '').replace(/\D/g, '');
@@ -450,6 +450,7 @@ function makeCore(store, env) {
     exhSave: (pw, id, ns) => { auth(pw); ns = ns || {};
       const title = cut(ns.title, 60); if (!title) fail('전시회 이름을 적어 주세요.');
       const v = { title: title, open: !!ns.open, closeAt: Number(ns.closeAt) > 0 ? Number(ns.closeAt) : '', note: cut(ns.note, 1000) };
+      if ('poster' in ns) v.poster = PHOTO_ID.test(String(ns.poster || '')) ? String(ns.poster) : '';   // 47판: 전시회 포스터 (사진 ID)
       let e;
       if (!id){ e = Object.assign({ id: 'e' + env.uid(), at: now() }, v); EXL = [e].concat(EXL); }
       else { e = exhFind_(id); const renamed = e.title !== title; Object.assign(e, v);
@@ -457,6 +458,7 @@ function makeCore(store, env) {
       return exhDetail_(e.id); },
     exhDelete: (pw, exhId, id) => { auth(pw); exhFind_(exhId); store.remove('exh', String(id)); return exhDetail_(exhId); },
     exhDrop: (pw, id) => { auth(pw); exhFind_(id); EXL = EXL.filter(x => x.id !== id); return exhAdmin_(); },
+    exhPoster: id => { id = String(id || ''); if (!id || !EXL.some(e => e.poster === id)) fail('포스터를 찾을 수 없어요.'); return env.readPhoto(id); },
 
     timeGuide: (sid, who, text) => { who = String(who || '').replace(/[^a-z0-9]/gi, '').slice(0, 8); text = cut(text, 20); if (!who) fail('다시 시도해 주세요.');
       if (!buildGuideLibrary(getAll(env.getPassword())).some(x => x.id === String(sid))) fail('설명서를 찾을 수 없어요.');
@@ -546,16 +548,18 @@ window.dgBuildDemo = function(clone){
     return {sessions, regs, reviews, guides, hostlogs: hostlogs.filter(l => l.logAt)};
   }
   /* 미리보기용 예시 사진 (나뭇결 그림) */
-  function fakePhoto(label, hue){
+  function fakePhoto(label, hue, W, H){
+    W = W || 640; H = H || 460;
     try {
-      const c = document.createElement('canvas'); c.width = 640; c.height = 460; const x = c.getContext('2d');
-      const g = x.createLinearGradient(0,0,640,460); g.addColorStop(0, `hsl(${hue},45%,72%)`); g.addColorStop(1, `hsl(${hue},45%,48%)`);
-      x.fillStyle = g; x.fillRect(0,0,640,460);
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+      const g = x.createLinearGradient(0,0,W,H); g.addColorStop(0, `hsl(${hue},45%,72%)`); g.addColorStop(1, `hsl(${hue},45%,48%)`);
+      x.fillStyle = g; x.fillRect(0,0,W,H);
       x.strokeStyle = `hsla(${hue},40%,30%,.28)`; x.lineWidth = 2;
-      for (let i = 0; i < 22; i++){ x.beginPath(); for (let k = 0; k <= 640; k += 16){ const yy = i*22 + Math.sin((k + i*37)/70)*7; k ? x.lineTo(k, yy) : x.moveTo(k, yy); } x.stroke(); }
-      x.fillStyle = 'rgba(255,250,240,.9)'; x.beginPath(); x.roundRect ? x.roundRect(170,120,300,200,18) : x.rect(170,120,300,200); x.fill();
-      x.fillStyle = `hsl(${hue},35%,30%)`; x.font = '600 26px sans-serif'; x.textAlign = 'center'; x.fillText(label, 320, 228);
-      x.font = '16px sans-serif'; x.fillText('미리보기 예시 사진', 320, 262);
+      for (let i = 0; i < Math.ceil(H / 22); i++){ x.beginPath(); for (let k = 0; k <= W; k += 16){ const yy = i*22 + Math.sin((k + i*37)/70)*7; k ? x.lineTo(k, yy) : x.moveTo(k, yy); } x.stroke(); }
+      const bx = (W - 300) / 2, by = (H - 200) / 2;
+      x.fillStyle = 'rgba(255,250,240,.9)'; x.beginPath(); x.roundRect ? x.roundRect(bx,by,300,200,18) : x.rect(bx,by,300,200); x.fill();
+      x.fillStyle = `hsl(${hue},35%,30%)`; x.font = '600 26px sans-serif'; x.textAlign = 'center'; x.fillText(label, W / 2, by + 108);
+      x.font = '16px sans-serif'; x.fillText('미리보기 예시 사진', W / 2, by + 142);
       return c.toDataURL('image/jpeg', 0.72);
     } catch(e){ return ''; }
   }
@@ -577,10 +581,10 @@ window.dgBuildDemo = function(clone){
       update: (k,o) => { const i = T[k].findIndex(x => x.id === o.id); if (i < 0) throw new Error('찾을 수 없어요.'); T[k][i] = clone(o); },
       remove: (k,id) => { T[k] = T[k].filter(x => x.id !== id); } };
     const cache = {}; const photos = {};
-    const demoLabels = {pdemoCut:['재단 중',28], pdemoHinge:['경첩 달기',24], pdemoBox1:['완성한 보석함',30], pdemoBox2:['뚜껑을 연 모습',32], pdemoRabbit:['완성한 토끼',38]};
+    const demoLabels = {pdemoCut:['재단 중',28], pdemoHinge:['경첩 달기',24], pdemoBox1:['완성한 보석함',30], pdemoBox2:['뚜껑을 연 모습',32], pdemoRabbit:['완성한 토끼',38], pdemoPoster:['2026 목방 전시회',20,460,650]};
     let demoPw = '1234';
     return makeCore(mem, { exhList: [
-      { id: 'edemo', title: '2026학년도 목방 전시회', open: true, closeAt: new Date(new Date().getFullYear(), 10, 20, 23, 50).getTime(), note: '출품작은 전시 하루 전까지 1동방으로 가져와 주세요.\n작품 설명은 3~5문장 정도로 적어 주세요.', at: Date.now() },
+      { id: 'edemo', title: '2026학년도 목방 전시회', open: true, closeAt: new Date(new Date().getFullYear(), 10, 20, 23, 50).getTime(), note: '출품작은 전시 하루 전까지 1동방으로 가져와 주세요.\n작품 설명은 3~5문장 정도로 적어 주세요.', poster: 'pdemoPoster', at: Date.now() },
       { id: 'edemo25', title: '2025학년도 목방 전시회', open: false, closeAt: '', note: '', at: Date.now() - 365 * 86400000 }], ratings: { sexjewel: [0, 1, 3, 4, 1], sexrabbit: [1, 2, 3, 0, 0] },
       times: { sexjewel: [['d1',300,'5시간'],['d2',270,'4시간 30분'],['d3',360,'6시간 정도'],['d4',null,'2~3시간씩 두 번'],['d5',null,'이틀'],['d6',330,'5시간반'],['d7',240,'4시간'],['d8',420,'7시간']],
                sexrabbit: [['e1',120,'2시간'],['e2',150,'2시간 30분'],['e3',100,'100분'],['e4',120,'두 시간']] }, getPassword: () => demoPw, setPassword: v => { demoPw = v; }, uid: () => Math.random().toString(36).slice(2,10), hash: (pin, salt) => (salt||'demo') + ':' + pin,

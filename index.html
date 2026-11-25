@@ -805,6 +805,24 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .exh-card .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .exh-card b{font-size:17px;word-break:keep-all}
 .exh-card .c-meta b{font-size:inherit;color:var(--wood)}
+/* 47판: 전시회 포스터 */
+.exh-th{flex:none;width:54px;height:72px;border-radius:6px;overflow:hidden;background:var(--paper);border:1px solid var(--line)}
+.exh-th img{width:100%;height:100%;object-fit:cover;display:block}
+.exh-poster{all:unset;box-sizing:border-box;display:block;cursor:zoom-in;width:100%;max-width:340px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--paper);-webkit-tap-highlight-color:transparent}
+.exh-poster.big{max-width:720px;cursor:zoom-out}
+.exh-poster:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.exh-poster img{width:100%;height:auto;display:block}
+.exh-poster img:not([src]),.exh-pfig img:not([src]){aspect-ratio:3/4}
+.exh-pset{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.exh-pfig{margin:0;width:120px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--paper)}
+.exh-pfig img{width:100%;height:auto;display:block}
+.exh-pbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.exh-pbtns label{position:relative;cursor:pointer}
+.exh-pbtns input,.exh-padd input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.exh-pbtns label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.exh-padd{position:relative;width:120px;aspect-ratio:3/4;text-align:center;padding:6px;box-sizing:border-box}
+.exh-pset.busy label{pointer-events:none;opacity:.6}
+.exh-pset .hint{flex-basis:100%}
 .exh-title-h{font-size:22px;word-break:keep-all}
 .exh-notice textarea{width:100%;font:inherit;font-size:14px;line-height:1.6;margin-top:10px;white-space:pre-wrap}
 .exh-mine-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 8px;font-size:16px}
@@ -2098,13 +2116,14 @@ async function openExhibit(want){
   catch(e){ $('#v-exhibit').innerHTML = `<div class="panel"><h1>출품 화면을 열지 못했어요</h1><p class="sub">${/알 수 없는 요청/.test(e.message) ? '전시회 출품은 임원진이 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : esc(e.message)}</p></div>`; return; }
   exhPick(want); renderExhibit();
 }
-function renderExhibit(){
+function renderExhibit(){ renderExhibit_(); loadPhotos(); }
+function renderExhibit_(){
   const v = $('#v-exhibit');
   if (EXM.mode === 'pick'){
     const open = ((EXM.all && EXM.all.list) || []).filter(e => e.open);
     v.innerHTML = `<div class="brand">${BRAND_SVG(36)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>전시회 출품</h1></div></div>
       <p class="sub" style="margin:0">지금 출품 신청을 받는 전시회가 ${open.length}개 있어요. 출품할 전시회를 골라 주세요.</p>
-      <div class="exh-cards">${open.map(e => `<button type="button" class="exh-card" data-x="pick" data-id="${esc(e.id)}"><b>${esc(e.title)}</b><span class="chip done">${esc(exhStateText(Object.assign({ ready: true }, e)).t)}</span></button>`).join('')}</div>
+      <div class="exh-cards">${open.map(e => `<button type="button" class="exh-card" data-x="pick" data-id="${esc(e.id)}">${exhThumb(e)}<span class="grow"><b>${esc(e.title)}</b></span><span class="chip done">${esc(exhStateText(Object.assign({ ready: true }, e)).t)}</span></button>`).join('')}</div>
       <p class="hint lib-foot"><button type="button" class="linkish" data-x="first">첫 화면으로</button></p>`;
     return;
   }
@@ -2112,6 +2131,7 @@ function renderExhibit(){
   const others = ((EXM.all && EXM.all.list) || []).filter(e => e.open && e.id !== I.id).length;
   const head = `<div class="brand">${BRAND_SVG(36)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>전시회 출품</h1></div></div>
     <div class="exh-head"><b>${esc(I.title || '')}</b><span class="chip ${st.cls}">${esc(st.t)}</span>${others && EXM.mode === 'home' ? `<button type="button" class="linkish" data-x="repick">다른 전시회 고르기</button>` : ''}</div>
+    ${I.poster && EXM.mode === 'home' ? `<button type="button" class="exh-poster" data-x="poster-zoom" aria-label="포스터 크게 보기">${phImg(I.poster, I.title + ' 포스터')}</button>` : ''}
     ${I.note ? `<p class="sub exh-note">${esc(I.note)}</p>` : ''}`;
   const msg = EXM.msg ? `<p class="msg ${EXM.msgCls || 'ok'}" role="status">${esc(EXM.msg)}</p>` : '';
   if (EXM.mode === 'new' || EXM.mode === 'edit'){ v.innerHTML = head + exhFormHTML(); return; }
@@ -2270,6 +2290,7 @@ exV.addEventListener('click', e => {
   const b = e.target.closest('[data-x]'); if (!b) return; const a = b.dataset.x;
   if (a === 'first'){ openLogin(); return; }
   if (a === 'pick'){ EXM.mode = 'home'; EXM.info = null; exhPick(b.dataset.id); renderExhibit(); window.scrollTo(0,0); return; }
+  if (a === 'poster-zoom'){ const big = b.classList.toggle('big'); b.setAttribute('aria-label', big ? '포스터 작게 보기' : '포스터 크게 보기'); return; }
   if (a === 'repick'){ EXM.mode = 'pick'; renderExhibit(); window.scrollTo(0,0); return; }
   if (a === 'home'){ Object.assign(EXM, { mode: 'home', fs: null, msg: '' }); renderExhibit(); window.scrollTo(0,0); return; }
   if (a === 'new'){ exhOpenForm('new'); return; }
@@ -2327,7 +2348,21 @@ exV.addEventListener('submit', async e => {
 /* ---------------- 임원진: 전시회 관리 탭 ----------------
    학습회 목록처럼 전시회가 카드로 나뉘어 보이고, 누르면 그 전시회의 설정 · 출품 목록이 열려요.
    전시회마다 구글 시트 파일이 따로 만들어져요 (실제 서버). */
-const EXA = { L: null, id: null, D: null, creating: false, open: {}, msg: '', msgCls: 'ok', armed: null, dropArmed: false, notice: false };
+const EXA = { L: null, id: null, D: null, creating: false, open: {}, msg: '', msgCls: 'ok', armed: null, dropArmed: false, notice: false, poster: undefined };   // poster: 저장 전에 고른 포스터 (undefined면 바꾸지 않음)
+/* 47판: 전시회 포스터 */
+const exhThumb = e => e && e.poster ? `<span class="exh-th">${phImg(e.poster, e.title + ' 포스터')}</span>` : '';
+const exhPosterNow = ex => EXA.poster !== undefined ? EXA.poster : ((ex && ex.poster) || '');
+function exhPosterEditHTML(ex){
+  const pid = exhPosterNow(ex), changed = EXA.poster !== undefined && EXA.poster !== ((ex && ex.poster) || '');
+  return (pid ? `<figure class="exh-pfig">${phImg(pid, '전시회 포스터')}</figure>
+      <div class="exh-pbtns"><label class="btn sm">바꾸기<input type="file" accept="image/*" data-xposter aria-label="포스터 바꾸기"></label><button type="button" class="btn sm ghost danger-t" data-xa="poster-rm">빼기</button></div>`
+    : `<label class="ph-add exh-padd">+ 포스터 올리기<input type="file" accept="image/*" data-xposter aria-label="포스터 올리기"></label>`)
+    + (changed ? `<span class="hint">[${ex ? '설정 저장하기' : '전시회 만들기'}]를 눌러야 부원 화면에 ${pid ? '보여요' : '반영돼요'}.</span>` : '');
+}
+function refreshExhPoster(){
+  const box = $('#ex-poster'); if (!box) return;
+  box.classList.remove('busy'); box.innerHTML = exhPosterEditHTML(EXA.id && EXA.D ? EXA.D.ex : null); loadPhotos();
+}
 const mainTabsHTML = cur => `<div class="main-tabs" role="tablist" aria-label="진행자 화면"><button type="button" role="tab" data-main="list" aria-selected="${cur === 'list'}">학습회</button><button type="button" role="tab" data-main="exh" aria-selected="${cur === 'exh'}">전시회 관리</button></div>`;
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-main]'); if (!b) return;
@@ -2339,7 +2374,7 @@ const exhAdminTop = () => `<div class="top"><div><div class="brand"><img class="
 const exhApiMsg = e => /알 수 없는 요청/.test(e.message) ? '전시회 관리는 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : e.message;
 async function openExhAdmin(){
   if (TUT) tutClose();
-  show('exh'); Object.assign(EXA, { id: null, D: null, creating: false, msg: '', armed: null, dropArmed: false });
+  show('exh'); Object.assign(EXA, { id: null, D: null, creating: false, msg: '', armed: null, dropArmed: false, poster: undefined });
   const c = EXA.L || cacheGet(PWK, 'exha2');
   if (c){ EXA.L = c; renderExhAdmin();
     api('exhAdmin', S.pw).then(d => { EXA.L = d; cacheSet(PWK, 'exha2', d); if (S.view === 'exh' && !EXA.id && !EXA.creating && !typingIn('#v-exh')) renderExhAdmin(); }).catch(() => {});
@@ -2350,7 +2385,7 @@ async function openExhAdmin(){
   renderExhAdmin();
 }
 async function openExhDetail(id){
-  Object.assign(EXA, { id, creating: false, msg: '', armed: null, dropArmed: false, open: {}, notice: false });
+  Object.assign(EXA, { id, creating: false, msg: '', armed: null, dropArmed: false, open: {}, notice: false, poster: undefined });
   const c = cacheGet(PWK, 'exhd_' + id);
   if (c){ EXA.D = c; renderExhAdmin(); window.scrollTo(0, 0);
     api('exhDetail', S.pw, id).then(d => { if (EXA.id !== id) return; EXA.D = d; cacheSet(PWK, 'exhd_' + id, d); if (S.view === 'exh' && !typingIn('#v-exh') && !EXA.armed && !EXA.dropArmed) renderExhAdmin(); }).catch(() => {});
@@ -2360,7 +2395,7 @@ async function openExhDetail(id){
   catch(e){ EXA.id = null; $('#v-exh').innerHTML = `${exhAdminTop()}<div class="empty">${esc(exhApiMsg(e))}<br><button type="button" class="btn sm" data-xa="back" style="margin-top:12px">전시회 목록</button></div>`; return; }
   renderExhAdmin(); window.scrollTo(0, 0);
 }
-function renderExhAdmin(){ if (EXA.id && EXA.D) renderExhDetail(); else renderExhList(); }
+function renderExhAdmin(){ if (EXA.id && EXA.D) renderExhDetail(); else renderExhList(); loadPhotos(); }
 /* 전시회 설정 칸 (새로 만들 때 · 고칠 때 같이 써요) */
 function exhSetFormHTML(ex){
   const s = ex || { title: (() => { const y = new Date().getFullYear(); const used = ((EXA.L && EXA.L.list) || []).map(e => e.title); return used.includes(y + '학년도 목방 전시회') ? '' : y + '학년도 목방 전시회'; })(), openFlag: false, closeAt: '', note: '' };
@@ -2377,6 +2412,8 @@ function exhSetFormHTML(ex){
       <div class="field"><label for="ex-close">마감 예약 <span class="hint">비우면 직접 닫을 때까지</span></label>
         <div class="pw-row">${dtPick('ex-close', 'closeAt', s.closeAt)}<button type="button" class="btn sm ghost" data-xa="clear-close">비우기</button></div></div>
     </div>
+    <div class="field"><div class="lbl">포스터 <span class="hint">출품 화면과 전시회 목록에 보여요 (선택) · 사진 한 장</span></div>
+      <div class="exh-pset" id="ex-poster">${exhPosterEditHTML(ex)}</div></div>
     <div class="field"><label for="ex-note">안내 문구 <span class="hint">출품 화면 위에 보여요 (선택) · 줄바꿈은 그대로 보여요</span></label><textarea id="ex-note" rows="4" maxlength="1000" placeholder="예: 출품작은 전시 하루 전까지 1동방으로 가져와 주세요.&#10;작품 설명은 3~5문장 정도로 적어 주세요.">${esc(s.note || '')}</textarea></div>
     <div class="actions"><button class="btn primary" type="submit" id="ex-save">${ex ? '설정 저장하기' : '전시회 만들기'}</button>${ex ? `<button class="btn" type="button" data-xa="notice" aria-expanded="${!!EXA.notice}">${EXA.notice ? '공지글 닫기' : '단톡방 공지글 보기'}</button>` : ''}${ex ? '' : '<button class="btn ghost" type="button" data-xa="cancel-new">취소</button>'}
       <span class="msg ${EXA.msgCls}" id="ex-msg" role="status">${esc(EXA.msg)}</span></div>
@@ -2389,7 +2426,7 @@ function renderExhList(){
     ${EXA.creating ? exhSetFormHTML(null) : ''}
     ${EXA.msg && !EXA.creating ? `<p class="msg ${EXA.msgCls}" role="status">${esc(EXA.msg)}</p>` : ''}
     <div class="exh-cards">${L.length ? L.map(e => { const st = exhStateText(Object.assign({ ready: true }, e));
-      return `<button type="button" class="exh-card" data-xa="open-ex" data-id="${esc(e.id)}">
+      return `<button type="button" class="exh-card" data-xa="open-ex" data-id="${esc(e.id)}">${exhThumb(e)}
         <span class="grow"><b>${esc(e.title)}</b><span class="c-meta"><span>출품 <b class="num">${e.pn != null ? e.pn : e.n || 0}</b>명</span><span>기획서 <b class="num">${e.n || 0}</b>장</span><span>작품(오브제) <b class="num">${e.objN || 0}</b>개</span></span></span>
         <span class="chip ${st.cls}">${esc(st.t)}</span></button>`; }).join('')
       : `<div class="empty">아직 만든 전시회가 없어요. <b>새 전시회 만들기</b>로 첫 전시회를 열어 보세요.</div>`}</div>`;
@@ -2455,8 +2492,9 @@ exA.addEventListener('click', async e => {
   const b = e.target.closest('[data-xa]'); if (!b) return; const a = b.dataset.xa, id = b.dataset.id;
   const D2 = EXA.D; const sorted = () => (D2.list || []).slice().sort((x, y) => String(x.at).localeCompare(String(y.at)));
   if (a === 'clear-close'){ const i = $('#ex-close'); if (i) i.value = ''; return; }
-  if (a === 'new'){ EXA.creating = true; EXA.msg = ''; renderExhAdmin(); return; }
-  if (a === 'cancel-new'){ EXA.creating = false; EXA.msg = ''; renderExhAdmin(); return; }
+  if (a === 'new'){ EXA.creating = true; EXA.msg = ''; EXA.poster = undefined; renderExhAdmin(); return; }
+  if (a === 'cancel-new'){ EXA.creating = false; EXA.msg = ''; EXA.poster = undefined; renderExhAdmin(); return; }
+  if (a === 'poster-rm'){ EXA.poster = ''; refreshExhPoster(); return; }
   if (a === 'open-ex'){ openExhDetail(id); return; }
   if (a === 'back'){ openExhAdmin(); return; }
   if (a === 'refresh-list'){ try { EXA.L = await withLoader(api('exhAdmin', S.pw)); cacheSet(PWK, 'exha2', EXA.L); EXA.msg = ''; } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); return; }
@@ -2477,16 +2515,28 @@ exA.addEventListener('click', async e => {
     b.disabled = true; try { EXA.L = await api('exhDrop', S.pw, EXA.id); cacheSet(PWK, 'exha2', EXA.L); store(PWK, 'dg_c_exhd_' + EXA.id, null); Object.assign(EXA, { id: null, D: null, dropArmed: false, msg: '전시회를 앱에서 지웠어요. 구글 시트 파일은 드라이브에 남아 있어요.', msgCls: 'ok' }); }
     catch(err){ EXA.dropArmed = false; EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); window.scrollTo(0, 0); return; }
 });
+/* 47판: 포스터 올리기 · 바꾸기 (사진은 바로 올리고, 전시회에는 [설정 저장하기]를 눌러야 걸려요) */
+exA.addEventListener('change', async e => {
+  const t = e.target; if (!t.matches || !t.matches('[data-xposter]')) return;
+  const f = t.files && t.files[0]; if (!f) return;
+  const box = $('#ex-poster'), m = $('#ex-msg'); box.classList.add('busy');
+  if (m){ m.className = 'msg'; m.textContent = '포스터를 올리는 중…'; }
+  try {
+    const data = await shrinkImage(f, LIVE ? 1400 : 900); const id = await api('uploadPhoto', S.pw, data, f.name);
+    PH[id] = data; EXA.poster = id; if (m) m.textContent = '';
+  } catch(err){ if (m){ m.className = 'msg err'; m.textContent = err.message; } }
+  refreshExhPoster();
+});
 exA.addEventListener('submit', async e => {
   if (e.target.id !== 'exh-set') return; e.preventDefault();
-  const body = { title: $('#ex-title').value.trim(), open: !!document.querySelector('#ex-open [data-open="1"][aria-checked="true"]'), closeAt: dtRead($('#ex-close')) || '', note: $('#ex-note').value.trim() };
+  const body = { title: $('#ex-title').value.trim(), open: !!document.querySelector('#ex-open [data-open="1"][aria-checked="true"]'), closeAt: dtRead($('#ex-close')) || '', note: $('#ex-note').value.trim(), poster: exhPosterNow(EXA.id && EXA.D ? EXA.D.ex : null) };
   const m = $('#ex-msg'); if (!body.title){ m.className = 'msg err'; m.textContent = '전시회 이름을 적어 주세요.'; return; }
   const isNew = !EXA.id;
   $('#ex-save').disabled = true; m.className = 'msg'; m.textContent = isNew ? '만드는 중… (구글 시트 파일도 만들어요)' : '저장하는 중…';
   try {
     const d = await (isNew ? withLoader(api('exhSave', S.pw, '', body)) : api('exhSave', S.pw, EXA.id, body));
-    Object.assign(EXA, { D: d, id: d.ex.id, creating: false, L: null, msg: isNew ? '전시회를 만들었어요. [단톡방 공지글 보기]로 공지글을 복사해서 부원들에게 보내 주세요.' : EXA.notice ? '저장했어요. 아래 공지글도 새 설정으로 다시 썼어요.' : '저장했어요.', msgCls: 'ok' });
-    cacheSet(PWK, 'exhd_' + d.ex.id, d); store(PWK, 'dg_c_exha2', null);
+    Object.assign(EXA, { D: d, id: d.ex.id, creating: false, L: null, poster: undefined, msg: isNew ? '전시회를 만들었어요. [단톡방 공지글 보기]로 공지글을 복사해서 부원들에게 보내 주세요.' : EXA.notice ? '저장했어요. 아래 공지글도 새 설정으로 다시 썼어요.' : '저장했어요.', msgCls: 'ok' });
+    cacheSet(PWK, 'exhd_' + d.ex.id, d); store(PWK, 'dg_c_exha2', null); store('l', 'dg_c_exh2', null);
   } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; }
   renderExhAdmin(); if (isNew) window.scrollTo(0, 0);
 });
@@ -2656,7 +2706,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 46판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 47판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -2905,7 +2955,7 @@ function loadPhotos(){
   document.querySelectorAll('img[data-ph]:not([src])').forEach(img => { const id = img.dataset.ph; if (!PH[id] && !phQueue.includes(id)) phQueue.push(id); });
   while (phBusy < 4 && phQueue.length){
     const id = phQueue.shift(); PH[id] = 'x'; phBusy++;
-    const fromServer = () => (S.view === 'guides' ? api('getGuidePhoto', id) : api('getPhoto', S.pw, id)).then(src => { PDB.put(id, src); return src; });
+    const fromServer = () => (S.view === 'guides' ? api('getGuidePhoto', id) : S.view === 'exhibit' ? api('exhPoster', id) : api('getPhoto', S.pw, id)).then(src => { PDB.put(id, src); return src; });
     PDB.get(id).then(hit => hit || fromServer()).then(src => { PH[id] = src; }).catch(() => { PH[id] = ''; }).finally(() => {
       phBusy--; document.querySelectorAll(`img[data-ph="${id}"]`).forEach(im => { if (PH[id]) im.src = PH[id]; else im.classList.add('broken'); }); loadPhotos(); });
   }
