@@ -1487,11 +1487,11 @@ function loadDemoJs(){
   });
 }
 /* 48판: 전시 상주 시간표는 sangju.js에 따로 있어요. 상주 화면을 처음 열 때만 불러와요 */
-const SANGJU_JS = 'sangju.js?v=48b';
+const SANGJU_JS = 'sangju.js?v=48c';
 let sjJsP = null;
 function loadSangju(){
   if (window.dgSangju) return Promise.resolve();
-  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, route, get S(){ return S; },
+  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, route, get S(){ return S; }, tut: () => !!TUT,
     openExhDetail: id => { show('exh'); openExhDetail(id); } };
   return sjJsP = sjJsP || new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = SANGJU_JS; s.async = true;
@@ -1539,8 +1539,9 @@ function loaderOff(){
    - 진행자 데이터(신청자 이름 등)는 로그인을 기억하는 곳(홈 화면 앱: 기기, 브라우저: 창을 닫으면 지워짐)에만, 로그아웃하면 지워요.
    - 부원용 설명서 목록 · 전시회 안내는 누구나 보는 내용이라 기기에 저장해요. */
 const CACHE_V = 'v1';
-function cacheGet(kind, k){ try { const v = store(kind, 'dg_c_' + k); if (!v) return null; const o = JSON.parse(v); return o && o.v === CACHE_V ? o.d : null; } catch(e){ return null; } }
-function cacheSet(kind, k, d){ if (!LIVE) return; try { store(kind, 'dg_c_' + k, JSON.stringify({ v: CACHE_V, t: Date.now(), d })); } catch(e){ try { store(kind, 'dg_c_' + k, null); } catch(e2){} } }
+function cacheGet(kind, k){ if (TUT) return null; try { const v = store(kind, 'dg_c_' + k); if (!v) return null; const o = JSON.parse(v); return o && o.v === CACHE_V ? o.d : null; } catch(e){ return null; } }
+function cacheSet(kind, k, d){ if (!LIVE || TUT) return;   // 튜토리얼 연습 내용은 기기에 남기지 않아요
+  try { store(kind, 'dg_c_' + k, JSON.stringify({ v: CACHE_V, t: Date.now(), d })); } catch(e){ try { store(kind, 'dg_c_' + k, null); } catch(e2){} } }
 function cacheClearHost(){ ['s','l'].forEach(k => { try { const st = k === 's' ? sessionStorage : localStorage; Object.keys(st).filter(x => /^dg_c_(all|exha|exhd_)/.test(x)).forEach(x => st.removeItem(x)); } catch(e){} }); }
 /* 진행자 데이터가 들어올 때마다(로그인 · 새로고침 · 저장) 저장해 둬요 */
 function rememberAll(d){
@@ -1567,6 +1568,10 @@ function bgRefreshAll(){
 async function withLoader(p){ loaderOn(); try { return await p; } finally { loaderOff(); } }
 async function api(fn, ...args){
   // 튜토리얼 중에는 실제 서버 대신 연습용 사본에서 처리해요 (실제 기록에 남지 않아요)
+  if (TUT && TUT.core && /^sj/.test(fn)){   // 48판: 전시 상주 시간표 연습 사본 (sangju.js)
+    const sj = await tutSj();
+    return new Promise((res, rej) => setTimeout(() => { try { res(clone(sj[fn](...clone(args)))); } catch(e){ rej(e); } }, 120));
+  }
   if (TUT && TUT.core && !(fn === 'getPhoto' && !TUT.photos[args[1]])){
     return new Promise((res, rej) => setTimeout(() => { try { res(clone(TUT.core[fn](...args))); } catch(e){ rej(e); } }, 120));
   }
@@ -1878,7 +1883,7 @@ rvBox.addEventListener('submit', async e => {
   const btn = $('#rv-submit'); btn.disabled = true; msg.className = 'msg'; msg.textContent = '보내는 중…';
   try { await api('submitReview', R.sid, Object.assign(cleanReview(R.form, Object.assign({}, R.pub.review || DEFAULT_REVIEW, {difficulty: true})), {classId: R.form.classId || ''})); }
   catch(err){ btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message; return; }
-  store('l', 'dg_sent_' + R.pub.id, '1');
+  if (!TUT) store('l', 'dg_sent_' + R.pub.id, '1');   // 튜토리얼 연습 평가는 기기에 남기지 않아요
   R.sent = true; renderReview(); window.scrollTo(0,0);
 });
 
@@ -2400,7 +2405,6 @@ const exhAdminTop = () => `<div class="top"><div><div class="brand"><img class="
   <p class="sub">전시회마다 출품 신청을 열고 닫고, 들어온 전시기획서를 모아 보고 인쇄해요. 전시회마다 구글 시트 파일이 따로 만들어져요.</p></div></div>${mainTabsHTML('exh')}`;
 const exhApiMsg = e => /알 수 없는 요청/.test(e.message) ? '전시회 관리는 앱스 스크립트의 Api.gs를 새 판으로 바꾸고 [새 버전]으로 배포하면 열려요.' : e.message;
 async function openExhAdmin(){
-  if (TUT) tutClose();
   show('exh'); route({ v: 'exh' }); Object.assign(EXA, { id: null, D: null, creating: false, msg: '', armed: null, dropArmed: false, poster: undefined });
   const c = EXA.L || cacheGet(PWK, 'exha2');
   if (c){ EXA.L = c; renderExhAdmin();
@@ -2729,7 +2733,7 @@ function cardInner(s, rank){
   </button>`;
 }
 /* 48판: 새로고침해도 보던 화면(학습회 · 전시회 · 상주 시간표)으로 돌아와요. 이 창(탭)에서만 기억해요 */
-function route(o){ try { o ? sessionStorage.setItem('dg_route', JSON.stringify(o)) : sessionStorage.removeItem('dg_route'); } catch(e){} }
+function route(o){ if (TUT) return; try { o ? sessionStorage.setItem('dg_route', JSON.stringify(o)) : sessionStorage.removeItem('dg_route'); } catch(e){} }
 function restoreRoute(){
   let r = null; try { r = JSON.parse(sessionStorage.getItem('dg_route') || 'null'); } catch(e){}
   try {
@@ -3566,7 +3570,7 @@ function setDemo(which, sid){
 let TUT = null, tutI = 0;
 function makeSandbox(){
   const d = clone(D());
-  const T = { sessions: d.sessions || [], regs: d.regs || [], reviews: d.reviews || [], hostlogs: d.hostlogs || [], guides: d.guides || [] };
+  const T = { sessions: d.sessions || [], regs: d.regs || [], reviews: d.reviews || [], hostlogs: d.hostlogs || [], guides: d.guides || [], exh: [] };   // exh: 연습 전시회 출품 (48판)
   const mem = { list: k => clone(T[k] || []), insert: (k,o) => { (T[k] = T[k] || []).push(clone(o)); },
     update: (k,o) => { const i = (T[k] || []).findIndex(x => x.id === o.id); if (i < 0) throw new Error('찾을 수 없어요.'); T[k][i] = clone(o); },
     remove: (k,id) => { T[k] = (T[k] || []).filter(x => x.id !== id); } };
@@ -3574,11 +3578,11 @@ function makeSandbox(){
   const core = makeCore(mem, { getPassword: () => S.pw, setPassword: () => {}, uid: () => Math.random().toString(36).slice(2,10),
     hash: (pin, salt) => (salt || Math.random().toString(36).slice(2,6)) + ':' + pin,
     cacheGet: k => cache[k] ?? null, cachePut: (k,v) => { cache[k] = v; }, cacheRemove: k => { delete cache[k]; },
-    url: () => D().url, version: D().version || '', lock: fn => fn(),
+    url: () => D().url, version: D().version || '', lock: fn => fn(), exhList: [],
     savePhoto: (b64, mime) => { const id = 'pt' + Math.random().toString(36).slice(2,12); photos[id] = `data:${mime};base64,${b64}`; return id; },
     readPhoto: id => { if (photos[id]) return photos[id]; throw new Error('사진을 찾을 수 없어요.'); },
     trashPhoto: id => { delete photos[id]; } });
-  return { core, photos, sid: null, seeded: {}, folded: false, ok: false, gen: 0, me: null, sched: null, doneSet: new Set() };
+  return { core, photos, sid: null, exhId: null, sj: null, seeded: {}, folded: false, ok: false, gen: 0, me: null, sched: null, doneSet: new Set() };
 }
 const tutSession = () => TUT && TUT.sid ? D().sessions.find(s => s.id === TUT.sid) : null;
 function tutList(){ S.termFilter = 'all'; S.sortMode = 'date'; openList(); }
@@ -3611,6 +3615,91 @@ async function tutSeedReviews(){
     try { TUT.core.submitReview(s.id, { overall: o, difficulty: d, classId: cid, scores, texts: tid ? { [tid]: t } : {} }); } catch(e){} });
   await tutRefresh();
 }
+
+/* ---------- 48판: 전시회 · 전시 상주 연습 ----------
+   전시회는 연습 사본(makeCore의 exh)에서, 상주 시간표는 sangju.js의 연습 사본(dgSangju.sandbox)에서 움직여요.
+   구글 시트 파일도 안 생기고, 튜토리얼을 끝내면 모두 사라져요. */
+const sjRoot = () => { const h = $('#v-sangju'); return h && h.shadowRoot; };
+const sjq = sel => { const r = sjRoot(); return r ? r.querySelector(sel) : null; };
+const sjCard = sel => { const el = sjq(sel); return el ? (el.closest('.card') || el) : null; };
+const sjPeek = () => (window.dgSangju && window.dgSangju.peek) ? window.dgSangju.peek() : {};
+const sjAdm = () => { const p = sjPeek(); return S.view === 'sangju' && p.mode === 'admin' && p.admin ? p.admin : null; };
+const tutDays = () => [14, 15, 16].map((n, i) => ({ date: tutDate(n), open: 11, close: i === 2 ? 17 : 18 }));
+async function tutSj(){
+  if (!TUT.sj){
+    await loadSangju(); if (!TUT) throw new Error('튜토리얼이 끝났어요.');
+    if (!TUT.sj) TUT.sj = window.dgSangju.sandbox({
+      title: id => { try { return ((TUT.core.exhInfo().list || []).find(e => e.id === id) || {}).title || ''; } catch(e){ return ''; } },
+      photo: id => TUT && TUT.photos[id] });
+  }
+  return TUT.sj;
+}
+const tutExhInfo = () => { try { return ((TUT.core.exhInfo().list || []).find(e => e.id === TUT.exhId)) || null; } catch(e){ return null; } };
+/* 연습 전시회를 미리 만들어 둬요 (전시 상주 · 부원 화면 튜토리얼) */
+async function tutPrepExh(){
+  if (TUT.exhId) return;
+  try { const d = TUT.core.exhSave(S.pw, '', { title: '목방 연습 전시회', open: true, closeAt: '', note: '출품작은 전시 하루 전까지 1동방으로 가져와 주세요.' }); TUT.exhId = d.ex.id; TUT.exhAuto = true; } catch(e){}
+}
+/* 출품 신청이 닫혀 있으면 잠깐 열어요. 돌려 놓을 함수를 돌려줘요 */
+function tutExhOpen(){
+  const D2 = TUT.core.exhDetail(S.pw, TUT.exhId), ex = D2.ex;
+  const body = { title: ex.title, open: true, closeAt: '', note: ex.note || '' };
+  if (ex.open) return () => {};
+  TUT.core.exhSave(S.pw, TUT.exhId, body);
+  return () => { try { TUT.core.exhSave(S.pw, TUT.exhId, { title: ex.title, open: ex.openFlag, closeAt: ex.closeAt || '', note: ex.note || '' }); } catch(e){} };
+}
+/* 연습용 출품 2장 (전시회 관리 · 출품 목록 보기) */
+async function tutSeedExh(){
+  if (TUT.seeded.exh || !TUT.exhId) return; TUT.seeded.exh = true;
+  const back = tutExhOpen();
+  [['김나무', '202401010', '38', '편백 컵받침 세트', [{ n: '컵받침', m: '편백', w: 100, d: 100, h: 10 }, { n: '컵받침 꽂이', m: '편백', w: 110, d: 40, h: 60 }], '편백 판재를 사포로만 다듬어 나뭇결이 그대로 보이게 만든 컵받침이에요.'],
+   ['이대패', '202402020', '39', '호두 숟가락', [{ n: '숟가락', m: '호두', w: 40, d: 180, h: 20 }], '칼과 끌로 깎아 칼자국을 살린 숟가락이에요.']]
+    .forEach(([name, sn, gen, work, objs, desc]) => { try { TUT.core.exhSubmitAll(TUT.exhId, [{ name, sn, gen, work, objs, desc, co: [] }]); } catch(e){} });
+  back();
+}
+async function tutOpenExh(){
+  if (!TUT.exhId) await tutPrepExh();
+  if (S.view !== 'exh' || EXA.id !== TUT.exhId || !EXA.D){ show('exh'); await openExhDetail(TUT.exhId); }
+}
+/* 상주 시간표 임원진 화면을 원하는 탭으로 (fresh: 새로 불러와서 그리기) */
+async function tutSjTab(tab, fresh){
+  const p = sjPeek();
+  if (!fresh && S.view === 'sangju' && p.mode === 'admin' && p.admin && p.exhId === TUT.exhId){
+    if (p.tab !== tab){ const b = sjq(`.tabs [data-t="${tab}"]`); if (b) b.click(); }
+    return;
+  }
+  await tutOpenExh(); await openSangjuAdmin(tab);
+}
+
+/* 예시로 채우기 (전시회) */
+function exExhCreate(){
+  if (!EXA.creating && !EXA.id){ const n = document.querySelector('#v-exh [data-xa="new"]'); if (n) n.click(); }
+  const t = $('#ex-title'); if (t && !t.value.trim()) setVal(t, new Date().getFullYear() + '학년도 목방 전시회');
+  const on = document.querySelector('#ex-open [data-open="1"]'); if (on) on.click();
+  const n = $('#ex-note'); if (n && !n.value.trim()) setVal(n, '출품작은 전시 하루 전까지 1동방으로 가져와 주세요.\n작품 설명은 3~5문장 정도로 적어 주세요.');
+}
+function exExhForm(){
+  const f = (sel, v) => { const el = document.querySelector(sel); if (el && !String(el.value || '').trim()) setVal(el, v); };
+  f('#xf-name', '최연습'); f('#xf-sn', '202505050'); f('#xf-gen', '40');
+  f('#exh-form [data-fi="0"] [data-xf="work"]', '편백 트레이');
+  const row = document.querySelector('#exh-form [data-fi="0"] .xo-row');
+  if (row) [['n', '트레이'], ['m', '편백'], ['w', '300'], ['d', '200'], ['h', '30']].forEach(([k, v]) => { const i = row.querySelector(`[data-xo="${k}"]`); if (i && !i.value) setVal(i, v); });
+  f('#exh-form [data-fi="0"] [data-xf="desc"]', '편백 판재를 짜맞춤으로 이어 만든 트레이예요. 오일로 마감해서 물에도 강해요.');
+  const b = $('#xf-go'); if (b) tutFocus(b);
+}
+/* 예시로 채우기 (상주 시간표) */
+function exSjDays(){
+  const fr = sjq('#sFrom'), to = sjq('#sTo'); if (!fr || !to) return;
+  if (!fr.value) fr.value = tutDate(14); if (!to.value) to.value = tutDate(16);
+  if (!sjq('#sDays .dayrow')) window.SJ.fillRange();
+}
+function exSjNotice(){ const n = sjq('#sNotice'); if (n && !n.value.trim()) n.value = '제1학생회관 전시실 · 상주하는 동안 방명록과 작품 안내를 맡아요.'; }
+function exSjMe(){
+  const n = sjq('#fName'), s = sjq('#fSid'); if (!n || !s || n.disabled) return;
+  n.value = '최연습'; s.value = '202505050'; window.SJ.formNext();
+}
+function exSjPaint(){ sjRoot().querySelectorAll('#fGrid .allday').forEach((b, i) => { if (i < 2) b.click(); }); const sv = sjq('#fSave'); if (sv) tutFocus(sv); }
+function exSjFind(){ const r = (sjPeek().pub || {}).result; const nm = r && (r.slots.find(s => s.names.length) || { names: [''] }).names[0]; const i = sjq('#tName'); if (i && nm){ i.value = nm.replace(/\(\d\d\)$/, ''); i.dispatchEvent(new Event('input')); } }
 
 /* ---------- 예시로 채우기 ---------- */
 /* 이미 적은 칸은 그대로 두고 빈 칸만 채워요 */
@@ -3649,7 +3738,7 @@ function exGuide(){
   setVal('#gd-safe', '밴드 쏘는 진행자가 옆에 있을 때만 써요.');
   setVal('#gd-tips', '오일은 얇게 두 번 바르면 얼룩이 덜 생겨요.');
 }
-const ME = { name: '최연습', dept: '화학과', studentNo: '20250505', phone: '01077778888' };
+const ME = { name: '최연습', dept: '화학과', studentNo: '202505050', phone: '01077778888' };
 function exApply(){
   const opt = [...document.querySelectorAll('#v-apply .cls-opt[role=radio]')].find(b => !b.disabled) || document.querySelector('#v-apply .cls-opt[role=radio]');
   if (opt && opt.getAttribute('aria-checked') !== 'true') opt.click();
@@ -3682,8 +3771,9 @@ const TUT_STEPS = [
       return `<p><b>${m.name}</b>${m.name.endsWith('튜토리얼') ? '이에요' : ' 튜토리얼이에요'}. ${m.intro}</p>
       <ul><li>칸이나 버튼을 하나씩 노란 테두리로 알려 드려요. 직접 해 보면 다음으로 넘어가요.</li>
       <li>연습하는 동안 한 일은 실제 기록에 남지 않아요.</li></ul>
-      ${m.makes ? '<p><b>마지막에 이 연습 학습회를 실제로 저장할 수도 있어요.</b> 곧 열 학습회가 있다면 그 내용으로 만들어 보세요.</p>'
-                : `<p>연습용 학습회 <b>'${esc((tutSession() || {}).title || '')}'</b>를 미리 만들어 뒀어요. 이걸로 연습해요.</p>`}`; },
+      ${m.makes ? '<p><b>마지막에 이 연습 학습회를 실제로 저장할 수도 있어요.</b> 곧 열 학습회가 있다면 그 내용으로 만들어 보세요.</p>' + (TUT.mod === 'all' ? '<p class="hint" style="margin:0">3부에서 만드는 연습 전시회는 저장되지 않고, 구글 시트 파일도 생기지 않아요.</p>' : '')
+        : m.kind === 'exh' ? (TUT.exhId ? `<p>연습용 전시회 <b>'${esc((tutExhInfo() || {}).title || '')}'</b>를 미리 만들어 뒀어요${TUT.mod === 'member' ? '. 출품 신청을 받고 있고, 상주 시간표도 공개돼 있어요' : ''}. 이걸로 연습해요.</p>` : '<p>연습으로 만드는 전시회는 실제로 저장되지 않고, 구글 시트 파일도 생기지 않아요.</p>')
+        : `<p>연습용 학습회 <b>'${esc((tutSession() || {}).title || '')}'</b>를 미리 만들어 뒀어요. 이걸로 연습해요.</p>`}`; },
     enter: async () => { await tutPrepare(); tutList(); } },
 
   // 1. 새 학습회 만들기
@@ -3818,6 +3908,134 @@ const TUT_STEPS = [
     body: () => `<p>평가를 보내면 이렇게 <b>감사 화면</b>이 나와요.</p><p>같은 휴대폰으로 다시 열면 <b>'이미 평가를 보냈습니다'</b>가 나와서 한 번만 평가할 수 있어요. [다시 열어 보기]로 확인해 보세요.</p>`,
     ex: ['다시 열어 보기', () => openReview(TUT.sid)], hl: () => document.querySelector('#v-review .thanks') },
 
+  // 3부 전시회 관리 (48판)
+  { part: 'exh', title: '1. 전시회 관리 탭 열기', done: () => S.view === 'exh', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `${TUT.mod === 'all' ? '<p>이제 전시회를 열어 볼게요.</p>' : ''}<p>전시회 출품 신청과 상주 시간표는 <b>전시회 관리</b> 탭에서 다뤄요. 위쪽의 <b>[전시회 관리]</b>를 눌러 보세요.</p>`,
+    enter: () => { if (S.view !== 'list') tutList(); }, hl: () => document.querySelector('.main-tabs [data-main="exh"]') },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 열기', done: () => S.view === 'exh' && (EXA.creating || (EXA.id && EXA.id === TUT.exhId)), auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>전시회는 학기마다 하나씩 만들어요. <b>[새 전시회 만들기]</b>를 눌러 보세요.</p><p class="hint">실제로 만들면 이 전시회 출품이 쌓일 구글 시트 파일이 따로 생겨요. 연습에서는 생기지 않아요.</p>`,
+    enter: () => { if (S.view !== 'exh') openExhAdmin(); }, hl: () => document.querySelector('#v-exh [data-xa="new"]') },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 이름', ex: ['예시로 채우기', exExhCreate],
+    body: () => `<p><b>전시회 이름</b>은 전시기획서 맨 위와 시트 파일 이름에 들어가요. 올해 이름이 미리 들어가 있으면 그대로 써도 돼요.</p>`,
+    hl: () => fld('#ex-title'), done: () => !!($('#ex-title') && $('#ex-title').value.trim()), doneMsg: '이름을 적었어요.' },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 출품 신청 받기', ex: ['예시로 채우기', exExhCreate],
+    body: () => `<p><b>출품 신청</b>을 <b>[받기]</b>로 골라요. [닫기]로 두면 부원이 링크를 열어도 신청할 수 없어요.</p><p class="hint">전시가 끝나거나 마감하면 여기서 [닫기]로 바꿔 저장해요.</p>`,
+    hl: () => fld('#ex-open'), done: () => !!document.querySelector('#ex-open [data-open="1"][aria-checked="true"]'), doneMsg: '출품 신청을 받기로 했어요.' },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 마감 예약', opt: true,
+    body: () => `<p><b>마감 예약</b>에 날짜와 시간을 넣으면 그때 출품 신청이 저절로 닫혀요. 비워 두면 직접 닫을 때까지 열려 있어요.</p>`,
+    hl: () => fld('#ex-close') },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 포스터와 안내 문구', ex: ['예시로 채우기', exExhCreate], opt: true,
+    body: () => `<ul><li><b>포스터</b>를 올리면 출품 화면과 전시회 목록에 보여요. 상주 시간표 디자인에서도 이 포스터로 색을 뽑을 수 있어요.</li><li><b>안내 문구</b>는 출품 화면 맨 위에 보여요. 가져올 날짜 같은 걸 적어요.</li></ul>`,
+    hl: () => document.querySelector('#ex-poster') ? document.querySelector('#ex-poster').closest('.field') : null },
+  { part: 'exh', title: '1. 새 전시회 만들기 · 만들기', ex: ['예시로 채우기', exExhCreate], auto: true, waitLabel: '만들면 넘어가요',
+    body: () => `<p>맨 아래 <b>[전시회 만들기]</b>를 눌러요.</p>`,
+    hl: '#ex-save', done: () => { if (S.view === 'exh' && EXA.id && EXA.D && !EXA.creating){ TUT.exhId = EXA.id; return true; } return false; } },
+
+  { part: 'exh', title: '2. 단톡방 공지글 보내기', done: () => !!EXA.notice, auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>전시회를 만들면 이 화면이 열려요. <b>[단톡방 공지글 보기]</b>를 눌러 보세요.</p><p class="hint">이름 · 마감 · 신청 링크 · 안내 문구로 공지글이 저절로 써져요.</p>`,
+    enter: () => tutOpenExh(), hl: () => document.querySelector('#v-exh [data-xa="notice"]') },
+  { part: 'exh', title: '2. 공지글 복사하기', opt: true,
+    body: () => `<p><b>[공지글 복사]</b>를 눌러 단톡방에 그대로 붙여 넣어요. 설정을 고치고 저장하면 공지글도 새 설정으로 다시 써져요.</p>`,
+    enter: () => { if (S.view !== 'exh' || !EXA.id) return tutOpenExh(); if (!EXA.notice){ const b = document.querySelector('#v-exh [data-xa="notice"]'); if (b) b.click(); } },
+    hl: () => document.querySelector('#v-exh .exh-notice') },
+  { part: 'exh', title: '2. 출품 신청 링크', opt: true,
+    body: () => `<ul><li><b>[출품 신청 링크 복사]</b>로 링크만 따로 보낼 수 있어요.</li><li><b>[출품 화면 보기]</b>를 누르면 부원에게 보이는 화면을 미리 봐요.</li></ul>`,
+    enter: () => tutOpenExh(), hl: () => document.querySelector('#v-exh .exh-sum') },
+
+  { part: 'exh', title: '3. 출품 목록 보기',
+    body: () => `<p>연습용으로 부원 2명이 출품 신청을 냈다고 해 볼게요.</p><ul><li>위에 <b>출품한 사람 · 기획서 · 작품(오브제)</b> 수가 모여요.</li><li>신청이 들어올 때마다 구글 시트에도 쌓여요.</li></ul>`,
+    enter: async () => { await tutSeedExh(); await tutOpenExh(); try { EXA.D = await api('exhDetail', S.pw, TUT.exhId); renderExhAdmin(); } catch(e){} },
+    hl: () => document.querySelector('#v-exh .exh-list') },
+  { part: 'exh', title: '3. 기획서 펼쳐 보기', auto: true, waitLabel: '펼치면 넘어가요',
+    body: () => `<p>줄을 누르면 그 사람이 쓴 <b>전시기획서</b>가 양식 그대로 펼쳐져요. 하나 눌러 보세요.</p>`,
+    enter: () => tutOpenExh(), hl: () => document.querySelector('#v-exh .exh-ih'), done: () => Object.values(EXA.open || {}).some(Boolean) },
+  { part: 'exh', title: '3. 인쇄 · Word로 받기', opt: true,
+    body: () => `<ul><li><b>[기획서 인쇄]</b> · <b>[Word로 받기]</b>로 한 장씩 뽑아요.</li><li>위쪽 <b>[전체 기획서 인쇄]</b> · <b>[전체 Word로 받기]</b>로 한꺼번에 뽑을 수도 있어요.</li><li><b>[출품 삭제]</b>는 두 번 눌러야 지워져요.</li></ul>`,
+    hl: () => document.querySelector('#v-exh .exh-item.open .exh-ib .actions') || document.querySelector('#v-exh .exh-sum') },
+
+  { part: 'exh', title: '4. 상주 시간표 열기', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `${TUT.mod === 'all' ? '' : `<p>연습용 전시회 <b>'${esc((tutExhInfo() || {}).title || '')}'</b>로 연습해요.</p>`}<p>전시 기간에 전시장을 지킬 <b>상주</b> 시간표를 만들어요. 부원들에게 가능한 시간을 받고, 한 타임에 몇 명씩 고르게 나눠요.</p><p>전시회 화면의 <b>[상주 시간표 열기]</b>를 눌러 보세요.</p>`,
+    enter: () => tutOpenExh(), hl: () => document.querySelector('#v-exh .exh-sj'), done: () => !!sjAdm() },
+  { part: 'exh', title: '4. 전시 날짜 정하기', ex: ['예시로 채우기', exSjDays],
+    body: () => `<p><b>시작 날짜 · 끝 날짜</b>와 <b>기본 여는 시간 · 닫는 시간</b>을 고르고 <b>[이 기간으로 날짜 채우기]</b>를 눌러요.</p><p class="hint">설치 · 철수하는 날처럼 시간이 다른 날은 아래 날짜별 줄에서 따로 바꿔요. 필요 없는 날은 × 로 빼요.</p>`,
+    enter: () => tutSjTab('set'), hl: () => sjCard('#sFrom'), done: () => !!sjq('#sDays .dayrow') || !!(sjAdm() && sjAdm().cfg.days.length), doneMsg: '날짜가 채워졌어요.' },
+  { part: 'exh', title: '4. 안내 문구 · 한 타임 인원', ex: ['예시로 채우기', exSjNotice], opt: true,
+    body: () => `<ul><li><b>안내 문구</b>는 부원 첫 화면에 보여요. 장소나 할 일을 적어요.</li><li>아래 <b>한 타임에 몇 명</b>에서 상주 인원을 정해요. 보통 2명이에요.</li></ul>`,
+    enter: () => tutSjTab('set'), hl: () => sjCard('#sNotice') },
+  { part: 'exh', title: '4. 설정 저장하기', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>맨 아래 <b>[설정 저장하기]</b>를 눌러요. 저장해야 부원 화면에 날짜가 나와요.</p>`,
+    enter: () => tutSjTab('set'), hl: () => sjq('#sSave'), done: () => !!(sjAdm() && sjAdm().cfg.days.length) },
+  { part: 'exh', title: '4. 시간 받기 링크 보내기', opt: true,
+    body: () => `<ul><li><b>[시간 적는 링크 복사]</b> · <b>[단톡방 공지글 복사]</b>로 부원들에게 보내요.</li><li><b>부원들의 가능한 시간 받기</b> 체크를 끄고 저장하면 더 받지 않아요.</li></ul>`,
+    enter: () => tutSjTab('set'), hl: () => sjCard('#sOpen') },
+
+  { part: 'exh', title: '5. 응답 모아 보기',
+    body: () => `<p>연습용 부원 10명이 상주할 수 있는 시간을 냈다고 해 볼게요.</p><ul><li>칸의 숫자는 그 시간에 올 수 있는 사람 수예요. 진할수록 많아요.</li><li><b>빨간 테두리</b>는 한 타임 인원보다 적은 시간이에요. 칸을 누르면 누가 되는지 보여요.</li><li>아래 응답 목록에서 잘못 낸 응답을 지울 수 있어요.</li></ul>`,
+    enter: async () => { const sj = await tutSj(); sj.seed(TUT.exhId, tutDays()); await tutSjTab('resp', true); }, hl: () => sjq('#tab') },
+  { part: 'exh', title: '5. 몇 시간씩 나눌지 고르기', opt: true,
+    body: () => `<p><b>배분 · 공개</b> 탭이에요. 표의 줄을 눌러 <b>한 타임 길이</b>를 골라요. 타임 수와 1인당 평균, 인원이 모자라는 타임 수를 비교해서 정하면 돼요.</p><p class="hint">'같은 사람의 타임을'에서 이어 붙이기 · 떨어뜨리기도 고를 수 있어요.</p>`,
+    enter: () => tutSjTab('dist'), hl: () => sjCard('tr[data-len]') },
+  { part: 'exh', title: '5. 균등하게 나누기', auto: true, waitLabel: '누르면 넘어가요',
+    body: () => `<p><b>[균등하게 나누기]</b>를 눌러요. 모두가 맡는 시간이 최대한 비슷해지게 나눠 줘요.</p>`,
+    enter: () => tutSjTab('dist'), hl: () => sjq('#dRun'), done: () => !!sjPeek().draft },
+  { part: 'exh', title: '5. 사람 바꿔 보기', opt: true,
+    body: () => `<p>나눈 결과에서 <b>타임을 누르면</b> 그 시간에 될 수 있는 사람 목록이 열려요. 체크로 넣고 빼면 아래 '사람마다 맡은 시간'이 바로 바뀌어요.</p><p class="hint">다시 누르면 [이 조건으로 다시 나누기]로 다른 결과를 볼 수 있어요.</p>`,
+    hl: () => sjq('#dRes .slot.edit') },
+  { part: 'exh', title: '5. 저장하고 공개하기', auto: true, waitLabel: '공개하면 넘어가요',
+    body: () => `<p><b>[저장하고 부원들에게 공개하기]</b>를 누르면 부원 첫 화면에 시간표가 올라가요.</p><p class="hint">[저장만 하기]는 공개하지 않고 저장만 해요. 공개한 뒤에도 [공개 내리기]로 내릴 수 있어요.</p>`,
+    enter: () => { if (!sjPeek().draft) return tutSjTab('dist'); }, hl: () => sjq('#dPub'), done: () => !!(sjAdm() && sjAdm().published) },
+
+  { part: 'exh', title: '6. 디자인 고르기', opt: true,
+    body: () => `<ul><li><b>기본</b>은 도각도각 디자인 그대로예요.</li><li><b>포스터에 맞추기</b>를 고르고 포스터를 불러오면 색을 저절로 뽑아요. 포스터에서 제목과 배경 무늬를 네모로 잘라 넣으면 바탕을 지워서 자연스럽게 섞어요.</li><li><b>[디자인 저장하기]</b>를 눌러야 부원에게 보여요.</li></ul>`,
+    enter: () => tutSjTab('design'), hl: () => sjq('#tab .card') },
+  { part: 'exh', title: '6. 부원 화면 미리 보기', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>위쪽 <b>[부원 화면 보기]</b>를 누르면 부원에게 보이는 첫 화면을 볼 수 있어요. 눌러 보세요.</p>`,
+    enter: () => { const p = sjPeek(); if (!(S.view === 'sangju' && p.admin && p.exhId === TUT.exhId)) return tutSjTab('dist'); },
+    hl: () => { const a = sjq('.atop'); return a ? [...a.querySelectorAll('button')].find(b => /부원 화면/.test(b.textContent)) : null; }, done: () => S.view === 'sangju' && sjPeek().mode === 'member' },
+  { part: 'exh', title: '6. 부원에게 보이는 화면',
+    body: () => `<p>공개한 시간표는 <b>[확정된 시간표 보기]</b>로 볼 수 있어요. 오른쪽 위 <b>[← 임원진 화면]</b>을 누르면 돌아가요.</p><p class="hint">임원진 화면 위쪽 <b>[← 전시회로]</b>를 누르면 전시회 화면으로 돌아가요.</p>`,
+    hl: () => sjq('#app') },
+
+  // 4부 부원 화면 (48판)
+  { part: 'member', title: '1. 출품 신청 화면', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>부원은 공지글의 <b>출품 신청 링크</b>로 이 화면에 들어와요. 로그인은 필요 없어요.</p><p><b>[출품 신청서 쓰기]</b>를 눌러 보세요.</p>`,
+    enter: async () => { if (!TUT.exhId) await tutPrepExh(); if (!TUT.exhBack) TUT.exhBack = tutExhOpen(); await openExhibit(TUT.exhId); },
+    hl: () => document.querySelector('#v-exhibit .exh-start'), done: () => S.view === 'exhibit' && (EXM.mode === 'new' || EXM.mode === 'view') },
+  { part: 'member', title: '1. 전시기획서 쓰기', ex: ['예시로 채우기', exExhForm], auto: true, waitLabel: '신청하면 넘어가요',
+    body: () => `<p>전시기획서 양식 그대로 칸을 채워요.</p><ol><li>이름 · 학번(9자리) · 기수</li><li>작품 <b>제목</b></li><li>작품(오브제)마다 설명 · 재료 · 크기(mm)</li><li>작품 설명</li></ol><p class="hint">다른 작품을 더 내려면 <b>[+ 신청서 추가]</b>로 기획서를 한 장 더 붙여요. 함께 만든 작품이면 <b>[+ 공동 작품자 추가]</b>. 다 적었으면 <b>[출품 신청하기]</b>를 눌러요.</p>`,
+    enter: () => { if (S.view !== 'exhibit') return openExhibit(TUT.exhId).then(() => { if (EXM.mode === 'home') exhOpenForm('new'); }); if (EXM.mode === 'home') exhOpenForm('new'); },
+    hl: () => document.querySelector('#exh-form .xd-sheet'), done: () => S.view === 'exhibit' && EXM.mode === 'view' && EXM.recs.length > 0 },
+  { part: 'member', title: '1. 출품 신청이 됐어요',
+    body: () => `<ul><li>낸 기획서가 양식 그대로 보여요. <b>[인쇄하기]</b> · <b>[Word로 받기]</b>도 돼요.</li><li>신청을 받는 동안은 <b>[수정하기]</b>, <b>[+ 신청서 추가]</b>로 고치거나 더 낼 수 있어요.</li><li>나중에는 첫 화면의 <b>[신청한 내용 보기 · 수정]</b>에 학번과 이름을 넣으면 내 기획서가 다시 나와요.</li></ul>`,
+    hl: () => document.querySelector('#v-exhibit .exh-mine') },
+
+  { part: 'member', title: '2. 상주 시간 적는 화면', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>부원은 <b>상주 링크</b>로 이 화면에 들어와요. <b>[내 가능한 시간 적기]</b>를 눌러 보세요.</p>`,
+    enter: async () => { const sj = await tutSj(); if (!TUT.exhId) await tutPrepExh(); sj.seed(TUT.exhId, tutDays()); sj.peek(TUT.exhId).cfg.open = true; sj.publish(TUT.exhId); await openSangju(TUT.exhId); },
+    hl: () => sjq('#app .stack .btn.primary'), done: () => S.view === 'sangju' && sjPeek().mode === 'member' && sjPeek().view === 'form' },
+  { part: 'member', title: '2. 이름 · 학번 적기', ex: ['예시로 채우기', exSjMe], auto: true, waitLabel: '[다음]을 누르면 넘어가요',
+    body: () => `<p><b>이름</b>과 <b>학번 9자리</b>를 적고 <b>[다음]</b>을 눌러요.</p><p class="hint">같은 이름 · 학번으로 다시 들어오면 적어 둔 시간을 불러와서 고칠 수 있어요.</p>`,
+    enter: () => { if (!(S.view === 'sangju' && sjPeek().view === 'form')) return openSangju(TUT.exhId).then(() => window.SJ.go('form')); },
+    hl: () => sjCard('#fName'), done: () => !!sjq('#fGrid .cell') },
+  { part: 'member', title: '2. 가능한 시간 칠하기', ex: ['예시로 채우기', exSjPaint],
+    body: () => `<p>상주할 수 있는 시간 칸을 <b>누르거나 손가락으로 쭉 끌어서</b> 칠해요. 다시 누르면 지워져요. 날짜 위 <b>[하루 종일]</b>로 하루를 한 번에 칠할 수도 있어요.</p><p class="hint">많이 칠할수록 고르게 나누기 쉬워져요.</p>`,
+    hl: () => sjq('#fGrid'), done: () => !!sjq('#fGrid .cell.on'), doneMsg: '시간을 칠했어요.' },
+  { part: 'member', title: '2. 저장하기', auto: true, waitLabel: '저장하면 넘어가요',
+    body: () => `<p>하고 싶은 말이 있으면 적고, <b>[저장하기]</b>를 눌러요.</p>`,
+    hl: () => sjq('#fSave'), done: () => { const h = sjq('#app h1'); return !!(h && /고마워요/.test(h.textContent)); } },
+
+  { part: 'member', title: '3. 확정된 시간표 보기', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `<p>임원진이 나눠서 공개하면 첫 화면에 <b>[확정된 시간표 보기]</b>가 생겨요. 눌러 보세요.</p>`,
+    enter: async () => { if (!(S.view === 'sangju' && sjPeek().mode === 'member')) await openSangju(TUT.exhId); window.SJ.go('home'); },
+    hl: () => { const st = sjq('#app .stack'); return st ? [...st.querySelectorAll('button')].find(b => /시간표/.test(b.textContent)) : null; }, done: () => sjPeek().view === 'table' },
+  { part: 'member', title: '3. 내 시간 찾기', ex: ['예시로 채우기', exSjFind],
+    body: () => `<p><b>내 이름</b>을 적으면 내가 맡은 시간이 위에 나오고 표에서도 표시돼요. <b>[표] · [목록]</b>으로 보는 방법을 바꿀 수 있어요.</p>`,
+    hl: () => sjq('#tName') },
+
+  { part: 'member', title: '4. 작업 설명서 보기',
+    body: () => `<p>부원 누구나 링크로 <b>작업 설명서</b>를 볼 수 있어요.</p><ul><li>만족도 추천순 · 최신순으로 보고, 이름이나 장비로 찾아요.</li><li>설명서를 누르면 준비물 · 만드는 방법 · 안전 주의사항이 나와요.</li><li>해 본 부원은 난이도와 걸린 시간을 남길 수 있어요.</li></ul>`,
+    enter: () => openGuides(), hl: '#v-guides' },
+
   { part: 'end', title: '튜토리얼을 마쳤어요',
     body: () => { const s = tutSession(); return s && !TUT.autoMade
       ? `<p>수고했어요! 연습으로 만든 <b>'${esc(s.title || '제목 없음')}'</b> 학습회를 실제로 저장할까요?</p>
@@ -3839,17 +4057,33 @@ const TUT_MODS = {
   guest: { name: '신청자 화면 연습', desc: '참가자가 보는 신청 · 내 신청 확인 · 만족도 조사 화면을 직접 해 봐요.',
     intro: '참가자 입장에서 신청하고, 신청을 확인하고, 평가해 볼게요.',
     pick: st => st.part === 'guest' },
-  all: { name: '전체 튜토리얼', makes: true, desc: '처음부터 끝까지 모두 해 봐요. 1부 진행자 사용법 · 2부 참가자 사용 안내',
-    intro: '학습회 만들기부터 신청, 출석, 만족도 조사, 기록, 참가자 화면까지 천천히 따라가 볼게요.',
-    pick: st => st.part === 'host' || st.part === 'guest' },
+  exh: { name: '전시회 열기·출품 받기', kind: 'exh', desc: '전시회를 만들어 출품 신청을 열고, 공지글을 보내고, 들어온 전시기획서를 보고 인쇄해요.',
+    intro: '전시회를 새로 만들어 출품 신청을 받고, 들어온 전시기획서를 모아 보는 방법을 따라가 볼게요.',
+    pick: st => st.part === 'exh' && /^[123]\. /.test(st.title) },
+  sangju: { name: '전시 상주 시간표', kind: 'exh', desc: '전시 날짜를 정해 부원들의 상주 가능 시간을 받고, 고르게 나눠 공개하고, 디자인을 골라요.',
+    intro: '전시 날짜를 정하고, 부원들이 낸 시간을 모아 고르게 나누고, 시간표를 공개하는 방법을 볼게요.',
+    pick: st => st.part === 'exh' && /^[456]\. /.test(st.title) },
+  member: { name: '부원 화면 연습', kind: 'exh', desc: '부원이 보는 출품 신청 · 상주 시간 적기 · 확정 시간표 · 작업 설명서 화면을 직접 해 봐요.',
+    intro: '부원 입장에서 출품 신청서를 내고, 상주할 수 있는 시간을 적고, 시간표와 작업 설명서를 볼게요.',
+    pick: st => st.part === 'member' },
+  all: { name: '전체 튜토리얼', makes: true, desc: '처음부터 끝까지 모두 해 봐요. 1부 진행자 · 2부 참가자 · 3부 전시회 관리 · 4부 부원 화면',
+    intro: '학습회 만들기부터 신청, 출석, 만족도 조사, 기록, 참가자 화면, 전시회 출품과 상주 시간표까지 천천히 따라가 볼게요.',
+    pick: st => !!TUT_PARTS[st.part] },
 };
-const TUT_ORDER = ['create', 'apply', 'guide', 'guest', 'all'];
+const TUT_PARTS = { host: '1부 · 진행자 사용법', guest: '2부 · 참가자 사용 안내', exh: '3부 · 전시회 관리', member: '4부 · 부원 화면' };
+const TUT_ORDER = ['create', 'apply', 'guide', 'guest', 'exh', 'sangju', 'member', 'all'];
 function tutBuildRun(mod){
   const body = TUT_STEPS.filter(st => st.part !== 'intro' && st.part !== 'end' && TUT_MODS[mod].pick(st));
   return [TUT_STEPS.find(st => st.part === 'intro'), ...body, TUT_STEPS.find(st => st.part === 'end')];
 }
 /* 학습회 추가하기가 아닌 튜토리얼은 연습용 학습회를 미리 만들어 둬요 */
 async function tutPrepare(){
+  if (TUT_MODS[TUT.mod].kind === 'exh'){   // 48판: 전시회 튜토리얼
+    if (TUT.mod === 'exh') return;   // 직접 만들어 봐요
+    await tutPrepExh();
+    if (TUT.mod === 'member'){ try { const sj = await tutSj(); sj.seed(TUT.exhId, tutDays()); sj.publish(TUT.exhId); } catch(e){} }
+    return;
+  }
   if (TUT.makes || TUT.sid) return;
   try {
     const res = TUT.core.saveSession(S.pw, { title: '나무 컵받침 만들기 (연습)', places: ['1동방'], desc: '편백 판재로 컵받침 두 개를 재단하고 사포질과 오일 마감까지 해요.',
@@ -3859,7 +4093,7 @@ async function tutPrepare(){
   } catch(e){}
   await tutRefresh();
 }
-function tutClearHL(){ document.querySelectorAll('.tut-hl').forEach(el => el.classList.remove('tut-hl')); }
+function tutClearHL(){ document.querySelectorAll('.tut-hl').forEach(el => el.classList.remove('tut-hl')); const r = sjRoot(); if (r) r.querySelectorAll('.tut-hl').forEach(el => el.classList.remove('tut-hl')); }
 function tutTarget(st){ if (!st.hl) return null; try { return typeof st.hl === 'function' ? st.hl() : document.querySelector(st.hl); } catch(e){ return null; } }
 function tutFocus(el){ if (!el) return; const r = el.getBoundingClientRect(); const top = r.top + scrollY - (r.height > innerHeight * .45 ? 70 : Math.max(80, innerHeight * .22)); window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
 function tutCanNext(st){ return st.opt || (!st.wait && !st.done) || TUT.ok; }
@@ -3884,11 +4118,11 @@ function tutRender(){
   let label;
   if (TUT.mod === 'all'){
     const ch = part => new Set(TUT_STEPS.filter(s => s.part === part).map(s => parseInt(s.title))).size;
-    label = st.part === 'host' ? `1부 · 진행자 사용법 ${parseInt(st.title)}/${ch('host')}` : st.part === 'guest' ? `2부 · 참가자 사용 안내 ${parseInt(st.title)}/${ch('guest')}` : st.part === 'intro' ? mod.name : '마무리';
+    label = TUT_PARTS[st.part] ? `${TUT_PARTS[st.part]} ${parseInt(st.title)}/${ch(st.part)}` : st.part === 'intro' ? mod.name : '마무리';
   } else label = st.part === 'intro' ? mod.name : st.part === 'end' ? '마무리' : `${mod.name} ${k}/${inner.length}`;
   const title = TUT.mod === 'all' ? st.title : st.title.replace(/^\d+\.\s*/, '');
   const can = tutCanNext(st); const nx = TUT.run[tutI + 1];
-  const nextLabel = !can ? (st.waitLabel || '해 보면 넘어가요') : tutI === 0 ? '시작하기 →' : (TUT.mod === 'all' && nx && st.part === 'host' && nx.part === 'guest') ? '2부로 →' : st.opt && !TUT.ok ? '다음 (건너뛰어도 돼요) →' : '다음 →';
+  const nextLabel = !can ? (st.waitLabel || '해 보면 넘어가요') : tutI === 0 ? '시작하기 →' : (TUT.mod === 'all' && nx && st.part !== 'intro' && nx.part !== st.part && TUT_PARTS[nx.part]) ? TUT_PARTS[nx.part].split(' · ')[0] + '로 →' : st.opt && !TUT.ok ? '다음 (건너뛰어도 돼요) →' : '다음 →';
   const pct = Math.round(tutI / (TUT.run.length - 1) * 100);
   const saveAsk = last && tutSession() && !TUT.autoMade;
   box.classList.toggle('folded', !!TUT.folded);
@@ -3953,7 +4187,14 @@ function tutEvent(name, val){
   const st = tutStep();
   if (st.wait === name) tutDone();
 }
-function tutClose(){ if (TUT && TUT.timer) clearInterval(TUT.timer); TUT = null; document.documentElement.style.removeProperty('--tut-h'); tutClearHL(); document.body.classList.remove('tut-on', 'tut-pick'); $('#tut').hidden = true; $('#tut').innerHTML = ''; }
+function tutClose(){ if (TUT && TUT.timer) clearInterval(TUT.timer); const was = !!TUT; TUT = null; if (was) tutForgetExh(); document.documentElement.style.removeProperty('--tut-h'); tutClearHL(); document.body.classList.remove('tut-on', 'tut-pick'); $('#tut').hidden = true; $('#tut').innerHTML = ''; }
+/* 48판: 연습 전시회 · 상주 화면 상태를 지워서, 끝난 뒤에는 실제 서버 내용만 보여요 */
+function tutForgetExh(){
+  Object.assign(EXA, { L: null, id: null, D: null, creating: false, open: {}, msg: '', armed: null, dropArmed: false, notice: false, poster: undefined });
+  Object.assign(EXM, { all: null, info: null, mode: 'home', fs: null, p: null, dels: [], sn: '', nm: '', recs: [], canEdit: false, msg: '', msgCls: '', lk: { sn: '', name: '' } });
+  LIB.list = null; LIB.sid = null;
+  if (window.dgSangju && window.dgSangju.reset) window.dgSangju.reset();
+}
 async function tutFinish(save, again){
   const s = tutSession(); const m = $('#tut-msg');
   let note = '튜토리얼을 마쳤어요. 연습한 내용은 지웠어요.';
@@ -3965,6 +4206,7 @@ async function tutFinish(save, again){
       classes: (s.classes || []).map(c => ({ id: c.id, label: c.label, dates: c.dates, time: c.time, capacity: c.capacity })) };
     if (m){ m.className = 'msg'; m.textContent = '저장하는 중…'; }
     const keep = TUT; clearInterval(keep.timer); TUT = null;   // 여기서부터는 실제 서버로 보내요
+    tutForgetExh();
     try { const res = await api('saveSession', S.pw, draft); S.data = res.all; note = `'${s.title}' 학습회를 저장했어요. 연습으로 넣은 신청·평가·기록은 지웠어요.`; }
     catch(e){ TUT = keep; TUT.timer = setInterval(tutTick, 400); if (m){ m.className = 'msg err'; m.textContent = '저장하지 못했어요: ' + e.message; } return; }
     tutClose(); S.sortMode = store('l', 'dg_sort') === 'rank' ? 'rank' : 'date'; openList();
