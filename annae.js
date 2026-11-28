@@ -162,7 +162,7 @@ function defaultInv(title){
   return v;
 }
 function defaultGuide(title){
-  const g = { published: false, label: '목공 동아리 목방 전시회', sub: '', dates: '', place: PLACE, sections: defaultSections(), staff: '', way: WAY, mapq: MAPQ, notes: '작품은 눈으로만 감상해 주세요.\n궁금한 점은 상주 중인 부원에게 물어봐 주세요.', map: { W: 1500, H: 1000, route: true, items: [] }, order: [] };
+  const g = { published: false, label: '목공 동아리 목방 전시회', sub: '', dates: '', place: PLACE, sections: defaultSections(), staff: '', way: WAY, mapq: MAPQ, notes: '작품은 눈으로만 감상해 주세요.\n궁금한 점은 상주 중인 부원에게 물어봐 주세요.', map: { W: 1500, H: 1000, route: true, items: [] }, order: [], grp: [] };
   if (/온각|溫刻/.test(title || '')) Object.assign(g, { label: '목방 제40회 전시회', sub: '차가운 계절에 새긴 따스함',
     dates: '12월 24일(목) – 25일(금) 11:00 – 18:00\n12월 26일(토) 11:00 – 17:00' });
   g.map.items.push({ id: uid(), k: 'door', x: 100, y: 980, w: 120, h: 20, lab: '' });
@@ -172,6 +172,7 @@ function fromServer(g, title){
   const d = Object.assign(defaultGuide(title), clone(g || {}));
   d.map = Object.assign({ W: 1500, H: 1000, route: true, items: [] }, d.map || {});
   d.order = Array.isArray(d.order) ? d.order : [];
+  d.grp = Array.isArray(d.grp) ? d.grp.map(String) : [];   // 단체작품: 리플렛 이름 칸에 '단체작품'만
   d.sections = fixSections(d.sections);
   d.inv = Object.assign(defaultInv(title), (g && g.inv) || {}); d.inv.ev = null;   // 발표회는 다른 곳에서 해서 초대장에 안 넣어요
   d.way = WAY; d.mapq = MAPQ; if (!d.place) d.place = PLACE;
@@ -193,6 +194,7 @@ function normalize(D, works){
   const seen = new Set();
   D.order = D.order.filter(id => holders.has(id) && !seen.has(id) && seen.add(id));
   D.map.items.forEach(it => { if (holders.has(it.id) && !seen.has(it.id)){ seen.add(it.id); D.order.push(it.id); } });
+  const gs = new Set(); D.grp = (D.grp || []).filter(id => ok.has(id) && !gs.has(id) && gs.add(id));
   return D;
 }
 const itemById = (D, id) => D.map.items.find(it => it.id === id);
@@ -604,9 +606,11 @@ function tabWorks(){
   const opts = sel => `<option value="">지도에 안 놓음</option>${holders.map(it => `<option value="${it.id}" ${sel === it.id ? 'selected' : ''}>${esc(placeName(D, it))}</option>`).join('')}`;
   $('#tab').innerHTML = `
   <p class="muted small" style="margin:0 0 12px">출품 기획서 내용이 그대로 관람객에게 보여요 (학번은 안 보여요). 설명을 고치려면 출품 기획서를 고친 뒤 여기서 [저장하기]를 눌러 주세요.
-    ${holders.length ? '' : '<br><b>먼저 [지도 · 순서] 탭에서 전시대를 놓으면, 작품마다 놓을 곳을 고를 수 있어요.</b>'}</p>
+    여러 명이 함께 만든 작품은 <b>[단체작품]</b>을 체크하면 리플렛 이름 칸에 이름 대신 '단체작품'으로만 나와요.
+    ${holders.length ? '' : '<br><b>먼저 [전시회장 구성] 탭에서 전시대를 놓으면, 작품마다 놓을 곳을 고를 수 있어요.</b>'}</p>
   ${S.works.length ? S.works.map(w => { const at = whereIs(D, w.id);
-    return `<div class="card wcard"><div class="row" style="align-items:flex-start"><div class="grow"><b class="wt">${esc(w.t || '(제목 없음)')}</b><div class="muted small">${esc(whoText(w))}</div></div>
+    return `<div class="card wcard"><div class="row" style="align-items:flex-start"><div class="grow"><b class="wt">${esc(w.t || '(제목 없음)')}</b><div class="muted small">${(w.who || []).length > 1 ? `<b>${w.who.length}명</b> · ` : ''}${esc(whoText(w))}</div>
+        ${(w.who || []).length > 1 || D.grp.includes(w.id) ? `<label class="ck grpck"><input type="checkbox" data-grp="${esc(w.id)}" ${D.grp.includes(w.id) ? 'checked' : ''}><span>단체작품 <span class="muted small">리플렛에 이름 대신 '단체작품'</span></span></label>` : ''}</div>
       <select class="inp place" data-place="${esc(w.id)}" aria-label="놓을 곳">${opts(at && at.id)}</select></div>
       ${w.objs.length ? `<div class="small objs">${w.objs.map(o => esc(objLine(o))).join('<br>')}</div>` : ''}
       ${w.d ? `<details><summary>작품 설명</summary><p class="desc">${esc(w.d)}</p></details>` : '<p class="muted small" style="margin:6px 0 0">작품 설명이 비어 있어요.</p>'}</div>`; }).join('')
@@ -751,7 +755,7 @@ async function leafletHTML(){
   let prevR = null;
   const staff = (D.staff || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/^([^:：]{1,12})\s*[:：]\s*(.*)$/); const r = m ? m[1].trim() : '', v = m ? m[2] : l, same = r && r === prevR; prevR = r; return `<div class="st${same ? ' same' : ''}"><span class="r">${esc(r)}</span><span>${esc(v)}</span></div>`; }).join('');
   const map = D.map.items.length ? mapSVG(D, { bs: 1.25 }) : null;
-  const rows = leafletRows(D).map(g => g.ws.map((w, k) => `<tr>${k ? '' : `<td class="no" rowspan="${g.ws.length}">${esc(g.n)}</td>`}<td class="who">${(w.who || []).map(p => esc((p.g ? p.g + '기 ' : '') + p.n)).join('<br>')}</td><td class="wt">${esc(w.t || '')}</td><td class="mt">${esc([...new Set((w.objs || []).flatMap(o => String(o.m || '').split(/[,、·]/)).map(x => x.trim()).filter(Boolean))].join(', '))}</td></tr>`).join('')).join('');
+  const rows = leafletRows(D).map(g => g.ws.map((w, k) => `<tr>${k ? '' : `<td class="no" rowspan="${g.ws.length}">${esc(g.n)}</td>`}<td class="who">${D.grp.includes(w.id) ? '단체작품' : (w.who || []).map(p => esc((p.g ? p.g + '기 ' : '') + p.n)).join('<br>')}</td><td class="wt">${esc(w.t || '')}</td><td class="mt">${esc([...new Set((w.objs || []).flatMap(o => String(o.m || '').split(/[,、·]/)).map(x => x.trim()).filter(Boolean))].join(', '))}</td></tr>`).join('')).join('');
   const title = X.ex.title || '';
   return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)} 리플렛</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Gowun+Batang:wght@700&display=swap" rel="stylesheet">
@@ -994,6 +998,7 @@ function wire(){
     if (t.dataset.w){ const it = itemById(S.D, S.sel); if (!it) return; snap(); const wid = t.dataset.w;
       S.D.map.items.forEach(x => { if (x.ws) x.ws = x.ws.filter(y => y !== wid); }); if (t.checked) it.ws.push(wid);
       normalize(S.D, S.works); markDirty(); drawMap(); drawSel(); drawOrder(); return; }
+    if (t.dataset.grp !== undefined){ const id = t.dataset.grp; S.D.grp = S.D.grp.filter(x => x !== id); if (t.checked) S.D.grp.push(id); markDirty(); return; }
     if (t.dataset.place !== undefined){ snap(); const wid = t.dataset.place; S.D.map.items.forEach(x => { if (x.ws) x.ws = x.ws.filter(y => y !== wid); });
       const it = t.value && itemById(S.D, t.value); if (it) it.ws.push(wid); normalize(S.D, S.works); markDirty(); tabWorks(); return; }
   });
@@ -1127,6 +1132,7 @@ svg .hit{fill:transparent;cursor:pointer}svg .hit.sel{cursor:move;touch-action:n
 .covk{font-size:12px;color:var(--muted)}.covt{font-family:"Gowun Batang",serif;font-size:34px;font-weight:700;line-height:1.1;margin-top:10px}.covs{margin-top:6px;color:var(--muted);font-size:13px}
 .covti{display:block;width:88%;margin:12px auto 0}.covd{white-space:pre-line;margin-top:14px;font-size:12.5px;line-height:1.6}
 .sgrp{margin-top:10px}.sgrp:first-child{margin-top:2px}.sgh{font-weight:700;font-size:14px;margin:0 0 2px;padding-top:8px;border-top:1px dashed var(--line)}.sgrp:first-child .sgh{border-top:0;padding-top:0}.sadd{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.grpck{display:inline-flex;gap:6px;align-items:center;margin-top:6px;font-size:13.5px;cursor:pointer}.grpck input{margin:0}
 .srow{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:6px}.srow .sr0{margin:0}.srow .sr0 .inp{min-height:38px;font-size:13px;padding:6px 8px}
 .prevrow{align-items:center}
 details.fixed>summary{cursor:pointer;color:var(--ink);font-size:14px;padding:0}
