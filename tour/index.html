@@ -1,1 +1,358 @@
-x
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef0eb">
+<meta name="description" content="목공 동아리 목방 전시회 관람 안내 · 전시 소개 · 지도 · 작품 설명">
+<title>목방 전시회 관람 안내</title>
+<link rel="icon" type="image/png" sizes="48x48" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<!-- 이 페이지는 입구 QR로 여는 관람 안내예요. 도각도각 앱(index.html)과 따로 떨어진 작은 페이지라 빨리 열려요.
+     내용은 도각도각 [전시회 관리] → 전시회 → [관람 안내]에서 정해요. 서버 주소는 ../config.js에서 읽어요. -->
+<style>
+:root{--bg:#eef0eb;--ink:#1d2420;--muted:#5b665e;--accent:#2d5a46;--on-accent:#fff;--card:#fbfbf8;--line:#d6dbd2;--soft:#e1eae3;--dim:#8f9890;--wood:#8a5a35;--tag:#8a5a35;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--head:"Gowun Batang","Noto Serif KR","AppleMyungjo",serif;--logo-filter:none;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.poster){--bg:#121613;--ink:#e6ebe5;--muted:#9ba69d;--accent:#8fcaa9;--on-accent:#102016;--card:#1a201c;--line:#2d3630;--soft:#22322a;--dim:#5f6a62;--wood:#cf9f72;--tag:#cf9f72;--logo-filter:invert(1) brightness(1.4);color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15.5px;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;right:0;bottom:0;width:min(100%,900px);pointer-events:none;z-index:0}
+.grain img{width:100%;height:auto;display:block;-webkit-mask-image:radial-gradient(130% 120% at 100% 100%,#000 40%,transparent 100%);mask-image:radial-gradient(130% 120% at 100% 100%,#000 40%,transparent 100%)}
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid transparent;transition:border-color .2s}
+.bar.on{border-bottom-color:var(--line)}
+.bar .in{max-width:620px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
+.bar img{width:28px;height:24px;object-fit:contain;filter:var(--logo-filter);flex:none}
+.bar .t{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;opacity:0;transition:opacity .2s}
+.bar.on .t{opacity:1}
+.bar nav{display:flex;gap:4px;flex:none}
+.bar nav a{font-size:12.5px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--bg)}
+main{max-width:620px;margin:0 auto;padding:0 20px 40px;position:relative;z-index:1}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pvb{background:var(--wood);color:#fff;text-align:center;font-size:12px;padding:6px 10px;position:relative;z-index:21}
+.hero{padding:28px 0 8px}
+.hero img.ti{display:block;max-width:100%;height:auto;margin:0 0 8px -6px}
+.hero .k{font-size:13px;color:var(--tag);letter-spacing:.04em;font-weight:500}
+.hero h1{font-family:var(--head);font-size:clamp(38px,12vw,60px);line-height:1.08;letter-spacing:-.03em;margin:6px 0 0;font-weight:700}
+.hero .sub{font-size:16px;color:var(--muted);margin-top:10px}
+.hero .ac{display:block;width:84px;height:4px;background:var(--accent);border-radius:2px;margin-top:18px}
+.poster .hero .ac{width:min(220px,60%);height:2px;border-radius:0;background:linear-gradient(90deg,var(--wood),var(--accent) 65%,transparent)}
+.poster .hero img.ti{margin-left:-4px}
+.info{margin:26px 0 0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+.info dt{color:var(--muted);font-size:12.5px;padding-top:1px}
+.info dd{margin:0;white-space:pre-line;font-weight:500}
+section.s{padding:44px 0 0}
+h2{font-family:var(--head);font-size:23px;margin:0 0 14px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:10px}
+h2 small{font-family:var(--font);font-size:13px;color:var(--muted);font-weight:400}
+.intro p{margin:0 0 1em;white-space:pre-line}
+.notes ul{list-style:none;margin:0;padding:0}
+.tx .intro p:last-child{margin-bottom:0}
+.sg{margin-top:16px;text-align:right;font-weight:700;color:var(--muted);font-size:14px}
+.staff{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14.5px}
+.staff dt{color:var(--muted);white-space:nowrap}.staff dd{margin:0}
+.where{display:flex;align-items:center;gap:10px;font-weight:500}
+.where i{width:12px;height:12px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
+.wayt{margin:8px 0 0;white-space:pre-line;color:var(--muted);font-size:14.5px}
+.mapl{display:inline-flex;align-items:center;margin-top:14px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+.notes{margin:18px 0 0;padding:14px 16px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:14px}
+.notes li{padding-left:16px;position:relative}
+.notes li::before{content:"";position:absolute;left:2px;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.notes b{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-bottom:4px;padding-left:0}
+.mapbox{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:auto;-webkit-overflow-scrolling:touch}
+.mapbox svg{display:block;width:100%;height:auto}
+.mapbox.big svg{width:220%}
+.maptools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.maptools button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer;white-space:nowrap}
+svg .floor{fill:var(--card);stroke:var(--ink)}
+svg .zone{fill:var(--soft);stroke:var(--dim);fill-opacity:.6}
+svg .zl{fill:var(--muted);font-weight:500;font-family:var(--font)}
+svg .wall{fill:var(--ink)}
+svg .door{fill:var(--accent)}svg .door.exit{fill:var(--wood)}
+svg .dl{fill:var(--ink);font-weight:700;font-family:var(--font)}
+svg .tx{fill:var(--muted);font-weight:500;font-family:var(--font)}
+svg .hold{fill:var(--bg);stroke:var(--dim)}svg .hold.has{stroke:var(--ink);fill:var(--soft)}
+svg .route{stroke:var(--accent);opacity:.7;stroke-linecap:round}
+svg .arw{fill:var(--accent)}
+svg .badge{cursor:pointer}
+svg .badge circle{fill:var(--accent);transition:r .2s}
+svg .badge text{fill:var(--on-accent);font-weight:700;font-family:var(--font)}
+svg .badge.focus circle{fill:var(--wood);stroke:var(--bg);stroke-width:4}
+svg .hold.focus{stroke:var(--wood);stroke-width:8}
+.find{position:relative;margin:0 0 6px}
+.find input{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:10px 14px 10px 38px;min-height:44px}
+.find input:focus{outline:none;border-color:var(--ink)}
+.find svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2}
+.stop{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 14px;padding:22px 0;border-top:1px solid var(--line);scroll-margin-top:64px}
+.stop:first-of-type{border-top:none}
+.stop .n{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;position:sticky;top:64px}
+.stop.other .n{background:var(--soft);color:var(--muted);font-size:13px}
+.stop .pl{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;min-height:44px;flex-wrap:wrap}
+.stop .pl button{font:inherit;font-size:12px;border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:2px 10px;cursor:pointer}
+.stop.flash{animation:fl 1.6s ease-out}
+@keyframes fl{0%{background:var(--soft)}100%{background:transparent}}
+.work+.work{margin-top:22px;padding-top:22px;border-top:1px dashed var(--line)}
+.work h3{font-family:var(--head);font-size:20px;line-height:1.3;margin:0;letter-spacing:-.01em}
+.work .who{font-size:13.5px;color:var(--muted);margin-top:4px}
+.work .who b{color:var(--ink);font-weight:500}
+.work ul{list-style:none;margin:10px 0 0;padding:0;font-size:13px;color:var(--muted)}
+.work ul li{padding:1px 0}
+.work ul li span{color:var(--ink)}
+.work .d{margin:10px 0 0;white-space:pre-line;font-size:15px}
+.work .d.clip{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.work .more{font:inherit;font-size:13px;background:none;border:none;color:var(--accent);padding:4px 0;cursor:pointer;font-weight:500}
+.none{color:var(--muted);font-size:14px;padding:20px 0}
+.empty{padding:80px 0;text-align:center;color:var(--muted)}
+.empty h1{font-family:var(--head);color:var(--ink);font-size:26px;margin:0 0 10px}
+.empty button{font:inherit;margin-top:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 16px;cursor:pointer}
+footer{max-width:620px;margin:0 auto;padding:30px 20px 46px;text-align:center;color:var(--dim);font-size:12px;position:relative;z-index:1}
+mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.top-btn{position:fixed;right:16px;bottom:18px;z-index:22;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:17px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.top-btn.on{opacity:1;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+</style>
+<script src="../config.js"></script>
+</head>
+<body>
+<div class="grain" id="grain" aria-hidden="true"></div>
+<div id="pvb"></div>
+<header class="bar" id="bar"><div class="in"><img src="../logo.png" alt="목방"><span class="t" id="bt"></span>
+  <nav id="nav" hidden><a href="#intro">소개</a><a href="#map">지도</a><a href="#works">작품</a></nav></div></header>
+<main id="app"><div class="empty">불러오는 중…</div></main>
+<footer id="foot">목공 동아리 목방</footer>
+<button class="top-btn" id="topb" aria-label="맨 위로">↑</button>
+<script>
+(function(){
+'use strict';
+const API = String(window.DOGAK_API || '').trim();
+const LIVE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+const QS = new URLSearchParams(location.search);
+const SID = (QS.get('s') || '').replace(/[^\w-]/g, '').slice(0, 40), PV = QS.get('pv') === '1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function lsGet(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+/* ---------- 지도 그리기 (annae.js에서 그대로 가져와요) ---------- */
+const K = {
+  stand: { name: '전시대', w: 40, h: 40, holds: true, hint: '작품을 올리는 네모 전시대' },
+  table: { name: '긴 테이블', w: 180, h: 60, holds: true, hint: '작품 여러 개를 올리는 긴 책상' },
+  wall:  { name: '벽 · 칸막이', w: 300, h: 10 },
+  door:  { name: '입구', w: 120, h: 20 },
+  exit:  { name: '출구', w: 120, h: 20 },
+  text:  { name: '글씨', w: 240, h: 50 },
+  zone:  { name: '구역', w: 300, h: 200 },
+};
+const HOLDS = k => !!(K[k] && K[k].holds);
+const itemById = (D, id) => D.map.items.find(it => it.id === id);
+const numOf = (D, id) => { const i = D.order.indexOf(id); return i < 0 ? 0 : i + 1; };
+function mapSVG(D, o){
+  o = o || {};
+  const M = D.map, W = M.W, H = M.H, U = Math.max(W, H), pad = U * 0.05, BR = U / 40;
+  const items = M.items, order = D.order;
+  const cx = it => it.x + it.w / 2, cy = it => it.y + it.h / 2;
+  const R = it => Math.max(Math.min(it.w, it.h) / 2, BR * (o.bs || 1));
+  const sw = U / 400;
+  let s = `<rect x="0" y="0" width="${W}" height="${H}" class="floor" stroke-width="${sw * 2}"/>`;
+  if (o.editor){ for (let x = 100; x < W; x += 100) s += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" class="grid" stroke-width="${sw * (x % 500 ? 0.5 : 1)}"/>`;
+    for (let y = 100; y < H; y += 100) s += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" class="grid" stroke-width="${sw * (y % 500 ? 0.5 : 1)}"/>`; }
+  const layer = k => items.filter(it => it.k === k);
+  layer('zone').forEach(it => { s += `<g data-g="${it.id}"><rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" rx="${BR * 0.3}" class="zone" stroke-width="${sw}" stroke-dasharray="${sw * 4} ${sw * 3}"/>${it.lab ? `<text x="${it.x + BR * 0.4}" y="${it.y + BR * 0.95}" class="zl" font-size="${BR * 0.8}">${esc(it.lab)}</text>` : ''}</g>`; });
+  layer('wall').forEach(it => { s += `<rect data-g="${it.id}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" class="wall"/>`; });
+  ['door', 'exit'].forEach(k => layer(k).forEach(it => {
+    const lab = it.lab || K[k].name, vert = it.h > it.w, fs = BR * 0.85;
+    const tx = vert ? (it.x + it.w / 2 > W / 2 ? it.x - fs * 0.5 : it.x + it.w + fs * 0.5) : cx(it), ty = vert ? cy(it) + fs * 0.35 : (it.y + it.h / 2 > H / 2 ? it.y - fs * 0.45 : it.y + it.h + fs * 1.05);
+    const anchor = vert ? (it.x + it.w / 2 > W / 2 ? 'end' : 'start') : 'middle';
+    s += `<g data-g="${it.id}"><rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" class="door ${k}"/><text x="${tx}" y="${ty}" text-anchor="${anchor}" class="dl" font-size="${fs}">${esc(lab)}</text></g>`;
+  }));
+  layer('text').forEach(it => { s += `<text data-g="${it.id}" x="${cx(it)}" y="${cy(it) + it.h * 0.22}" text-anchor="middle" class="tx" font-size="${it.h * 0.62}">${esc(it.lab || '글씨')}</text>`; });
+  items.filter(it => HOLDS(it.k)).forEach(it => {
+    const n = numOf(D, it.id), has = it.ws && it.ws.length;
+    s += `<rect data-g="${it.id}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" rx="${Math.min(it.w, it.h) * 0.08}" class="hold${has ? ' has' : ''}${o.focus === it.id ? ' focus' : ''}" stroke-width="${sw * 1.2}"/>`;
+    if (!n && o.editor) s += `<text x="${cx(it)}" y="${cy(it) + BR * 0.3}" text-anchor="middle" class="empty" font-size="${BR * 0.8}">+</text>`;
+  });
+  // 동선: 입구 → 1번 → 2번 … → 출구
+  if (M.route !== false && order.length){
+    const door = layer('door')[0], exit = layer('exit')[0];
+    const pts = [];
+    if (door) pts.push({ x: cx(door), y: cy(door), r: 0 });
+    order.forEach(id => { const it = itemById(D, id); if (it) pts.push({ x: cx(it), y: cy(it), r: R(it) * 1.05 }); });
+    if (exit) pts.push({ x: cx(exit), y: cy(exit), r: 0 });
+    let path = '', arrows = '';
+    for (let i = 1; i < pts.length; i++){
+      const a = pts[i - 1], b = pts[i], dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy); if (L < a.r + b.r + 1) continue;
+      const ux = dx / L, uy = dy / L, x1 = a.x + ux * a.r, y1 = a.y + uy * a.r, x2 = b.x - ux * b.r, y2 = b.y - uy * b.r;
+      path += `M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}`;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, ang = Math.atan2(dy, dx) * 180 / Math.PI, A = BR * 0.55;
+      if (Math.hypot(x2 - x1, y2 - y1) > A * 2.4) arrows += `<path d="M${A} 0L${-A * 0.7} ${A * 0.7}L${-A * 0.7} ${-A * 0.7}Z" transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) rotate(${ang.toFixed(1)})" class="arw"/>`;
+    }
+    s += `<path d="${path}" class="route" stroke-width="${BR * 0.16}" stroke-dasharray="${BR * 0.5} ${BR * 0.35}" fill="none"/>${arrows}`;
+  }
+  order.forEach((id, i) => { const it = itemById(D, id); if (!it) return; const r = R(it);
+    s += `<g class="badge${o.focus === id ? ' focus' : ''}" data-stop="${id}"><circle cx="${cx(it)}" cy="${cy(it)}" r="${r}"/><text x="${cx(it)}" y="${cy(it) + r * 0.36}" text-anchor="middle" font-size="${r * (i >= 9 ? 0.9 : 1.05)}">${i + 1}</text></g>`; });
+  if (o.pick) [...o.pick].forEach((id, i) => { const it = itemById(D, id); if (!it) return; s += `<circle cx="${cx(it)}" cy="${cy(it)}" r="${R(it) * 1.35}" class="picked"/>`; });
+  // 고른 것 테두리 + 누를 곳
+  if (o.sel){ const it = itemById(D, o.sel); if (it){ const g = BR * 0.25; s += `<rect x="${it.x - g}" y="${it.y - g}" width="${it.w + g * 2}" height="${it.h + g * 2}" class="selbox" stroke-width="${sw * 1.6}" stroke-dasharray="${sw * 3} ${sw * 2}"/>`; } }
+  if (o.editor){
+    const mh = o.minHit || 0;
+    items.slice().sort((a, b) => (b.w * b.h) - (a.w * a.h)).forEach(it => {
+      const gx = Math.max(0, (mh - it.w) / 2), gy = Math.max(0, (mh - it.h) / 2);
+      s += `<rect class="hit${o.sel === it.id ? ' sel' : ''}" data-id="${it.id}" x="${it.x - gx}" y="${it.y - gy}" width="${it.w + gx * 2}" height="${it.h + gy * 2}"/>`;
+    });
+  }
+  return { vb: `${-pad} ${-pad} ${W + pad * 2} ${H + pad * 2}`, body: s };
+}
+
+
+/* ---------- 서버 ---------- */
+async function api(fn, ...args){
+  let r; try { r = await fetch(API, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) }); }
+  catch(e){ throw new Error(navigator.onLine === false ? '인터넷에 연결되어 있지 않아요.' : '서버에 연결하지 못했어요.'); }
+  let j = null; try { j = await r.json(); } catch(e){}
+  if (!j) throw new Error('서버 응답을 읽지 못했어요.');
+  if (!j.ok) throw new Error(String(j.error || '불러오지 못했어요.'));
+  return j.data;
+}
+
+/* ---------- 포스터 디자인 (상주 시간표 [디자인] 탭에서 정한 것) ---------- */
+function hexRgb(h){ h = String(h || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mix(a, b, t){ const x = hexRgb(a), y = hexRgb(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+function lum(h){ const c = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+function contrast(a, b){ const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+const FONTS = { plex: '"IBM Plex Sans KR"', gmarket: '"GmarketSans"', batang: '"Gowun Batang"' };
+function applyTheme(t){
+  const R = document.documentElement;
+  if (!(t && t.mode === 'poster')){ R.classList.remove('poster'); return; }
+  const dark = lum(t.bg) < 0.25, v = {
+    '--bg': t.bg, '--ink': t.ink, '--muted': t.muted, '--accent': t.accent, '--card': mix(t.bg, t.ink, 0.05), '--soft': mix(t.bg, t.ink, 0.1), '--line': mix(t.bg, t.ink, 0.22),
+    '--dim': mix(t.bg, t.ink, 0.5), '--wood': mix(t.accent, t.ink, 0.45), '--tag': t.muted, '--on-accent': contrast(t.accent, '#151515') >= contrast(t.accent, '#ffffff') ? '#1b1b1a' : '#ffffff',
+    '--font': `${FONTS[t.font] || FONTS.plex},"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif`,
+    '--head': t.font === 'batang' ? '"Gowun Batang",serif' : t.font === 'gmarket' ? '"GmarketSans",sans-serif' : '"Gowun Batang","Noto Serif KR",serif',
+    '--logo-filter': dark ? 'invert(1) brightness(1.4)' : 'none' };
+  R.classList.add('poster'); Object.keys(v).forEach(k => R.style.setProperty(k, v[k])); R.style.colorScheme = dark ? 'dark' : 'light';
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.bg);
+  if (t.font === 'gmarket' && !document.getElementById('gm')){
+    const u = w => `url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSans${w}.woff") format("woff")`, st = document.createElement('style'); st.id = 'gm';
+    st.textContent = [['Light', 300], ['Medium', 500], ['Bold', 700]].map(([w, n]) => `@font-face{font-family:"GmarketSans";font-weight:${n};font-display:swap;src:local("GmarketSans${w}"),${u(w)}}`).join('\n');
+    document.head.appendChild(st);
+  }
+}
+/* 포스터 그림: 한 번 받으면 이 휴대폰에 저장해 두고 다음부터 바로 보여 줘요 */
+const IMG = {};
+async function getImg(id){
+  if (IMG[id]) return IMG[id];
+  let s = null; try { s = localStorage.getItem('dg_tour_img_' + id); } catch(e){}
+  if (!s){ if (!LIVE) throw new Error('no'); s = await api('sjPhoto', DATA.ex.id, id); try { localStorage.setItem('dg_tour_img_' + id, s); } catch(e){} }
+  return IMG[id] = s;
+}
+function loadImgs(){ document.querySelectorAll('img[data-img]:not([src])').forEach(im => getImg(im.dataset.img).then(s => { im.src = s; }).catch(() => { im.remove(); const f = document.querySelector('.hero .k.alt'); if (f) f.hidden = false; })); }
+
+/* ---------- 그리기 ---------- */
+let DATA = null, Q = '', BIG = false, FOCUS = null;
+const whoHTML = w => (w.who || []).map(p => `<b>${hi(p.n)}</b>${p.g ? ` ${esc(p.g)}기` : ''}`).join(' · ');
+const objHTML = o => [o.n ? `<span>${esc(o.n)}</span>` : '', esc(o.m || ''), o.w && o.d && o.h ? `${o.w}×${o.d}×${o.h}mm` : ''].filter(Boolean).join(' · ');
+function hi(s){ s = esc(s); if (!Q) return s; const q = esc(Q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return s.replace(new RegExp(q, 'gi'), m => `<mark>${m}</mark>`); }
+const match = w => !Q || [w.t, ...(w.who || []).map(p => p.n), ...(w.objs || []).map(o => o.n + ' ' + o.m)].join(' ').toLowerCase().includes(Q.toLowerCase());
+function workHTML(w){
+  const long = (w.d || '').length > 170;
+  return `<article class="work"><h3>${hi(w.t || '제목 없음')}</h3>${w.who && w.who.length ? `<div class="who">${whoHTML(w)}</div>` : ''}
+    ${w.objs && w.objs.length ? `<ul>${w.objs.map(o => `<li>${objHTML(o)}</li>`).join('')}</ul>` : ''}
+    ${w.d ? `<p class="d${long ? ' clip' : ''}">${esc(w.d)}</p>${long ? '<button class="more" data-more>더 보기</button>' : ''}` : ''}</article>`;
+}
+function render(){
+  const d = DATA, ex = d.ex, title = ex.title || '목방 전시회';
+  document.title = title + ' · 관람 안내'; $('#bt').textContent = title;
+  applyTheme(d.theme);
+  const t = d.theme && d.theme.mode === 'poster' ? d.theme : null;
+  $('#grain').innerHTML = t && t.pattern ? `<img data-img="${esc(t.pattern)}" alt="">` : '';
+  if (!d.ready){
+    $('#nav').hidden = true;
+    $('#app').innerHTML = `<div class="empty"><h1>${esc(title)}</h1><p>관람 안내를 준비하고 있어요.<br>조금 뒤에 다시 열어 주세요.</p><button onclick="location.reload()">다시 열기</button></div>`;
+    loadImgs(); return;
+  }
+  const g = d.guide, wmap = Object.fromEntries((d.works || []).map(w => [w.id, w])), D = { map: g.map, order: g.order };
+  const used = new Set();
+  const stops = g.order.map((id, i) => { const it = itemById(D, id); if (!it) return null; const ws = (it.ws || []).map(x => wmap[x]).filter(Boolean); ws.forEach(w => used.add(w.id)); return { id, n: i + 1, it, ws }; }).filter(Boolean);
+  const others = (d.works || []).filter(w => !used.has(w.id));
+  const dates = (g.dates || '').trim(), place = (g.place || '').trim(), notes = (g.notes || '').split('\n').map(s => s.trim()).filter(Boolean);
+  // 49판: [관람객 화면]에 체크한 글만 와요 (축사 · 임원진 · 찾아오시는 길은 리플렛과 초대장에). 예전 '전시 소개글'도 읽어요
+  const secs = (Array.isArray(g.sections) ? g.sections : (g.intro ? [{ t: '전시 소개', b: g.intro, at: 'pre' }] : [])).filter(x => x.tour !== false && (x.b || '').trim());
+  const pre = secs.filter(x => x.at !== 'post'), post = secs.filter(x => x.at === 'post');
+  const hasMap = g.map && g.map.items && g.map.items.length;
+  const secHTML = (x, i, id) => `<section class="s tx"${id ? ` id="${id}"` : ''}>${x.t ? `<h2>${esc(x.t)}</h2>` : ''}<div class="intro">${x.b.trim().split(/\n\s*\n/).map(p => `<p>${esc(p.trim().replace(/\s*\n\s*/g, ' '))}</p>`).join('')}</div>${x.s ? `<div class="sg">${esc(x.s)}</div>` : ''}</section>`;
+  $('#nav').hidden = false;
+  $('#nav').innerHTML = `${secs.length ? `<a href="#${pre.length ? 'intro' : 'more'}">소개</a>` : ''}${hasMap ? '<a href="#map">지도</a>' : ''}<a href="#works">작품</a>`;
+  const total = (d.works || []).length, label = (g.label || '').trim() || '목공 동아리 목방 전시회';
+  $('#app').innerHTML = `
+  <div class="hero">
+    ${t && t.title ? `<h1 class="sr">${esc(title)}</h1><img class="ti" data-img="${esc(t.title)}" alt="${esc(title)}" style="width:${t.titleW || 72}%"><div class="k alt" hidden>${esc(label)}</div>` : `<div class="k">${esc(label)}</div><h1>${esc(title)}</h1>`}
+    ${g.sub && !(t && t.title) ? `<div class="sub">${esc(g.sub)}</div>` : ''}<span class="ac"></span>
+    ${dates || place ? `<dl class="info">${dates ? `<dt>일정</dt><dd>${esc(dates)}</dd>` : ''}${place ? `<dt>장소</dt><dd>${esc(place)}</dd>` : ''}</dl>` : ''}
+  </div>
+  ${pre.map((x, i) => secHTML(x, i, i ? '' : 'intro')).join('')}
+  ${hasMap ? `<section class="s" id="map"><h2>전시장 지도</h2><div class="mapbox${BIG ? ' big' : ''}" id="mapbox"></div>
+    <div class="maptools"><span>${stops.length ? '숫자 순서대로 둘러보세요. 숫자를 누르면 작품 설명으로 가요.' : ''}</span><button id="bigb">${BIG ? '작게 보기' : '크게 보기'}</button></div>
+    ${notes.length ? `<div class="notes"><b>관람 안내</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>` : ''}</section>`
+    : notes.length ? `<div class="notes"><b>관람 안내</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>` : ''}
+  <section class="s" id="works"><h2>작품 <small>${total}점</small></h2>
+    ${total > 4 ? `<div class="find"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="작품 제목이나 만든 사람 이름으로 찾기" value="${esc(Q)}" autocomplete="off"></div>` : ''}
+    <div id="list"></div></section>
+  ${post.map((x, i) => secHTML(x, i, !pre.length && !i ? 'more' : '')).join('')}
+`;
+  drawList(stops, others); drawMap();
+  loadImgs();
+  RS = { stops, others };
+}
+let RS = null;
+function drawList(stops, others){
+  stops = stops || RS.stops; others = others || RS.others;
+  const st = stops.map(s => ({ s, ws: s.ws.filter(match) })).filter(x => x.ws.length || !Q);
+  const ot = others.filter(match);
+  const one = x => `<section class="stop" id="stop-${x.s.id}"><div class="n">${x.s.n}</div><div><div class="pl">${x.s.it.lab ? `<span>${esc(x.s.it.lab)}</span>` : ''}<button data-loc="${x.s.id}">지도에서 위치 보기</button></div>${x.ws.map(workHTML).join('')}</div></section>`;
+  $('#list').innerHTML = st.map(one).join('') + (ot.length ? `<section class="stop other"><div class="n">그 밖</div><div><div class="pl"><span>${st.length ? '그 밖의 작품' : ''}</span></div>${ot.map(workHTML).join('')}</div></section>` : '')
+    + (!st.length && !ot.length ? `<p class="none">${Q ? `‘${esc(Q)}’와 맞는 작품이 없어요.` : '아직 올라온 작품이 없어요.'}</p>` : '');
+}
+function drawMap(){
+  const box = $('#mapbox'); if (!box) return;
+  const g = DATA.guide, r = mapSVG({ map: g.map, order: g.order }, { focus: FOCUS, bs: 1.4 });
+  box.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r.vb}" role="img" aria-label="전시장 지도">${r.body}</svg>`;
+}
+
+/* ---------- 누르기 ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('.badge'); if (b){ const el = document.getElementById('stop-' + b.dataset.stop); if (el){ el.scrollIntoView({ block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } return; }
+  const l = e.target.closest('[data-loc]'); if (l){ FOCUS = l.dataset.loc; drawMap(); $('#map').scrollIntoView({ block: 'start' }); setTimeout(() => { FOCUS = null; drawMap(); }, 2600); return; }
+  const m = e.target.closest('[data-more]'); if (m){ const p = m.previousElementSibling; p.classList.remove('clip'); m.remove(); return; }
+  if (e.target.id === 'bigb'){ BIG = !BIG; $('#mapbox').classList.toggle('big', BIG); e.target.textContent = BIG ? '작게 보기' : '크게 보기'; return; }
+  if (e.target.id === 'topb'){ window.scrollTo(0, 0); return; }
+});
+document.addEventListener('input', e => { if (e.target.id === 'q'){ Q = e.target.value.trim(); drawList(); } });
+let tick = false;
+window.addEventListener('scroll', () => { if (tick) return; tick = true; requestAnimationFrame(() => { tick = false; const y = window.scrollY; $('#bar').classList.toggle('on', y > 140); $('#topb').classList.toggle('on', y > 900); }); }, { passive: true });
+
+/* ---------- 불러오기: 이 휴대폰에 저장해 둔 내용을 먼저 보여 주고, 뒤에서 새 내용을 받아요 ---------- */
+function fail(msg){ $('#app').innerHTML = `<div class="empty"><h1>열지 못했어요</h1><p>${esc(msg)}</p><button onclick="location.reload()">다시 열기</button></div>`; }
+async function start(){
+  if (PV){
+    const p = lsGet('dg_ga_pv');
+    $('#pvb').innerHTML = '<div class="pvb">미리보기 · 아직 저장하지 않은 내용일 수 있어요</div>';
+    if (p && p.data && (!SID || p.s === SID)){ DATA = p.data; return render(); }
+    return fail('미리보기 내용을 찾지 못했어요. 도각도각에서 [미리보기]를 다시 눌러 주세요.');
+  }
+  if (!LIVE) return fail('서버 주소가 없어서 열 수 없어요. 도각도각 [관람 안내] → [미리보기]로 확인해 주세요.');
+  const ck = 'dg_tour_' + (SID || 'last'), cached = lsGet(ck);
+  if (cached && cached.ex){ DATA = cached; render(); }
+  try {
+    const d = await api('gaInfo', SID);
+    const same = cached && JSON.stringify(cached) === JSON.stringify(d);
+    lsSet(ck, d); if (!same){ const y = window.scrollY; DATA = d; render(); if (cached) window.scrollTo(0, y); }
+  } catch(e){ if (!cached) fail(/알 수 없는 요청/.test(e.message) ? '관람 안내를 아직 준비하는 중이에요.' : /찾을 수 없어요/.test(e.message) ? '이 전시회를 찾을 수 없어요. 입구 QR을 다시 찍어 주세요.' : e.message); }
+}
+start();
+})();
+</script>
+</body>
+</html>
