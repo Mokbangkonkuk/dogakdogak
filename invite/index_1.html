@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#434341">
+<title>목방 전시회에 초대합니다</title>
+<meta name="description" content="목공 동아리 목방 전시회 초대장이에요. 일시 · 장소 · 오시는 길을 확인해 주세요.">
+<!-- 카톡 · 인스타 링크 미리보기: 페이지가 열리기 전에 읽혀서 전시회마다 자동으로 바뀌지 않아요. 전시회가 바뀌면 og.jpg만 새 포스터로 바꿔 올려 주세요. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="목방 전시회에 초대합니다">
+<meta property="og:description" content="목공 동아리 목방 전시회 초대장 · 일시와 장소를 확인해 주세요">
+<meta property="og:image" content="https://mokbangkonkuk.github.io/dogakdogak/invite/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="48x48" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<!-- 도각도각 49판 · 전시 초대장. 내용은 도각도각 [전시회 관리] → 전시회 → [관람 안내] → [초대장] 탭에서 정해요. 서버 주소는 ../config.js에서 읽어요. -->
+<style>
+:root{--bg:#eef0eb;--ink:#1d2420;--muted:#5b665e;--accent:#2d5a46;--on-accent:#fff;--card:#fbfbf8;--line:#d6dbd2;--soft:#e1eae3;--dim:#8f9890;--wood:#8a5a35;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--head:"Gowun Batang","Noto Serif KR","AppleMyungjo",serif;--logo-filter:none;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not(.poster){--bg:#121613;--ink:#e6ebe5;--muted:#9ba69d;--accent:#8fcaa9;--on-accent:#102016;--card:#1a201c;--line:#2d3630;--soft:#22322a;--dim:#5f6a62;--wood:#cf9f72;--logo-filter:invert(1) brightness(1.4);color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15.5px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.grain{position:fixed;right:0;bottom:0;width:min(100%,900px);pointer-events:none;z-index:0}
+.grain img{width:100%;height:auto;display:block;-webkit-mask-image:radial-gradient(130% 120% at 100% 100%,#000 40%,transparent 100%);mask-image:radial-gradient(130% 120% at 100% 100%,#000 40%,transparent 100%)}
+main{max-width:480px;margin:0 auto;padding:0 28px;position:relative;z-index:1;text-align:center}
+.pvb{background:var(--wood);color:#fff;text-align:center;font-size:12px;padding:6px 10px;position:relative;z-index:3}
+.cover{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 0 40px;position:relative}
+.cover .k{font-size:13px;color:var(--muted);letter-spacing:.04em}
+.cover .ln{display:block;width:min(240px,60%);height:2px;margin:14px auto 0;background:linear-gradient(90deg,transparent,var(--wood) 35%,var(--accent) 75%,transparent)}
+.cover img.ti{display:block;width:100%;max-width:400px;height:auto;margin:22px auto 0}
+.cover h1{font-family:var(--head);font-size:clamp(46px,15vw,72px);line-height:1.05;letter-spacing:-.03em;margin:26px 0 0;font-weight:700}
+.cover .sub{color:var(--muted);margin-top:10px}
+.cover .hello{font-family:var(--head);font-size:19px;margin:34px 0 0;font-weight:700;text-wrap:balance}
+.cover .when{margin-top:18px;font-size:15px;font-weight:500}
+.cover .where{margin-top:4px;font-size:14px;color:var(--muted)}
+.cover .down{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);width:2px;height:44px;background:linear-gradient(180deg,var(--accent),transparent)}
+section.s{padding:72px 0 0}
+section.s h2{font-family:var(--head);font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+section.s .eh{font-size:11.5px;letter-spacing:.24em;color:var(--muted);margin-bottom:8px}
+.letter p{margin:0 0 1.15em;white-space:pre-line}
+.letter .body{margin-top:26px;font-size:15.5px;line-height:1.95}
+.letter .end{margin-top:26px;font-weight:500}
+.letter .sg{margin-top:14px;font-size:13.5px;color:var(--muted)}
+.cal{margin:26px auto 0;max-width:320px}
+.cal .mt{font-family:var(--head);font-size:18px;font-weight:700;margin-bottom:12px}
+.cal .g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px 0;font-size:13.5px}
+.cal .wd{font-size:11.5px;color:var(--muted);padding-bottom:6px}
+.cal .wd.su,.cal .c.su{color:#c2685a}
+.cal .c{height:38px;display:flex;align-items:center;justify-content:center;position:relative}
+.cal .c span{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.cal .c.on span{background:var(--accent);color:var(--on-accent);font-weight:700}
+.cal .c.ev span{box-shadow:inset 0 0 0 2px var(--wood);font-weight:700}
+.cal .c.on.ev span{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--wood)}
+.cal .c.td::after{content:"";position:absolute;bottom:0;width:4px;height:4px;border-radius:50%;background:var(--muted)}
+.cal + .cal{margin-top:22px}
+.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:-1px}
+.legend i.e{background:none;box-shadow:inset 0 0 0 2px var(--wood)}
+.hours{list-style:none;margin:22px auto 0;padding:0;max-width:320px;text-align:left;font-size:14.5px}
+.hours li{display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-top:1px solid var(--line)}
+.hours li:last-child{border-bottom:1px solid var(--line)}
+.hours li span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.hours li small{display:block;font-size:12.5px;color:var(--wood);font-weight:700;line-height:1.4}
+.dday{margin-top:22px;font-size:15px}
+.dday b{font-family:var(--head);font-size:24px;display:block;line-height:1.2;color:var(--accent)}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{font:inherit;font-size:14px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;cursor:pointer}
+.btn.pr{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.credits{margin-top:24px;font-size:14px;line-height:2.25;text-wrap:balance}
+.credits span{white-space:nowrap}
+.credits i{font-style:normal;color:var(--wood);padding:0 8px}
+.vline{width:2px;height:64px;margin:30px auto 0;background:linear-gradient(180deg,var(--accent),var(--wood) 70%,transparent)}
+.cnt{color:var(--muted);font-size:14px;margin-top:10px}
+.place{margin-top:20px;font-size:17px;font-weight:700}
+.way{margin-top:6px;color:var(--muted);font-size:14.5px;white-space:pre-line}
+.staff{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:22px auto 0;max-width:340px;text-align:left;font-size:14.5px}
+.staff dt{color:var(--muted);white-space:nowrap}.staff dd{margin:0}
+.share{padding:72px 0 0}
+footer{max-width:480px;margin:0 auto;padding:40px 28px 54px;text-align:center;color:var(--dim);font-size:12px;position:relative;z-index:1}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{min-height:80vh;display:flex;flex-direction:column;justify-content:center;color:var(--muted)}
+.empty h1{font-family:var(--head);color:var(--ink);font-size:28px;margin:0 0 10px}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.toast{transition:none}}
+</style>
+<script src="../config.js"></script>
+</head>
+<body>
+<div class="grain" id="grain" aria-hidden="true"></div>
+<div id="pvb"></div>
+<main id="app"><div class="empty">불러오는 중…</div></main>
+<footer id="foot" hidden>목공 동아리 목방</footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(function(){
+'use strict';
+const API = String(window.DOGAK_API || '').trim();
+const LIVE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+const QS = new URLSearchParams(location.search);
+const SID = (QS.get('s') || '').replace(/[^\w-]/g, '').slice(0, 40), PV = QS.get('pv') === '1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function lsGet(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
+
+async function api(fn, ...args){
+  let r; try { r = await fetch(API, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) }); }
+  catch(e){ throw new Error(navigator.onLine === false ? '인터넷에 연결되어 있지 않아요.' : '서버에 연결하지 못했어요.'); }
+  let j = null; try { j = await r.json(); } catch(e){}
+  if (!j) throw new Error('서버 응답을 읽지 못했어요.');
+  if (!j.ok) throw new Error(String(j.error || '불러오지 못했어요.'));
+  return j.data;
+}
+
+/* ---------- 포스터 디자인 (관람 안내 페이지와 같은 규칙) ---------- */
+function hexRgb(h){ h = String(h || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mix(a, b, t){ const x = hexRgb(a), y = hexRgb(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+function lum(h){ const c = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+function contrast(a, b){ const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+const FONTS = { plex: '"IBM Plex Sans KR"', gmarket: '"GmarketSans"', batang: '"Gowun Batang"' };
+function applyTheme(t){
+  const R = document.documentElement;
+  if (!(t && t.mode === 'poster')){ R.classList.remove('poster'); const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', '#eef0eb'); return; }
+  const dark = lum(t.bg) < 0.25, v = {
+    '--bg': t.bg, '--ink': t.ink, '--muted': t.muted, '--accent': t.accent, '--card': mix(t.bg, t.ink, 0.05), '--soft': mix(t.bg, t.ink, 0.1), '--line': mix(t.bg, t.ink, 0.22),
+    '--dim': mix(t.bg, t.ink, 0.5), '--wood': mix(t.accent, t.ink, 0.45), '--on-accent': contrast(t.accent, '#151515') >= contrast(t.accent, '#ffffff') ? '#1b1b1a' : '#ffffff',
+    '--font': `${FONTS[t.font] || FONTS.plex},"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif`,
+    '--head': t.font === 'batang' ? '"Gowun Batang",serif' : t.font === 'gmarket' ? '"GmarketSans",sans-serif' : '"Gowun Batang","Noto Serif KR",serif',
+    '--logo-filter': dark ? 'invert(1) brightness(1.4)' : 'none' };
+  if (dark) v['--wood'] = mix(t.bg, '#d9c2a5', 0.45);
+  R.classList.add('poster'); Object.keys(v).forEach(k => R.style.setProperty(k, v[k])); R.style.colorScheme = dark ? 'dark' : 'light';
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.bg);
+  if (t.font === 'gmarket' && !document.getElementById('gm')){
+    const u = w => `url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSans${w}.woff") format("woff")`, st = document.createElement('style'); st.id = 'gm';
+    st.textContent = [['Light', 300], ['Medium', 500], ['Bold', 700]].map(([w, n]) => `@font-face{font-family:"GmarketSans";font-weight:${n};font-display:swap;src:local("GmarketSans${w}"),${u(w)}}`).join('\n');
+    document.head.appendChild(st);
+  }
+}
+const IMG = {};
+async function getImg(id){
+  if (IMG[id]) return IMG[id];
+  try { const P = window.parent.__img; if (P && P[id]) return IMG[id] = P[id]; } catch(e){}
+  let s = null; try { s = localStorage.getItem('dg_tour_img_' + id); } catch(e){}
+  if (!s){ if (!LIVE) throw new Error('no'); s = await api('sjPhoto', DATA.ex.id, id); try { localStorage.setItem('dg_tour_img_' + id, s); } catch(e){} }
+  return IMG[id] = s;
+}
+function loadImgs(){ document.querySelectorAll('img[data-img]:not([src])').forEach(im => getImg(im.dataset.img).then(s => { im.src = s; }).catch(() => { const alt = im.dataset.alt; if (alt){ const h = document.createElement('h1'); h.textContent = alt; im.replaceWith(h); } else im.remove(); })); }
+
+/* ---------- 날짜 ---------- */
+const WD = '일월화수목금토';
+const pd = d => { const [y, m, dd] = d.split('-').map(Number); return { y, m, d: dd, w: new Date(y, m - 1, dd).getDay() }; };
+const todayKST = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+function range(days){
+  if (!days.length) return '';
+  const a = pd(days[0].d), b = pd(days[days.length - 1].d);
+  const one = x => `${x.m}. ${x.d} (${WD[x.w]})`;
+  return days.length === 1 ? `${a.y}. ${one(a)}` : `${a.y}. ${one(a)} – ${a.y === b.y ? '' : b.y + '. '}${one(b)}`;
+}
+function calHTML(days, ev){
+  const on = new Set(days.map(x => x.d)), evd = ev ? ev.d : '', td = todayKST();
+  const months = [...new Set(days.map(x => x.d.slice(0, 7)).concat(evd ? [evd.slice(0, 7)] : []))].sort();
+  return months.map(ym => {
+    const [y, m] = ym.split('-').map(Number), first = new Date(y, m - 1, 1).getDay(), n = new Date(y, m, 0).getDate();
+    let cells = WD.split('').map((w, i) => `<div class="wd${i ? '' : ' su'}">${w}</div>`).join('') + '<div></div>'.repeat(first);
+    for (let d = 1; d <= n; d++){
+      const k = `${ym}-${String(d).padStart(2, '0')}`, w = (first + d - 1) % 7;
+      cells += `<div class="c${w ? '' : ' su'}${on.has(k) ? ' on' : ''}${k === evd ? ' ev' : ''}${k === td ? ' td' : ''}"><span>${d}</span></div>`;
+    }
+    return `<div class="cal"><div class="mt">${y}. ${m}</div><div class="g" role="img" aria-label="${y}년 ${m}월 달력, 전시하는 날 표시">${cells}</div></div>`;
+  }).join('');
+}
+function ddayHTML(days){
+  if (!days.length) return '';
+  const td = todayKST(), a = days[0].d, b = days[days.length - 1].d, diff = (x, y) => Math.round((Date.UTC(...ymd(y)) - Date.UTC(...ymd(x))) / 864e5);
+  if (td < a){ const n = diff(td, a); return `<div class="dday"><b>D-${n}</b>전시까지 ${n}일 남았어요</div>`; }
+  if (td <= b) return `<div class="dday"><b>지금 전시 중</b>오늘 ${esc(hoursOf(days, td))}에 열려요</div>`;
+  return `<div class="dday"><b>전시가 끝났어요</b>함께해 주셔서 고마워요</div>`;
+}
+const ymd = d => { const x = pd(d); return [x.y, x.m - 1, x.d]; };
+function hoursOf(days, d){ const x = days.find(y => y.d === d); return x && x.o ? `${x.o} – ${x.c}` : ''; }
+/* 캘린더에 추가: 날마다 한 일정 + 행사 (.ics 파일) */
+function ics(){
+  const d = DATA, iv = d.inv, title = d.ex.title || '목방 전시회', loc = d.place || '';
+  const u = (day, hm) => { const [y, m, dd] = day.split('-').map(Number), [h, mi] = (hm || '00:00').split(':').map(Number); return new Date(Date.UTC(y, m - 1, dd, h - 9, mi)).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+  const e = s => String(s || '').replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const ev = (start, end, sum, i) => ['BEGIN:VEVENT', `UID:${(d.ex.id || 'mokbang')}-${i}@mokbangkonkuk.github.io`, `DTSTAMP:${stamp}`, `DTSTART:${start}`, `DTEND:${end}`, `SUMMARY:${e(sum)}`, loc ? `LOCATION:${e(loc)}` : '', `URL:${location.href.split('&pv')[0]}`, 'END:VEVENT'].filter(Boolean).join('\r\n');
+  const list = iv.days.map((x, i) => ev(u(x.d, x.o || '10:00'), u(x.d, x.c || x.o || '18:00'), `${title} 전시 (목방)`, i));
+  if (iv.ev && iv.ev.d) list.push(ev(u(iv.ev.d, iv.ev.o || '17:00'), u(iv.ev.d, iv.ev.c || iv.ev.o || '19:00'), `${title} ${iv.ev.t || '발표회'} (목방)`, 'ev'));
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//mokbang//dogakdogak//KO', 'CALSCALE:GREGORIAN', ...list, 'END:VCALENDAR'].join('\r\n');
+}
+
+/* ---------- 그리기 ---------- */
+let DATA = null;
+function render(){
+  const d = DATA, title = d.ex.title || '목방 전시회';
+  document.title = `${title} · 초대장`;
+  applyTheme(d.theme);
+  const t = d.theme && d.theme.mode === 'poster' ? d.theme : null;
+  $('#grain').innerHTML = t && t.pattern ? `<img data-img="${esc(t.pattern)}" alt="">` : '';
+  if (!d.ready){ $('#app').innerHTML = `<div class="empty"><h1>${esc(title)}</h1><p>초대장을 준비하고 있어요.<br>조금 뒤에 다시 열어 주세요.</p></div>`; loadImgs(); return; }
+  const iv = d.inv || {}, days = (iv.days || []).filter(x => x && x.d), ev = iv.ev && iv.ev.d ? iv.ev : null;
+  const label = (d.label || '').trim() || '목공 동아리 목방 전시회';
+  const paras = (iv.text || '').trim().split(/\n\s*\n/).filter(Boolean);
+  const staff = (d.staff || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => { const m = l.match(/^([^:：]{1,12})\s*[:：]\s*(.*)$/); return m ? [m[1].trim(), m[2]] : ['', l]; });
+  staff.forEach((x, i) => { if (i && x[0] && staff[i - 1][0] === x[0]) x.same = 1; });
+  const titles = (d.titles || []).filter(Boolean), mq = (d.mapq || '').trim(), q = encodeURIComponent(mq);
+  const when = range(days) || (d.dates || '').split('\n')[0];
+  const hours = days.map(x => { const p = pd(x.d), e = ev && ev.d === x.d; return `<li><span>${p.m}월 ${p.d}일 (${WD[p.w]})${e ? `<small>${esc(ev.t || '발표회')} ${esc(ev.o)}${ev.c ? ' – ' + esc(ev.c) : ''}</small>` : ''}</span><span>${esc(x.o)}${x.c ? ' – ' + esc(x.c) : ''}</span></li>`; }).join('')
+    + (ev && !days.some(x => x.d === ev.d) ? (() => { const p = pd(ev.d); return `<li><span>${p.m}월 ${p.d}일 (${WD[p.w]}) · ${esc(ev.t || '발표회')}</span><span>${esc(ev.o)}${ev.c ? ' – ' + esc(ev.c) : ''}</span></li>`; })() : '');
+  $('#app').innerHTML = `
+  <section class="cover">
+    <div class="k">${esc(label)}</div><span class="ln"></span>
+    ${t && t.title ? `<img class="ti" data-img="${esc(t.title)}" data-alt="${esc(title)}" alt="${esc(title)}">` : `<h1>${esc(title)}</h1>${d.sub ? `<div class="sub">${esc(d.sub)}</div>` : ''}`}
+    ${iv.hello ? `<p class="hello">${esc(iv.hello)}</p>` : ''}
+    ${when ? `<div class="when">${esc(when)}</div>` : ''}${d.place ? `<div class="where">${esc(d.place)}</div>` : ''}
+    <span class="down" aria-hidden="true"></span>
+  </section>
+  ${paras.length || iv.end ? `<section class="s letter rv"><div class="eh">INVITATION</div><h2>초대합니다</h2>
+    <div class="body">${paras.map(p => `<p>${esc(p.trim())}</p>`).join('')}</div>
+    ${iv.end ? `<p class="end">${esc(iv.end)}</p>` : ''}<p class="sg">목공 동아리 목방 드림</p></section>` : ''}
+  ${days.length || ev ? `<section class="s rv"><div class="eh">DATE</div><h2>일시</h2>
+    ${calHTML(days, ev)}
+    <div class="legend">${days.length ? '<span><i></i>전시</span>' : ''}${ev ? `<span><i class="e"></i>${esc(ev.t || '발표회')}</span>` : ''}</div>
+    <ul class="hours">${hours}</ul>
+    ${ddayHTML(days)}
+    <div class="btns"><button class="btn pr" id="calb">캘린더에 추가</button></div></section>` : ''}
+  ${titles.length ? `<section class="s rv"><div class="eh">WORKS</div><h2>전시 작품</h2><div class="cnt">${titles.length}점의 이야기가 전시장에서 기다리고 있어요</div>
+    <div class="credits">${titles.map((x, i) => `<span>${esc(x)}${i < titles.length - 1 ? '<i>·</i>' : ''}</span>`).join(' ')}</div><div class="vline"></div></section>` : ''}
+  ${d.place || d.way ? `<section class="s rv"><div class="eh">LOCATION</div><h2>오시는 길</h2>${d.place ? `<div class="place">${esc(d.place)}</div>` : ''}${d.way ? `<div class="way">${esc(d.way)}</div>` : ''}
+    ${mq ? `<div class="btns"><a class="btn" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버 지도</a><a class="btn" href="https://map.kakao.com/link/search/${q}" target="_blank" rel="noopener">카카오맵</a></div>` : ''}</section>` : ''}
+  ${staff.length ? `<section class="s rv"><div class="eh">HOSTS</div><h2>초대하는 사람들</h2><dl class="staff">${staff.map(([r, v], i) => `<dt>${staff[i].same ? '' : esc(r)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></section>` : ''}
+  <section class="share rv"><div class="btns"><button class="btn" id="copyb">링크 복사</button>${navigator.share ? '<button class="btn" id="shareb">공유하기</button>' : ''}</div></section>`;
+  $('#foot').hidden = false;
+  loadImgs(); reveal();
+}
+function reveal(){
+  const els = document.querySelectorAll('.rv:not(.in)');
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches){ els.forEach(e => e.classList.add('in')); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+  els.forEach(e => io.observe(e));
+}
+const shareUrl = () => location.href.split('&pv')[0];
+document.addEventListener('click', async e => {
+  const id = e.target.id;
+  if (id === 'calb'){
+    const blob = new Blob([ics()], { type: 'text/calendar;charset=utf-8' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'mokbang-exhibition.ics'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('캘린더 파일을 열면 일정이 추가돼요');
+  }
+  if (id === 'copyb'){ try { await navigator.clipboard.writeText(shareUrl()); toast('링크를 복사했어요'); } catch(_){ toast(shareUrl()); } }
+  if (id === 'shareb'){ try { await navigator.share({ title: document.title, text: (DATA.inv && DATA.inv.hello) || '목방 전시회에 초대합니다', url: shareUrl() }); } catch(_){} }
+});
+
+function fail(msg){ $('#app').innerHTML = `<div class="empty"><h1>열지 못했어요</h1><p>${esc(msg)}</p></div>`; }
+async function start(){
+  if (PV){
+    $('#pvb').innerHTML = '<div class="pvb">미리보기 · 아직 저장하지 않은 내용일 수 있어요</div>';
+    let p = null; try { p = window.parent.__invPv ? { s: SID, data: window.parent.__invPv } : null; } catch(e){}
+    p = p || lsGet('dg_ga_ivpv');
+    if (p && p.data && (!SID || !p.s || p.s === SID)){ DATA = p.data; return render(); }
+    return fail('미리보기 내용을 찾지 못했어요. 도각도각에서 [초대장 미리보기]를 다시 눌러 주세요.');
+  }
+  if (!LIVE) return fail('서버 주소가 없어서 열 수 없어요.');
+  const ck = 'dg_inv_' + (SID || 'last'), cached = lsGet(ck);
+  if (cached && cached.ex){ DATA = cached; render(); }
+  try {
+    const d = await api('gaInvite', SID);
+    const same = cached && JSON.stringify(cached) === JSON.stringify(d);
+    lsSet(ck, d); if (!same){ const y = window.scrollY; DATA = d; render(); if (cached) window.scrollTo(0, y); }
+  } catch(e){ if (!cached) fail(/알 수 없는 요청/.test(e.message) ? '초대장을 아직 준비하는 중이에요.' : /찾을 수 없어요/.test(e.message) ? '이 전시회를 찾을 수 없어요. 받은 링크를 다시 확인해 주세요.' : e.message); }
+}
+start();
+})();
+</script>
+</body>
+</html>
