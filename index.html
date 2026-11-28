@@ -810,6 +810,34 @@ select.term-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px
 .exh-th img{width:100%;height:100%;object-fit:cover;display:block}
 .exh-poster{all:unset;box-sizing:border-box;display:block;cursor:zoom-in;width:100%;max-width:340px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--paper);-webkit-tap-highlight-color:transparent}
 .exh-poster.big{max-width:720px;cursor:zoom-out}
+/* 49판: 두 칸 나란히 (전시회 화면의 상주 · 안내서, 출품 첫 화면의 포스터 · 새로 신청) */
+.exh-duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;margin:0 0 14px}
+.exh-duo>.panel{margin:0;display:flex;flex-direction:column;gap:10px}.exh-duo>.panel .actions{margin-top:auto}
+.exh-home{align-items:start}.exh-side{display:flex;flex-direction:column;gap:14px;min-width:0}.exh-side>.panel{margin:0}.exh-home .exh-poster{max-width:none}.exh-home .exh-poster.big{grid-column:1/-1;max-width:720px}
+@media (max-width:640px){.exh-duo{grid-template-columns:minmax(0,1fr)}}
+/* 49판: 휴대폰(과 미리보기의 모바일 화면)에서는 작은 포스터를 가운데에 두고, 아래로 [새로 출품 신청하기] → [보기 · 수정]. 포스터를 누르면 크게 */
+@media (max-width:640px){
+  .exh-duo{grid-template-columns:minmax(0,1fr)}
+  .exh-home{gap:10px}
+  .exh-side{gap:10px}
+  .exh-home .exh-poster:not(.big){width:150px;justify-self:center;margin:2px auto 4px;cursor:zoom-in}
+  .exh-home .exh-poster.big{grid-column:auto;max-width:100%}
+  .exh-side>.panel{padding:16px 18px;gap:8px}
+  .exh-side h2{font-size:19px;margin:0}
+  .exh-side .exh-start .sub{font-size:13.5px;line-height:1.55}
+  .exh-side .exh-look .row{grid-template-columns:1fr 1fr;gap:10px}
+  .exh-side .exh-look .field{margin:0}
+}
+body.mobile-sim .exh-duo{grid-template-columns:minmax(0,1fr)}
+body.mobile-sim .exh-home{gap:10px}
+body.mobile-sim .exh-side{gap:10px}
+body.mobile-sim .exh-home .exh-poster:not(.big){width:150px;justify-self:center;margin:2px auto 4px;cursor:zoom-in}
+body.mobile-sim .exh-home .exh-poster.big{grid-column:auto;max-width:100%}
+body.mobile-sim .exh-side>.panel{padding:16px 18px;gap:8px}
+body.mobile-sim .exh-side h2{font-size:19px;margin:0}
+body.mobile-sim .exh-side .exh-start .sub{font-size:13.5px;line-height:1.55}
+body.mobile-sim .exh-side .exh-look .row{grid-template-columns:1fr 1fr;gap:10px}
+body.mobile-sim .exh-side .exh-look .field{margin:0}
 .exh-poster:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .exh-poster img{width:100%;height:auto;display:block}
 .exh-poster img:not([src]),.exh-pfig img:not([src]){aspect-ratio:3/4}
@@ -1052,6 +1080,7 @@ window.dgWrite = function(root){
   <section id="v-exhibit" class="stackcol narrow" hidden></section>
   <section id="v-exh" class="stackcol" hidden></section>
   <section id="v-sangju" hidden></section>
+  <section id="v-annae" hidden></section>
 
   <section id="v-list" class="stackcol" hidden>
     <div class="top">
@@ -1487,12 +1516,20 @@ function loadDemoJs(){
   });
 }
 /* 48판: 전시 상주 시간표는 sangju.js에 따로 있어요. 상주 화면을 처음 열 때만 불러와요 */
-const SANGJU_JS = 'sangju.js?v=48c';
+const SANGJU_JS = 'sangju.js?v=49a';
 let sjJsP = null;
+/* 49판: sangju.js · annae.js가 같이 쓰는 도각도각 도구 */
+function setDG(){
+  if (window.DG) return;
+  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, route, drawQR, get S(){ return S; }, tut: () => !!TUT,
+    openExhDetail: id => { show('exh'); openExhDetail(id); },
+    openSangju: tab => openSangjuAdmin(tab),
+    exhList: async () => { if (!(EXA.L && EXA.L.list)){ EXA.L = await api('exhAdmin', S.pw); cacheSet(PWK, 'exha2', EXA.L); } return EXA.L.list; },
+    setExhDetail: (id, d) => { if (EXA.id === id && d){ EXA.D = d; cacheSet(PWK, 'exhd_' + id, d); } } };
+}
 function loadSangju(){
   if (window.dgSangju) return Promise.resolve();
-  window.DG = { api, LIVE, SITE, PWK, PDB, shrinkImage, cacheGet, cacheSet, route, get S(){ return S; }, tut: () => !!TUT,
-    openExhDetail: id => { show('exh'); openExhDetail(id); } };
+  setDG();
   return sjJsP = sjJsP || new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = SANGJU_JS; s.async = true;
     s.onload = () => window.dgSangju ? res() : rej(new Error('sangju.js를 읽지 못했어요.'));
@@ -1511,6 +1548,26 @@ async function openSangjuAdmin(tab){
   try { await loadSangju(); await window.dgSangju.admin(EXA.id, EXA.D.ex, tab); }
   catch(e){ show('exh'); EXA.msg = e.message; EXA.msgCls = 'err'; renderExhAdmin(); }
 }
+/* 49판: 전시 관람 안내(입구 QR 페이지 tour/)를 만드는 화면은 annae.js에 따로 있어요. 처음 열 때만 불러와요 */
+const ANNAE_JS = 'annae.js?v=49e';
+let anJsP = null;
+function loadAnnae(){
+  if (window.dgAnnae) return Promise.resolve();
+  setDG();
+  return anJsP = anJsP || new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = ANNAE_JS; s.async = true;
+    s.onload = () => window.dgAnnae ? res() : rej(new Error('annae.js를 읽지 못했어요.'));
+    s.onerror = () => { anJsP = null; s.remove(); rej(new Error(navigator.onLine === false ? '인터넷에 연결되어 있지 않아요. 연결을 확인한 뒤 다시 시도해 주세요.' : '관람 안내 파일(annae.js)을 불러오지 못했어요. GitHub에 annae.js를 올렸는지 확인해 주세요.')); };
+    document.head.appendChild(s);
+  });
+}
+async function openAnnaeAdmin(tab){
+  if (!EXA.id || !EXA.D) return;
+  show('annae'); banner(''); route({ v: 'ga', id: EXA.id, tab: tab || '' });
+  try { await loadAnnae(); await window.dgAnnae.admin(EXA.id, EXA.D.ex, EXA.D.list || [], tab); }
+  catch(e){ show('exh'); EXA.msg = e.message; EXA.msgCls = 'err'; renderExhAdmin(); }
+}
+const tourLink = id => SITE + 'tour/?s=' + encodeURIComponent(id);
 async function getDemo(){
   if (!Demo){ await loadDemoJs(); Demo = window.dgBuildDemo(clone); if (!LIVE) window.__DG_DEMO = Demo; }   // 미리보기에서만: 속도 시험용
   return Demo;
@@ -1601,7 +1658,7 @@ const S = {
   notice:{}, regMsg:'', regMsgCls:'', addFor:null, add:{}, copyFor:null, copyText:'', armed:null, rawComments:false,
   ap:null, rv:null,
 };
-const VIEWS = ['apply','review','login','list','session','guides','exhibit','exh','sangju'];
+const VIEWS = ['apply','review','login','list','session','guides','exhibit','exh','sangju','annae'];
 ['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
 function show(v){ S.view = v; document.body.dataset.view = v; VIEWS.forEach(x => $('#v-' + x).hidden = x !== v); installShow(); window.scrollTo(0,0); }
@@ -2163,8 +2220,9 @@ function renderExhibit_(){
   const others = ((EXM.all && EXM.all.list) || []).filter(e => e.open && e.id !== I.id).length;
   const head = `<div class="brand">${BRAND_SVG(36)}<div><div class="tag">목공 동아리 목방 · 부원 누구나</div><h1>전시회 출품</h1></div></div>
     <div class="exh-head"><b>${esc(I.title || '')}</b><span class="chip ${st.cls}">${esc(st.t)}</span>${others && EXM.mode === 'home' ? `<button type="button" class="linkish" data-x="repick">다른 전시회 고르기</button>` : ''}</div>
-    ${I.poster && EXM.mode === 'home' ? `<button type="button" class="exh-poster" data-x="poster-zoom" aria-label="포스터 크게 보기">${phImg(I.poster, I.title + ' 포스터')}</button>` : ''}
     ${I.note ? `<p class="sub exh-note">${esc(I.note)}</p>` : ''}`;
+  // 49판: 첫 화면은 왼쪽 포스터, 오른쪽에 [새로 출품 신청하기]와 그 아래 [신청한 내용 보기 · 수정]
+  const poster = I.poster && EXM.mode === 'home' ? `<button type="button" class="exh-poster" data-x="poster-zoom" aria-label="포스터 크게 보기">${phImg(I.poster, I.title + ' 포스터')}</button>` : '';
   const msg = EXM.msg ? `<p class="msg ${EXM.msgCls || 'ok'}" role="status">${esc(EXM.msg)}</p>` : '';
   if (EXM.mode === 'new' || EXM.mode === 'edit'){ v.innerHTML = head + exhFormHTML(); return; }
   if (EXM.mode === 'view' && EXM.recs.length){
@@ -2178,6 +2236,8 @@ function renderExhibit_(){
     return;
   }
   v.innerHTML = head + msg + `
+    <div class="${poster ? 'exh-duo exh-home' : ''}">${poster}
+    <div class="exh-side">
     <div class="panel exh-start">
       <h2>새로 출품 신청하기</h2>
       <p class="sub" style="margin:0">전시기획서 양식 그대로 칸을 채워요. <b>작품 하나에 기획서 한 장</b>이에요. 작품을 여러 개 내려면 쓰는 화면 아래 [+ 신청서 추가]로 기획서를 늘려서 한 번에 내요.</p>
@@ -2188,10 +2248,10 @@ function renderExhibit_(){
       <h2>신청한 내용 보기 · 수정</h2>
       <div class="row">
         <div class="field"><label for="xl-sn">학번</label><input type="text" id="xl-sn" inputmode="numeric" autocomplete="off" value="${esc(EXM.lk.sn)}"></div>
-        <div class="field"><label for="xl-name">이름 <span class="hint">신청할 때 적은 이름</span></label><input type="text" id="xl-name" maxlength="20" autocomplete="off" value="${esc(EXM.lk.name || '')}"></div>
+        <div class="field"><label for="xl-name">이름</label><input type="text" id="xl-name" maxlength="20" autocomplete="off" placeholder="신청한 이름" value="${esc(EXM.lk.name || '')}"></div>
       </div>
       <div class="actions"><button class="btn" type="submit" id="xl-go">불러오기</button><span class="msg err" id="xl-msg" role="status"></span></div>
-    </form>
+    </form></div></div>
     <p class="hint lib-foot"><button type="button" class="linkish" data-x="first">첫 화면으로</button></p>`;
 }
 function exhObjRows(objs, fi){
@@ -2472,9 +2532,14 @@ function renderExhDetail(){
     <h2 class="exh-title-h">${esc(ex.title)}</h2>
     ${exhSetFormHTML(ex)}
     ${EXA.notice ? exhNoticeHTML(ex) : ''}
+    <div class="exh-duo">
     <div class="panel exh-sj"><div class="qs-head"><h2>전시 상주 시간표</h2></div>
       <p class="hint" style="margin:0">부원들에게 상주할 수 있는 시간을 받아 한 타임에 몇 명씩 고르게 나누고, 시간표를 공개해요. 포스터에 맞춘 디자인도 여기서 정해요.</p>
-      <div class="actions"><button type="button" class="btn primary sm" data-xa="sangju">상주 시간표 열기</button><button type="button" class="btn sm ghost" data-xa="sj-link">상주 링크 복사</button><span class="msg ok" id="ex-sj-msg" role="status"></span></div></div>
+      <div class="actions"><button type="button" class="btn primary sm" data-xa="sangju">전시 상주 시간표 만들기</button><button type="button" class="btn sm ghost" data-xa="sj-link">상주 링크 복사</button><span class="msg ok" id="ex-sj-msg" role="status"></span></div></div>
+    <div class="panel exh-ga"><div class="qs-head"><h2>전시 안내서</h2></div>
+      <p class="hint" style="margin:0">초대장 · 입구 QR 안내 화면 · 인쇄용 리플렛을 한 번에 만들어요. 전시회장 구성과 작품 순서를 정하면 출품 기획서 내용이 알아서 들어가요. 디자인은 포스터를 따라가요.</p>
+      <div class="actions"><button type="button" class="btn primary sm" data-xa="annae">전시 안내서 만들기</button><button type="button" class="btn sm ghost" data-xa="ga-link">안내 화면 링크 복사</button><span class="msg ok" id="ex-ga-msg" role="status"></span></div></div>
+    </div>
     <div class="toolbar"><h2>출품 목록</h2></div>
     <div class="exh-sum"><span>출품 <b class="num">${pn}</b>명</span><span>기획서 <b class="num">${list.length}</b>장</span><span>작품(오브제) <b class="num">${objN}</b>개</span><span class="spacer"></span>
       ${ex.url ? `<a class="btn sm ghost" href="${esc(ex.url)}" target="_blank" rel="noopener">구글 시트에서 보기</a>` : ''}
@@ -2533,6 +2598,8 @@ exA.addEventListener('click', async e => {
   if (a === 'open-ex'){ openExhDetail(id); return; }
   if (a === 'back'){ openExhAdmin(); return; }
   if (a === 'sangju'){ openSangjuAdmin(); return; }
+  if (a === 'annae'){ openAnnaeAdmin(); return; }
+  if (a === 'ga-link'){ const ok = await copyOut(tourLink(EXA.id)); const m = $('#ex-ga-msg'); if (m) m.textContent = ok ? '안내 화면(입구 QR) 링크를 복사했어요.' : tourLink(EXA.id); return; }
   if (a === 'sj-link'){ const ok = await copyOut(SITE + '?v=s&s=' + encodeURIComponent(EXA.id)); const m = $('#ex-sj-msg'); if (m) m.textContent = ok ? '상주 링크를 복사했어요. 단톡방에 붙여 넣어 주세요.' : SITE + '?v=s&s=' + EXA.id; return; }
   if (a === 'refresh-list'){ try { EXA.L = await withLoader(api('exhAdmin', S.pw)); cacheSet(PWK, 'exha2', EXA.L); EXA.msg = ''; } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); return; }
   if (a === 'refresh'){ try { EXA.D = await withLoader(api('exhDetail', S.pw, EXA.id)); cacheSet(PWK, 'exhd_' + EXA.id, EXA.D); EXA.msg = ''; } catch(err){ EXA.msg = exhApiMsg(err); EXA.msgCls = 'err'; } renderExhAdmin(); return; }
@@ -2732,14 +2799,14 @@ function cardInner(s, rank){
     </div>
   </button>`;
 }
-/* 48판: 새로고침해도 보던 화면(학습회 · 전시회 · 상주 시간표)으로 돌아와요. 이 창(탭)에서만 기억해요 */
+/* 48판: 새로고침해도 보던 화면(학습회 · 전시회 · 상주 시간표 · 49판: 관람 안내)으로 돌아와요. 이 창(탭)에서만 기억해요 */
 function route(o){ if (TUT) return; try { o ? sessionStorage.setItem('dg_route', JSON.stringify(o)) : sessionStorage.removeItem('dg_route'); } catch(e){} }
 function restoreRoute(){
   let r = null; try { r = JSON.parse(sessionStorage.getItem('dg_route') || 'null'); } catch(e){}
   try {
     if (r && r.v === 'session' && D().sessions.some(x => x.id === r.sid)) return openSession(r.sid, r.tab);
     if (r && r.v === 'exh') return openExhAdmin();
-    if (r && (r.v === 'exhd' || r.v === 'sj') && r.id){ show('exh'); return openExhDetail(r.id).then(() => { if (r.v === 'sj' && EXA.id === r.id && EXA.D) return openSangjuAdmin(r.tab); }); }
+    if (r && (r.v === 'exhd' || r.v === 'sj' || r.v === 'ga') && r.id){ show('exh'); return openExhDetail(r.id).then(() => { if (EXA.id === r.id && EXA.D){ if (r.v === 'sj') return openSangjuAdmin(r.tab); if (r.v === 'ga') return openAnnaeAdmin(r.tab); } }); }
   } catch(e){}
   openList();
 }
@@ -2754,7 +2821,7 @@ function renderList(){
     `<option value="all"${sel==='all'?' selected':''}>전체 학기</option>`].join('');
   const shownS = ss.filter(s => sel === 'all' || termFor(s) === sel);
   $('#list-title').textContent = sel === 'all' ? '모든 학습회' : `${termLabel(sel)} 학습회`;
-  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 48판 · 서버 ${D().version || '13판 이하'}`;
+  $('#ver').textContent = `앱 버전: 화면 18판 · 홈 화면 앱 49판 · 서버 ${D().version || '13판 이하'}`;
   const list = $('#list');
   const ranked = S.sortMode === 'rank';
   document.querySelectorAll('#sort-seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.sort === (ranked ? 'rank' : 'date'))));
@@ -3953,8 +4020,8 @@ const TUT_STEPS = [
     body: () => `<ul><li><b>[기획서 인쇄]</b> · <b>[Word로 받기]</b>로 한 장씩 뽑아요.</li><li>위쪽 <b>[전체 기획서 인쇄]</b> · <b>[전체 Word로 받기]</b>로 한꺼번에 뽑을 수도 있어요.</li><li><b>[출품 삭제]</b>는 두 번 눌러야 지워져요.</li></ul>`,
     hl: () => document.querySelector('#v-exh .exh-item.open .exh-ib .actions') || document.querySelector('#v-exh .exh-sum') },
 
-  { part: 'exh', title: '4. 상주 시간표 열기', auto: true, waitLabel: '눌러 보면 넘어가요',
-    body: () => `${TUT.mod === 'all' ? '' : `<p>연습용 전시회 <b>'${esc((tutExhInfo() || {}).title || '')}'</b>로 연습해요.</p>`}<p>전시 기간에 전시장을 지킬 <b>상주</b> 시간표를 만들어요. 부원들에게 가능한 시간을 받고, 한 타임에 몇 명씩 고르게 나눠요.</p><p>전시회 화면의 <b>[상주 시간표 열기]</b>를 눌러 보세요.</p>`,
+  { part: 'exh', title: '4. 전시 상주 시간표 만들기', auto: true, waitLabel: '눌러 보면 넘어가요',
+    body: () => `${TUT.mod === 'all' ? '' : `<p>연습용 전시회 <b>'${esc((tutExhInfo() || {}).title || '')}'</b>로 연습해요.</p>`}<p>전시 기간에 전시장을 지킬 <b>상주</b> 시간표를 만들어요. 부원들에게 가능한 시간을 받고, 한 타임에 몇 명씩 고르게 나눠요.</p><p>전시회 화면의 <b>[전시 상주 시간표 만들기]</b>를 눌러 보세요.</p>`,
     enter: () => tutOpenExh(), hl: () => document.querySelector('#v-exh .exh-sj'), done: () => !!sjAdm() },
   { part: 'exh', title: '4. 전시 날짜 정하기', ex: ['예시로 채우기', exSjDays],
     body: () => `<p><b>시작 날짜 · 끝 날짜</b>와 <b>기본 여는 시간 · 닫는 시간</b>을 고르고 <b>[이 기간으로 날짜 채우기]</b>를 눌러요.</p><p class="hint">설치 · 철수하는 날처럼 시간이 다른 날은 아래 날짜별 줄에서 따로 바꿔요. 필요 없는 날은 × 로 빼요.</p>`,

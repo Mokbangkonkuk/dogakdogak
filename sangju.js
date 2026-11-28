@@ -904,7 +904,7 @@ function tabDist(){
   if (!c.days.length){ $('#tab').innerHTML = '<div class="card"><p class="muted">설정 탭에서 날짜를 먼저 정해 주세요.</p></div>'; return; }
   const people = prepPeople(A.responses, c.days);
   if (!S.draft && A.result){ S.draft = JSON.parse(JSON.stringify(A.result)); S.draft.saved = true; }
-  if (!S.distOpt) S.distOpt = {L: (A.result && A.result.L) || 2, mode: (A.result && A.result.mode) || 'any', seed: 1};
+  if (!S.distOpt) S.distOpt = {L: (A.result && A.result.L) || 2, mode: (A.result && A.result.mode) || 'join', seed: 1};   // 49판: 기본은 '가능하면 이어 붙이기'
   const cmp = compareLens(c.days, people, c.k);
   if (!cmp.some(x => String(x.L) === String(S.distOpt.L))) S.distOpt.L = cmp[0].L;
   const D = S.draft;
@@ -920,8 +920,8 @@ function tabDist(){
     <div class="hr"></div>
     <label class="f" for="dMode">같은 사람의 타임을</label>
     <select class="inp" id="dMode" style="max-width:360px">
-      <option value="any" ${S.distOpt.mode === 'any' ? 'selected' : ''}>상관없이 고르게만</option>
       <option value="join" ${S.distOpt.mode === 'join' ? 'selected' : ''}>가능하면 이어 붙이기 (한 번 올 때 길게)</option>
+      <option value="any" ${S.distOpt.mode === 'any' ? 'selected' : ''}>상관없이 고르게만</option>
       <option value="apart" ${S.distOpt.mode === 'apart' ? 'selected' : ''}>가능하면 떨어뜨리기 (연달아 안 하게)</option>
     </select>
     <p class="muted small">1시간 타임이면 '이어 붙이기'를 추천해요.</p>
